@@ -20,6 +20,7 @@ window.player = {
   version: 102,
   //MOD
   imaginaryInfluence: new Set(),
+  pendingMessage:[],
   light: {
     inMirror: false,
     prisms: 0,

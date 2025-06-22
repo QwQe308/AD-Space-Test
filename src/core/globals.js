@@ -98,3 +98,5 @@ export * from "./_MOD/space";
 export * from "./_MOD/space-challenges/space-challenges";
 export * from "./_MOD/mirror/light.js";
 export * from "./_MOD/mirror/mirror.js";
+
+export * from "./_MOD/abyss/animation.js";
