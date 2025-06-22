@@ -44,7 +44,7 @@ import VTab from "./celestial-v/VTab";
 //MOD Tab
 import SpaceResearchTab from "./_MOD/space-researches/SpaceResearchTab";
 import SpaceChallengesTab from "./_MOD/space-challenges/SpaceChallengesTab";
-import MirrorTab from "./_MOD/mirror/mirrorTab";
+import MirrorTab from "./_MOD/mirror/MirrorTab";
 
 const TabComponents = {
   AntimatterDimensionsTab,

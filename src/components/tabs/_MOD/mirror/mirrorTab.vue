@@ -1,7 +1,7 @@
 <script>
-import EnterMirrorButton from "./enterMirrorButton";
-import ColorSlider from "./colorSlider";
-import PrimaryButton from "../../../PrimaryButton.vue";
+import EnterMirrorButton from "./EnterMirrorButton";
+import ColorSlider from "./ColorSlider";
+import PrimaryButton from "../../../PrimaryButton";
 
 export default {
   name: "MirrorTab",

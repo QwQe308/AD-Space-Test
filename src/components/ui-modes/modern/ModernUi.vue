@@ -8,8 +8,7 @@ import NewsTicker from "../NewsTicker";
 
 import GameSpeedDisplay from "@/components/GameSpeedDisplay";
 
-
-import HeaderSpaceInfo from "../../tabs/_MOD/headerSpaceInfo.vue";
+import HeaderSpaceInfo from "../../tabs/_MOD/HeaderSpaceInfo.vue";
 
 export default {
   name: "ModernUi",
@@ -36,7 +35,7 @@ export default {
     },
     topMargin() {
       return this.$viewModel.news ? "" : "margin-top: 3.9rem";
-    }
+    },
   },
   methods: {
     update() {
@@ -50,37 +49,24 @@ export default {
     handleClick() {
       if (PlayerProgress.infinityUnlocked()) manualBigCrunchResetRequest();
       else Modal.bigCrunch.show();
-    }
+    },
   },
 };
 </script>
 
 <template>
   <div id="page">
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="stylesheets/new-ui-styles.css"
-    >
-    <div
-      :key="newGameKey"
-      class="game-container"
-      :style="topMargin"
-    >
-      <NewsTicker
-        v-if="news"
-      />
+    <link rel="stylesheet" type="text/css" href="stylesheets/new-ui-styles.css" />
+    <div :key="newGameKey" class="game-container" :style="topMargin">
+      <NewsTicker v-if="news" />
       <BigCrunchButton />
-      <div
-        v-if="!bigCrunch"
-        class="tab-container"
-      >
+      <div v-if="!bigCrunch" class="tab-container">
         <HeaderPrestigeGroup />
         <div class="information-header">
           <HeaderChallengeDisplay />
           <HeaderChallengeEffects />
           <GameSpeedDisplay v-if="hasReality" />
-          <br v-if="hasReality">
+          <br v-if="hasReality" />
           <HeaderBlackHole />
           <HeaderSpaceInfo />
         </div>
@@ -90,6 +76,4 @@ export default {
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

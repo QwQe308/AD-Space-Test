@@ -1,5 +1,5 @@
 <script>
-import HeaderSpaceInfo from "../tabs/_MOD/headerSpaceInfo.vue";
+import HeaderSpaceInfo from "../tabs/_MOD/HeaderSpaceInfo.vue";
 
 import HeaderBlackHole from "./HeaderBlackHole";
 import HeaderChallengeDisplay from "./HeaderChallengeDisplay";

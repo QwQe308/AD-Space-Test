@@ -81,6 +81,7 @@ import S12GamesModal from "@/components/modals/secret-themes/S12GamesModal";
 
 import SpaceChallengeStartModal from "@/components/modals/_MOD/SpaceChallengeStartModal";
 import SpaceChallengeRewardModal from "@/components/modals/_MOD/SpaceChallengeRewardModal";
+import AbyssOverlayModal from "@/components/modals/_MOD/AbyssOverlayModal";
 
 let nextModalID = 0;
 export class Modal {
@@ -197,6 +198,7 @@ class TimeModal extends Modal {
 //MOD Modal
 Modal.startSpaceChallenge = new ChallengeConfirmationModal(SpaceChallengeStartModal);
 Modal.spaceChallengeReward = new Modal(SpaceChallengeRewardModal);
+Modal.abyssOverlay = new Modal(AbyssOverlayModal);
 
 
 Modal.startEternityChallenge = new ChallengeConfirmationModal(EternityChallengeStartModal);

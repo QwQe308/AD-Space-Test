@@ -13,6 +13,8 @@ import SpectateGame from "@/components/SpectateGame";
 import SpeedrunStatus from "@/components/SpeedrunStatus";
 import TimeTheoremShop from "@/components/tabs/time-studies/tt-shop/TimeTheoremShop";
 
+import AbyssOverlayModal from "@/components/modals/_MOD/AbyssOverlayModal";
+
 export default {
   name: "GameUiComponentFixed",
   components: {
@@ -28,7 +30,10 @@ export default {
     FadeAway,
     CreditsContainer,
     SpectateGame,
-    NewGame
+    NewGame,
+
+    //Mod
+    AbyssOverlayModal,
   },
   data() {
     return {
@@ -77,6 +82,9 @@ export default {
     <SpeedrunStatus :style="hideIfMatoFullscreen" />
     <template v-if="view.theme !== 'S12'">
       <ModalProgressBar v-if="view.modal.progressBar" />
+      <!-- <AbyssOverlayModal
+        v-else-if="1"
+      /> 填一下谢谢  -->
       <CelestialQuoteModal
         v-else-if="view.quotes.current"
         :quote="view.quotes.current"
