@@ -501,6 +501,25 @@ export const tabs = [
     ],
   },
   {
+    key: "imaginary",
+    name: "Imaginary",
+    hideAt: 3,
+    id: 6,
+    hidable: true,
+    UIClass: "o-tab-btn--imaginary",
+    condition: () => PlayerProgress.imaginaryUnlocked(),
+    subtabs: [
+      {
+        key: "analyzer",
+        name: "Influence Analyzer",
+        symbol: "※",
+        component: "InfluenceAnalyzerTab",
+        id: 0,
+        hidable: true,
+      },
+    ],
+  },
+  {
     key: "shop",
     name: "Shop",
     newUIClass: "shop",

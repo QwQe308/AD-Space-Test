@@ -17,9 +17,9 @@ function getGlyphTypes() {
 // This is actually reassigned when importing saves
 // eslint-disable-next-line prefer-const
 window.player = {
-  version: 102,
+  version: 103,
   //MOD
-  imaginaryInfluence: new Set(),
+  imaginaryInfluence: [],
   pendingMessage:[],
   light: {
     inMirror: false,

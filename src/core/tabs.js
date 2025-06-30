@@ -209,6 +209,7 @@ export const Tabs = (function() {
       Tab.eternity,
       Tab.reality,
       Tab.celestials,
+      Tab.imaginary,//MOD
     ],
     newUI: [
       Tab.dimensions,
@@ -219,6 +220,7 @@ export const Tabs = (function() {
       Tab.eternity,
       Tab.reality,
       Tab.celestials,
+      Tab.imaginary,//MOD
       Tab.achievements,
       Tab.statistics,
       Tab.options,

@@ -198,7 +198,7 @@ class TimeModal extends Modal {
 //MOD Modal
 Modal.startSpaceChallenge = new ChallengeConfirmationModal(SpaceChallengeStartModal);
 Modal.spaceChallengeReward = new Modal(SpaceChallengeRewardModal);
-Modal.abyssOverlay = new Modal(AbyssOverlayModal);
+Modal.abyssOverlay = new Modal(AbyssOverlayModal, -2, GAME_EVENT.ABYSS_ANIMATION_AFTER);//this is not a typical modal but whoever cares XD
 
 
 Modal.startEternityChallenge = new ChallengeConfirmationModal(EternityChallengeStartModal);

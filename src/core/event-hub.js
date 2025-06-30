@@ -48,6 +48,9 @@ EventHub.logic = new EventHub();
 EventHub.ui = new EventHub();
 
 window.GAME_EVENT = {
+  // Special(mod)
+  ABYSS_ANIMATION_BEFORE: "ABYSS_ANIMATION_BEFORE",
+  ABYSS_ANIMATION_AFTER: "ABYSS_ANIMATION_AFTER",
   // Ticks
   GAME_TICK_BEFORE: "GAME_TICK_BEFORE",
   GAME_TICK_AFTER: "GAME_TICK_AFTER",

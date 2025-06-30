@@ -511,7 +511,7 @@ export const GameStorage = {
             Modal.message.show(
               `Since you bypassed the endgame in last update, your game is rolled back to an offical save pre-TS111.
           (Note that glyph seed is re-randomized for all save in this update)
-          Please don't worry about your achievements and secret ones, they are going to be changed.`,
+          Please don't worry about your achievements and secret ones, they are going to be changed. Options are kept.`,
               {},
               3
             );
@@ -519,6 +519,7 @@ export const GameStorage = {
           }
         }, 1000);
         player.options = tmpOptions
+        player.options.breakPlaceHolder = false
         return;
       }
 

@@ -67,8 +67,7 @@ export default {
       this.extraTesseracts.copyFrom(Tesseracts.extra);
       this.creditsClosed = GameEnd.creditsEverClosed;
 
-      this.unSoftCapped = InfinityDimension(1).unSoftCapped
-      //hmmmm may cause some bugs with different stats but not exist in my mod xd
+      this.unSoftCapped = InfinityDimensions.unSoftCapped
     },
     maxAll() {
       InfinityDimensions.buyMax();

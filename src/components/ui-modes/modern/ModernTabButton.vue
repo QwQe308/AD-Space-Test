@@ -140,6 +140,10 @@ export default {
   background-color: var(--color-space);
 }
 
+.o-tab-btn--imaginary::before {
+  background-color: var(--color-imaginary);
+}
+
 .o-subtab-btn--active {
   border-bottom-width: 0.5rem;
 }

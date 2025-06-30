@@ -82,9 +82,6 @@ export default {
     <SpeedrunStatus :style="hideIfMatoFullscreen" />
     <template v-if="view.theme !== 'S12'">
       <ModalProgressBar v-if="view.modal.progressBar" />
-      <!-- <AbyssOverlayModal
-        v-else-if="1"
-      /> 填一下谢谢  -->
       <CelestialQuoteModal
         v-else-if="view.quotes.current"
         :quote="view.quotes.current"

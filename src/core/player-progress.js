@@ -85,4 +85,8 @@ export class PlayerProgress {
   static reachedEternities(count) {
     return PlayerProgress.current.isRealityUnlocked || player.eternities.gte(count);
   }
+
+  static imaginaryUnlocked() {
+    return player.imaginaryInfluence.includes("abyss");
+  }
 }

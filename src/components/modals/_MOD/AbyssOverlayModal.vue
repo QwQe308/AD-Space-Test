@@ -1,20 +1,39 @@
 <script>
 export default {
   name: "AbyssOverlayModal",
+  data() {
+    return {
+      text: "",
+    };
+  },
+  methods: {
+    update() {
+      this.text = ui.view.abyssTexts;
+    },
+  },
 };
 </script>
 
 <template>
-  <div class="overlay"></div>
+  <div class="overlayClass">
+    <span v-html="text" class="textClass"></span>
+  </div>
 </template>
 
 <style scoped>
-.overlay{
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  background-color: gray;
+.overlayClass {
+  position: absolute;
+  left: -50vw;
+  top: -50vh;
+  width: 110vw;
+  height: 110vh;
+  background-color: #111014;
+  color: white;
+  text-align: left;
+}
+.textClass {
+  position: relative;
+  left: 5vw;
+  top: 5vh;
 }
 </style>
