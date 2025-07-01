@@ -72,6 +72,11 @@ export class TimeStudyTreeLayout {
       normalRow(                      TS(81),  TS(82),  TS(83)                        ),
       normalRow(                      TS(91),  TS(92),  TS(93)                        ),
       normalRow(                      TS(101), TS(102), TS(103)                       ),
+    )
+
+    if(player.options.breakPlaceHolder || !PlayerProgress.imaginaryUnlocked()){
+
+    this.rows.push(
       normalRow(                       EC(7),  TS(111), TS(112)                       ),
       normalRow(                      TS(121), TS(122), TS(123)                       ),
       normalRow(               EC(6), TS(131), TS(132), TS(133), EC(8)                ),
@@ -117,6 +122,12 @@ export class TimeStudyTreeLayout {
       normalRow(          TimeStudy.timeDimension(7), TimeStudy.timeDimension(8)      ),
       normalRow(                          TimeStudy.reality                           )
     );
+
+  }else{
+    this.rows.push(
+      normalRow(                       TS(111)                       )
+    )
+  }
     /* eslint-enable no-multi-spaces, space-in-parens, func-call-spacing */
 
     /**

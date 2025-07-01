@@ -60,16 +60,16 @@ let abyssTexts = [
   ["<br>Eternity_Upgrades.exe successfully booted in 44ms", 44],
   ["<br>Mirror.exe successfully booted in 1904ms", 1904],
   ["<br>Space.exe successfully booted in 1351ms", 1351],
-  ["<br>!Error detected in booting Space_Research.exe!", 41],
-  ["<br>!Error detected in booting Achievements.exe!", 53],
-  ["<br>!Error detected in booting Time_Studies.exe!", 53],
+  ["<br>! Error detected in booting Space_Research.exe !", 41],
+  ["<br>! Error detected in booting Achievements.exe !", 53],
+  ["<br>! Error detected in booting Time_Studies.exe !", 53],
   ["<br>.", 800],
   [".", 500],
   [".", 500],
   [".", 1000],
   [".", 800],
   [".", 1000],
-  ["<br>!!! Booting System Failed !!!", 2253],
+  ["<br>! Booting System Failed !", 2253],
   ["<br>.", 800],
   [".", 500],
   [".", 500],
@@ -84,14 +84,14 @@ let abyssTexts = [
   [".", 1000],
   [".", 500],
   [".", 500],
-  ["<br>!!! Imaginary Influence Detected !!!", 500],
+  ["<br>! Imaginary Influence Detected !", 500],
   ["<br>Searching for solutions...", 800],
   [".", 600],
   [".", 800],
   [".", 500],
   [".", 700],
   [".", 500],
-  ["<br>Safety System successfully booted. Starting Plan B...", 1000],
+  ["<br>Safety System successfully booted. Starting Plan Alpha...", 1000],
   [".", 1000],
   [".", 800],
   [".", 700],
@@ -133,7 +133,7 @@ export async function abyssAnimation() {
   }
   GameIntervals.stop();//pauses the game
   await new Promise((resolve) => {
-    setTimeout(()=>{resolve()},3000)
+    setTimeout(()=>{resolve()},5000)
   })
   swapDelay = 1000;
   ui.view.abyssTexts = "";
@@ -142,6 +142,15 @@ export async function abyssAnimation() {
   for (let i = 0; i < abyssTexts.length; i++) {
     await showText(abyssTexts[i]);
   }
+  for (const autobuyer of Autobuyers.unlocked) {
+    autobuyer.isActive = false;
+  }
+  Laitela.setContinuum(false);
+  eternity(true, true);
+  AutomatorBackend.pause()
+  player.imaginaryInfluence.push("abyss")
+  Tab.imaginary.analyzer.show(true, true)
+  for (const tab of Tabs.currentUIFormat) if(!tab.isHidden) tab.toggleVisibility();
   EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER);
   console.log("test completed");
 }

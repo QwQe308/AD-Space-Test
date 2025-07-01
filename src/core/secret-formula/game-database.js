@@ -19,7 +19,8 @@ import { sidebarResources } from "./sidebar-resources";
 import { speedrunMilestones } from "./speedrun-milestones";
 import { tabNotifications } from "./tab-notifications";
 import { tabs } from "./tabs";
-import { space } from "./MOD_SpaceData";
+import { space } from "../_MOD/space-data";
+import { imaginary } from "../_MOD/imaginary/imaginary-data";
 
 export const GameDatabase = {
   achievements,
@@ -43,7 +44,8 @@ export const GameDatabase = {
   speedrunMilestones,
   tabNotifications,
   tabs,
-  space
+  space,
+  imaginary,
 };
 
 window.GameDatabase = GameDatabase;

@@ -504,7 +504,7 @@ export const tabs = [
     key: "imaginary",
     name: "Imaginary",
     hideAt: 3,
-    id: 6,
+    id: 11,
     hidable: true,
     UIClass: "o-tab-btn--imaginary",
     condition: () => PlayerProgress.imaginaryUnlocked(),
@@ -525,7 +525,7 @@ export const tabs = [
     newUIClass: "shop",
     hideAt: 1.5,
     condition: () => false,
-    id: 11,
+    id: 12,
     hidable: true,
     subtabs: [
       {

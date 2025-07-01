@@ -271,7 +271,7 @@ export const normalTimeStudies = [
     id: 111,
     cost: new Decimal(30),
     requirement: [101, 102, 103],//placeholder
-    reqType: TS_REQUIREMENT_TYPE.PLACE_HOLDER,
+    reqType: TS_REQUIREMENT_TYPE.AT_LEAST_ONE,
     description: () => {
       if(randomDelay){
         randomDelay --
@@ -290,8 +290,7 @@ export const normalTimeStudies = [
       }
 
       randomDelay = 30
-      if(!player.options.breakPlaceHolder) garbled += `[PLACE HOLDER]`//placeholder
-      else garbled += `(IP formula improves to ^1/280 & uncaps T3 Research "Continuous Dimensions" "Powered Power")`
+      if(player.options.breakPlaceHolder) garbled += `(IP formula improves to ^1/280 & uncaps T3 Research "Continuous Dimensions" "Powered Power")`
       randomStr = garbled
 
       return garbled;

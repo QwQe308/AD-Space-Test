@@ -100,3 +100,5 @@ export * from "./_MOD/mirror/light.js";
 export * from "./_MOD/mirror/mirror.js";
 
 export * from "./_MOD/abyss/animation.js";
+
+export * from "./_MOD/imaginary/influence";

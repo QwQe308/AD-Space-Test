@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       isDoomed: false,
+      isAbyss: false,
       autobuyersOn: false,
       showContinuum: false,
       disableContinuum: false,
@@ -31,6 +32,7 @@ export default {
   },
   methods: {
     update() {
+      this.isAbyss = imaginaryInfluences.abyss.isUnlocked;
       this.isDoomed = Pelle.isDoomed;
       this.autobuyersOn = player.auto.autobuyersOn;
       this.showContinuum = Laitela.continuumUnlocked;
@@ -68,7 +70,7 @@ export default {
         Continuum is disabled
       </PrimaryButton>
     </span>
-    <span v-else>
+    <span v-else-if="!isAbyss">
       <PrimaryToggleButton
         v-if="showContinuum"
         v-model="disableContinuum"
@@ -76,6 +78,14 @@ export default {
         off="Disable Continuum"
         class="o-primary-btn--subtab-option"
       />
+    </span>
+    <span v-else>
+      <PrimaryButton
+        v-if="showContinuum"
+        class="o-primary-btn--subtab-option"
+      >
+        Continuum is permanent
+      </PrimaryButton>
     </span>
   </div>
 </template>

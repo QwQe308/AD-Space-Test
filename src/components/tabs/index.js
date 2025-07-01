@@ -46,6 +46,9 @@ import SpaceResearchTab from "./_MOD/space-researches/SpaceResearchTab";
 import SpaceChallengesTab from "./_MOD/space-challenges/SpaceChallengesTab";
 import MirrorTab from "./_MOD/mirror/MirrorTab";
 
+import InfluenceAnalyzerTab from "./_MOD/imaginary/InfluenceAnalyzerTab";
+
+
 const TabComponents = {
   AntimatterDimensionsTab,
   InfinityDimensionsTab,
@@ -94,6 +97,7 @@ const TabComponents = {
   SpaceResearchTab,
   SpaceChallengesTab,
   MirrorTab,
+  InfluenceAnalyzerTab,
 };
 
 export default TabComponents;

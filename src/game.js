@@ -111,7 +111,9 @@ export function breakInfinity() {
 }
 
 export function gainedInfinityPoints() {
-  const div = new Decimal(Effects.min(308, Achievement(103) , TimeStudy(111))).toNumber();
+  let div;
+  if (player.options.breakPlaceHolder) div = new Decimal(Effects.min(308, Achievement(103), TimeStudy(111))).toNumber();
+  else div = new Decimal(Effects.min(308, Achievement(103))).toNumber();
   if (Pelle.isDisabled("IPMults")) {
     return Decimal.pow10(player.records.thisInfinity.maxAM.max(1).log10().div(div).sub(0.75))
       .timesEffectsOf(PelleRifts.vacuum)
@@ -323,7 +325,8 @@ export function addRealityTime(trueTime, time, realTime, rm, level, realities, a
 export function gainedInfinities() {
   if (isSCRunningOnTier(5, 1) || EternityChallenge(4).isRunning || Pelle.isDisabled("InfinitiedMults")) return DC.D1;
   let infGain = DC.D1;
-  if(player.records.thisInfinity.time.gte(5000) && Achievement(87).isUnlocked) infGain = infGain.mul(Achievement(87).effectValue)
+  if (player.records.thisInfinity.time.gte(5000) && Achievement(87).isUnlocked)
+    infGain = infGain.mul(Achievement(87).effectValue);
 
   infGain = infGain.timesEffectsOf(
     RealityUpgrade(5),

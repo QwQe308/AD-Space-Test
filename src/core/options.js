@@ -97,6 +97,10 @@ export function tryImportSecret(data) {
       GameUI.notify.info("You have successfully entered the test server! Make sure you have a backup! Thanks!")
       return true;
     case 6:
+      if(PlayerProgress.imaginaryUnlocked()){
+        GameUI.notify.info("A strange force stricted you back from doing this. Maybe try it later...?")
+        return true
+      }
       player.options.breakPlaceHolder = true;
       GameUI.notify.info("Something has happened... You have gained access to further unbalanced contents. These may not exist in further versions.")
       return true;
