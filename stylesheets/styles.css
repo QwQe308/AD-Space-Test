@@ -107,6 +107,8 @@ html {
   
   --color-space: #cccccc;
   --color-space-inverted: #333333;
+
+  --color-imaginary: #ffecfd;
 }
 
 :root .t-metro,
@@ -769,6 +771,17 @@ button:focus {
 
 .o-tab-btn--space:hover {
   background: var(--color-space);
+}
+
+.o-tab-btn--imaginary {
+  color: var(--color-imaginary);
+  background-color: var(--color-prestige--accent);
+  border-color: var(--color-imaginary);
+}
+
+
+.o-tab-btn--imaginary:hover {
+  background: var(--color-imaginary);
 }
 
 /* #endregion tab buttons */
