@@ -149,6 +149,7 @@ export const tabs = [
     hideAt: 1.9,
     id: 3,
     hidable: true,
+    condition: () => !imaginaryInfluences.abyss.isUnlocked,
     subtabs: [
       {
         key: "normal",

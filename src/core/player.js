@@ -19,6 +19,11 @@ function getGlyphTypes() {
 window.player = {
   version: 103,
   //MOD
+  abyssResearches:{
+    layer1:{
+      13: DC.D0,
+    }
+  },
   imaginaryInfluence: [],
   pendingMessage:[],
   light: {

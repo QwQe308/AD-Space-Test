@@ -41,10 +41,11 @@ class AchievementState extends GameMechanicState {
   }
 
   get isEffectActive() {
-    return this.isUnlocked && !this.isDisabled;
+    return !imaginaryInfluences.abyss.isUnlocked && this.isUnlocked && !this.isDisabled;
   }
 
   tryUnlock(args) {
+    if(imaginaryInfluences.abyss.isUnlocked) return
     if (this.isUnlocked) return;
     if (!this.config.checkRequirement(args)) return;
     this.unlock();
@@ -55,6 +56,7 @@ class AchievementState extends GameMechanicState {
   }
 
   unlock(auto) {
+    if(imaginaryInfluences.abyss.isUnlocked) return
     if (this.isUnlocked) return;
     player.achievementBits[this.row - 1] |= this._bitmask;
     if (this.id === 85 || this.id === 93) {
@@ -173,6 +175,7 @@ export const Achievements = {
   }),
 
   get power() {
+    if(imaginaryInfluences.abyss.isUnlocked) return DC.D1;
     if (Pelle.isDisabled("achievementMult")) return DC.D1;
     return Achievements._power.value;
   },

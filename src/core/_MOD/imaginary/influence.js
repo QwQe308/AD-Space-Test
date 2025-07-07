@@ -14,6 +14,14 @@ class Influence extends GameMechanicState {
     return this.config.name;
   }
 
+  get info() {
+    return this.config.info
+  }
+
+  get influenceStat(){
+    return this.config.influenceStat
+  }
+
   get isUnlocked() {
     return player.imaginaryInfluence.includes(this.id);
   }

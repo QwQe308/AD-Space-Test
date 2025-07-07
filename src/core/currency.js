@@ -367,6 +367,7 @@ Currency.timeTheorems = new class extends DecimalCurrency {
 
   reset() {
     respecTimeStudies(true);
+    player.timestudy.studies = []
     super.reset();
     TimeTheoremPurchaseType.am.reset();
     TimeTheoremPurchaseType.ip.reset();

@@ -13,14 +13,20 @@ function showText(info) {
   return new Promise((resolve) => {
     setTimeout(() => {
       ui.view.abyssTexts += info[0];
-      if(info.length == 3) info[2]()
+      if (info.length == 3) info[2]();
       resolve();
     }, info[1]);
   });
 }
 
 let abyssTexts = [
-  ["<br>FATAL ERROR: JavaScript heap out of memory", 4000, () => {console.error("FATAL ERROR: JavaScript heap out of memory")}],
+  [
+    "<br>FATAL ERROR: JavaScript heap out of memory",
+    4000,
+    () => {
+      console.error("FATAL ERROR: JavaScript heap out of memory");
+    },
+  ],
   ["<br>.", 1000],
   [".", 800],
   [".", 600],
@@ -97,7 +103,13 @@ let abyssTexts = [
   [".", 700],
   [".", 600],
   [".", 500],
-  ["", 1000, () => {ui.view.abyssTexts = ""}],//clear all texts, they are going to get off-screen
+  [
+    "",
+    1000,
+    () => {
+      ui.view.abyssTexts = "";
+    },
+  ], //clear all texts, they are going to get off-screen
   ["<br>Influence_Analyzer.exe successfully imported.", 2500],
   ["<br>Analyzing.", 2500],
   [".", 1000],
@@ -131,14 +143,16 @@ export async function abyssAnimation() {
     swapDelay /= 1.04;
     await waitForInterval();
   }
-  GameIntervals.stop();//pauses the game
+  GameIntervals.stop(); //pauses the game
   await new Promise((resolve) => {
-    setTimeout(()=>{resolve()},5000)
-  })
+    setTimeout(() => {
+      resolve();
+    }, 5000);
+  });
   swapDelay = 1000;
   ui.view.abyssTexts = "";
   Modal.abyssOverlay.show();
-  GameIntervals.start();//resumes the game
+  GameIntervals.start(); //resumes the game
   for (let i = 0; i < abyssTexts.length; i++) {
     await showText(abyssTexts[i]);
   }
@@ -146,11 +160,35 @@ export async function abyssAnimation() {
     autobuyer.isActive = false;
   }
   Laitela.setContinuum(false);
+  //reset values
   eternity(true, true);
-  AutomatorBackend.pause()
-  player.imaginaryInfluence.push("abyss")
-  Tab.imaginary.analyzer.show(true, true)
-  for (const tab of Tabs.currentUIFormat) if(!tab.isHidden) tab.toggleVisibility();
+  player.eternityPoints = new Decimal(0);
+  fullResetTimeDimensions();
+  player.eternities = new Decimal(0);
+  respecTimeStudies(true);
+  player.timestudy.theorem = new Decimal(0);
+  TimeTheoremPurchaseType.am.reset();
+  TimeTheoremPurchaseType.ip.reset();
+  TimeTheoremPurchaseType.ep.reset();
+  resetEternityRuns();
+  player.records.thisEternity.time = DC.D0;
+  player.records.thisEternity.realTime = DC.D0;
+  player.records.bestEternity.time = DC.BEMAX;
+  player.records.bestEternity.realTime = DC.BEMAX;
+  player.eternityUpgrades.clear();
+  player.totalTickGained = DC.D0;
+  player.eternityChalls = {};
+  player.challenge.eternity.current = 0;
+  player.challenge.eternity.unlocked = 0;
+  player.challenge.eternity.requirementBits = 0;
+  SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].reset());
+  player.imaginaryInfluence.push("abyss");
+  eternity(true, true);
+  player.eternities = new Decimal(100);
+  //end
+  AutomatorBackend.pause();
+  Tab.imaginary.analyzer.show(true, true);
+  for (const tab of Tabs.currentUIFormat) if (!tab.isHidden) tab.toggleVisibility();
   EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER);
   console.log("test completed");
 }
