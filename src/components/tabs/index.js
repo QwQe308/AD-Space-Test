@@ -48,6 +48,7 @@ import MirrorTab from "./_MOD/mirror/MirrorTab";
 
 import InfluenceAnalyzerTab from "./_MOD/imaginary/InfluenceAnalyzerTab";
 
+import AbyssResearchTab from "./_MOD/abyss/AbyssResearchTab.vue";
 
 const TabComponents = {
   AntimatterDimensionsTab,
@@ -98,6 +99,7 @@ const TabComponents = {
   SpaceChallengesTab,
   MirrorTab,
   InfluenceAnalyzerTab,
+  AbyssResearchTab
 };
 
 export default TabComponents;

@@ -269,6 +269,15 @@ export const tabs = [
         id: 1,
         hidable: true,
       },
+      {
+        key: "abyssResearch",
+        name: "Abyss Research",
+        symbol: "〖〗",
+        component: "AbyssResearchTab",
+        condition: () => PlayerProgress.imaginaryUnlocked(),
+        id: 2,
+        hidable: true,
+      },
     ],
   },
   {
