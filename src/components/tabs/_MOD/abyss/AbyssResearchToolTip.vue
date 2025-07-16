@@ -45,10 +45,10 @@ export default {
     },
     requirementsText() {
       if (!this.requirementsMet) {
-        return "需要前置研究";
+        return "Requires prior researches";
       }
       if (!this.isUnlocked) {
-        return "尚未解锁";
+        return "Not unlockeda";
       }
       return "";
     }
@@ -64,34 +64,34 @@ export default {
 <template>
   <div :class="classObject">
     <div class="research-tooltip__title">{{ node.name }}</div>
-    <div class="research-tooltip__type">类型: {{ 
-      node.type === 'unlimited' ? '无等级上限' :
-      node.type === 'limited' ? '有等级上限' : '只能研究一次'
+    <div class="research-tooltip__type">Type: {{ 
+      node.type === 'unlimited' ? 'Unlimited' :
+      node.type === 'limited' ? 'Limited' : 'Unlockable'
     }}</div>
     
     <div class="research-tooltip__progress">
       <div class="research-tooltip__progress-bar" :style="{ width: `${progressPercent}%` }"></div>
     </div>
     <div class="research-tooltip__status">
-      进度: {{ progressPercent.toFixed(1) }}% | 
-      状态: {{ 
-        isResearching ? '研究中' :
-        isCompleted ? '已完成' : '未开始'
+      Progress: {{ progressPercent.toFixed(1) }}% | 
+      State: {{ 
+        isResearching ? 'Researching' :
+        isCompleted ? 'Completed' : 'Not Researching'
       }}
     </div>
     
-    <div class="research-tooltip__level">等级: {{ levelText }}</div>
+    <div class="research-tooltip__level">Level: {{ levelText }}</div>
     
     <div class="research-tooltip__effect" v-if="node.effect">
-      效果: {{ node.effect }}
+      Effect: {{ node.effect }}
     </div>
     
     <div class="research-tooltip__stats">
       <div class="research-tooltip__stat" v-if="node.cost">
-        <i class="fas fa-coins"></i> 消耗: {{ node.cost }}
+        <i class="fas fa-coins"></i> Cost: {{ node.cost }}
       </div>
       <div class="research-tooltip__stat" v-if="node.time">
-        <i class="fas fa-clock"></i> 时间: {{ node.time }}天
+        <i class="fas fa-clock"></i> Research Time: {{ node.time }}s <!-- to be fixed -->
       </div>
     </div>
     
@@ -104,7 +104,7 @@ export default {
       class="research-tooltip__button"
       @click="startResearch"
     >
-      <i class="fas fa-flask"></i> 开始研究
+      <i class="fas fa-flask"></i> Start
     </button>
   </div>
 </template>

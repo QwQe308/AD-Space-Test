@@ -54,7 +54,6 @@ export default {
 <style scoped>
 .research-tabs {
   display: flex;
-  background: rgba(20, 21, 30, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   user-select: none;
 }

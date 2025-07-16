@@ -16,7 +16,7 @@ export default {
     return {
       researchCategories: window.researchCategories,
       researchNodes: window.abyssResearches,
-      researchManager: new ResearchManager(),
+      researchManager: window.researchManager,
       currentCategory: "1",
       zoomLevel: 1,
       offsetX: 0,
@@ -32,6 +32,7 @@ export default {
         y: 0,
         visible: false,
       },
+      activeResearches: new Set(),
     };
   },
   computed: {
@@ -40,9 +41,6 @@ export default {
     },
     filteredNodes() {
       return this.currentNodes.filter((node) => node.unlocked());
-    },
-    activeResearches() {
-      return this.currentNodes.filter((node) => this.researchManager.isResearching(node));
     },
     currentCategoryName() {
       const category = this.researchCategories.find((c) => c.id === this.currentCategory);
@@ -79,6 +77,9 @@ export default {
     },
   },
   methods: {
+    update() {
+      this.activeResearches = this.currentNodes.filter((node) => this.researchManager.isResearching(node));
+    },
     getCategoryColor(categoryId) {
       const category = this.researchCategories.find((c) => c.id === categoryId);
       return category ? category.color : "#3498db";
@@ -132,6 +133,7 @@ export default {
       this.startOffsetY = this.offsetY;
     },
     drag(event) {
+      this.updateTooltipPosition(event);
       if (this.isDragging) {
         this.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
         this.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
@@ -158,16 +160,10 @@ export default {
         this.showTooltip(node, event);
       } else if (this.researchManager.canStartResearch(node)) {
         this.startResearch(node);
-      } else if (this.researchManager.isResearching(node)) {
-        alert(`${node.name} 正在研究中...`);
-      } else if (!node.requirements()) {
-        alert(`无法开始研究: ${this.getRequirementsText(node)}`);
       }
     },
     startResearch(node) {
-      if (this.researchManager.startResearch(node)) {
-        alert(`已开始研究: ${node.name}`);
-      }
+      this.researchManager.startResearch(node)
     },
     startResearchFromTooltip(node) {
       this.startResearch(node);
@@ -183,9 +179,6 @@ export default {
         }
       });
     },
-    getRequirementsText(node) {
-      return "需要前置研究";
-    },
     calculateConnectionPositions(connection) {
       const from = this.currentNodes.find((n) => n.id === connection.from);
       const to = this.currentNodes.find((n) => n.id === connection.to);
@@ -199,7 +192,31 @@ export default {
     isConnectionActive(connection) {
       const from = this.currentNodes.find((n) => n.id === connection.from);
       const to = this.currentNodes.find((n) => n.id === connection.to);
-      return this.researchManager.isResearching(from) || this.researchManager.isResearching(to);
+      return this.researchManager.isResearching(to);
+    },
+    updateTooltipPosition(event) {
+      const padding = 15;
+      const tooltip = this.$refs.tooltip;
+
+      if (!tooltip) return;
+
+      // 先显示以获取尺寸
+      tooltip.style.display = "block";
+      const rect = tooltip.getBoundingClientRect();
+
+      let x = event.clientX + padding;
+      let y = event.clientY + padding;
+
+      // 视窗边界检测
+      if (x + rect.width > window.innerWidth) {
+        x = event.clientX - rect.width - padding;
+      }
+      if (y + rect.height > window.innerHeight) {
+        y = event.clientY - rect.height - padding;
+      }
+
+      this.tooltip.x = x;
+      this.tooltip.y = y;
     },
   },
   mounted() {
@@ -217,8 +234,6 @@ export default {
   <div class="research-wrapper">
     <!-- 新增的wrapper -->
     <main class="research-container">
-      <ResearchTabs :categories="researchCategories" :initial-tab="currentCategory" @tab-change="handleTabChange" />
-
       <div class="canvas-container" ref="canvasContainer">
         <div class="canvas-background"></div>
 
@@ -263,10 +278,11 @@ export default {
             @hide-tooltip="hideTooltip"
           />
         </div>
+        <ResearchTabs :categories="researchCategories" :initial-tab="currentCategory" @tab-change="handleTabChange" />
 
         <div class="zoom-info">
           <i class="fas fa-search-plus"></i>
-          <span>缩放: {{ (zoomLevel * 100).toFixed(0) }}%</span>
+          <span>Scale: {{ (zoomLevel * 100).toFixed(0) }}%</span>
         </div>
 
         <div class="tooltip" ref="tooltip" :style="tooltipStyle">
@@ -283,7 +299,7 @@ export default {
         </div>
 
         <div class="active-research-info" v-if="activeResearches.length > 0">
-          <h3>正在研究 ({{ activeResearches.length }}/{{ maxConcurrent }})</h3>
+          <h3>Researching ({{ activeResearches.length }}/{{ maxConcurrent }})</h3>
           <div class="active-list">
             <div v-for="research in activeResearches" :key="research.id" class="active-item">
               {{ research.name }} ({{ (research.progress * 100).toFixed(1) }}%)
@@ -293,49 +309,14 @@ export default {
       </div>
 
       <div class="controls">
-        <button class="btn" @click="zoomIn">
-          <i class="fas fa-search-plus"></i>
-          <span>放大</span>
-        </button>
-        <button class="btn" @click="zoomOut">
-          <i class="fas fa-search-minus"></i>
-          <span>缩小</span>
-        </button>
         <button class="btn btn-outline" @click="resetView">
           <i class="fas fa-sync-alt"></i>
-          <span>重置视图</span>
+          <span>Relocate</span>
         </button>
         <button class="btn btn-outline" @click="simulateProgress">
           <i class="fas fa-flask"></i>
-          <span>模拟进度</span>
+          <span>Simulate(test)</span>
         </button>
-      </div>
-
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-shape legend-circle"></div>
-          <span>无等级上限</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-shape legend-diamond"></div>
-          <span>有等级上限</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-shape legend-hexagon"></div>
-          <span>只能研究一次</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-shape" style="background: linear-gradient(to top, #3498db, #2ecc71)"></div>
-          <span>研究进度</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-shape" style="background: rgba(255, 255, 255, 0.2)"></div>
-          <span>关联关系</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-shape" style="border-color: #f39c12"></div>
-          <span>正在研究</span>
-        </div>
       </div>
     </main>
   </div>
@@ -353,7 +334,7 @@ export default {
 }
 
 .research-wrapper {
-  height: 70vh;
+  height: 71vh;
   display: flex;
   overflow: hidden;
 }
@@ -469,7 +450,7 @@ export default {
   justify-content: center;
   gap: 20px;
   padding: 20px;
-  background: rgba(20, 21, 30, 0.95);
+  background: #111014;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 

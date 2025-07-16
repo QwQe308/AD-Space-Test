@@ -7,7 +7,6 @@ export class ResearchManager {
 
   canStartResearch(node) {
     return (
-      !this.isResearching(node) &&
       this.activeResearches.size < this.maxConcurrent &&
       node.requirements() &&
       node.unlocked()
@@ -15,6 +14,11 @@ export class ResearchManager {
   }
 
   startResearch(node) {
+    if(node.isResearching){
+      this.activeResearches.delete(node.id);
+      node.isResearching = false;
+      return true
+    }
     if (this.canStartResearch(node)) {
       this.activeResearches.add(node.id);
       node.isResearching = true;
@@ -26,20 +30,10 @@ export class ResearchManager {
   completeResearch(node) {
     this.activeResearches.delete(node.id);
     node.isResearching = false;
-    node.progress = 1;
-    this.unlockNextResearches(node);
   }
 
   isResearching(node) {
     return this.activeResearches.has(node.id);
-  }
-
-  unlockNextResearches(node) {
-    if (node.nextIds) {
-      node.nextIds.forEach(id => {
-        this.unlockedResearches.add(id);
-      });
-    }
   }
 }
 

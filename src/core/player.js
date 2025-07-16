@@ -21,7 +21,8 @@ window.player = {
   //MOD
   abyssResearches:{
     layer1:{
-      13: DC.D0,
+      A1: DC.D0,
+      A2: DC.D0,
     }
   },
   imaginaryInfluence: [],
