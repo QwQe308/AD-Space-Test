@@ -98,7 +98,7 @@ export default {
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <div class="research-node__shape" :style="specializedShapeStyle">
+    <div class="research-node__shape">
       <!-- 进度填充层 -->
       <div class="research-node__progress-mask">
         <div class="research-node__progress-fill" :style="progressStyle"></div>

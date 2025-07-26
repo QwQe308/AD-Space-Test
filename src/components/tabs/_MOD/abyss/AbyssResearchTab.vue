@@ -221,11 +221,6 @@ export default {
   },
   mounted() {
     this.updateCanvasTransform();
-    this.currentNodes.forEach((node) => {
-      if (node.unlocked()) {
-        this.researchManager.unlockNextResearches(node);
-      }
-    });
   },
 };
 </script>

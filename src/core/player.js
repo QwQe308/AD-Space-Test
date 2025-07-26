@@ -20,9 +20,9 @@ window.player = {
   version: 103,
   //MOD
   abyssResearches:{
-    layer1:{
-      A1: DC.D0,
-      A2: DC.D0,
+    A1:{
+      level: 0,
+      progress: 0
     }
   },
   imaginaryInfluence: [],

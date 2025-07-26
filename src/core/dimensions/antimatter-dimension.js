@@ -1,6 +1,4 @@
 import { DC } from "../constants";
-import { SpaceResearchRifts } from "../globals";
-import { TimeStudy } from "../time-studies/normal-time-study";
 
 import { DimensionState } from "./dimension";
 

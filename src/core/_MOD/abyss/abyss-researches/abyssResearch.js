@@ -1,8 +1,10 @@
 export class ResearchManager {
   constructor() {
-    this.maxConcurrent = 3; // 最大同时研究数量
     this.activeResearches = new Set();
-    this.unlockedResearches = new Set();
+  }
+
+  get maxConcurrent(){
+    return 3
   }
 
   canStartResearch(node) {

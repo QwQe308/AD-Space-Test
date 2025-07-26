@@ -3,14 +3,37 @@ export const researchCategories = [
   { id: "2", name: '2' },
 ];
 
+export function getAbyssResearchProgressPercentage(layer, node){
+  return quickSpawnScalingBasingOnParams(layer, node).percentageToNext
+}
+
+export function quickSpawnScalingBasingOnParams(layer, node){
+  if(node.scaling.type === "linear"){
+    return linearCostScaling(player.abyssResearches[layer][node.id], node.scaling.cost, node.scaling.costMult)
+  }
+}
+
+export function quickSpawnResearches(layer, researches){
+  for(let id in researches){
+    researches[i].layer = layer
+    researches[i].id = id
+    
+  }
+}
+
 export const abyssResearches = {
   1: [// layer 1
     { 
-      id: 1,
-      name: 'A1',
+      layer: 1,
+      id: 0,
+      name: 'A0',
       type: 'unlimited',
       x: 5400, y: 5200,
-      progress: 0.5,
+      scaling:{
+        type:"linear",
+        cost: new Decimal(1),
+        costMult: new Decimal(2),
+      },
       currentLevel: 0,
       maxLevel: 0,
       color: '#3498db',
@@ -18,12 +41,13 @@ export const abyssResearches = {
       requirements: () => true, // 无条件
       unlocked: () => true,     // 默认解锁
       effect: 'Antimatter Multplier * 2 per level',
-      nextIds: [2],
+      nextIds: [1],
       // 其他属性...
     },
     {
-      id: 2,
-      name: 'A2',
+      layer: 1,
+      id: 1,
+      name: 'A1',
       type: 'limited',
       x: 5200, y: 5350,
       progress: 0.5,

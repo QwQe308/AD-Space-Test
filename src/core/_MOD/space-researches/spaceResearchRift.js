@@ -1,21 +1,17 @@
 import { DC } from "../../constants";
 import { GameMechanicState } from "../../utils";
 
-class SpaceResearchRift extends GameMechanicState {
+class SpaceResearchRiftClass extends GameMechanicState {
+  name;tier;
   constructor(config) {
     super(config);
+    this.name = config.name;
+    this.tier = config.tier;
+
   }
 
   get canBeApplied() {
     return true;
-  }
-
-  get name() {
-    return this.config.name;
-  }
-
-  get tier() {
-    return this.config.tier;
   }
 
   get rift() {
@@ -110,10 +106,6 @@ class SpaceResearchRift extends GameMechanicState {
       .toNumber();
   }
 
-  get description() {
-    return this.config.description;
-  }
-
   get effect() {
     let effect = this.config.effect(this.effectValue); //to change
     return effect;
@@ -131,6 +123,7 @@ class SpaceResearchRift extends GameMechanicState {
     if (!this.config.maxLevel || !this.config.maxLevel()) return false;
     return this.config.maxLevel();
   }
+
   get isMaxed() {
     return (this.config.maxLevel && this.config.maxLevel()) ? this.level.gte(this.maxLevel) : false;
   }
@@ -203,5 +196,5 @@ class SpaceResearchRift extends GameMechanicState {
 
 export const SpaceResearchRifts = mapGameDataToObject(
   GameDatabase.space.spaceResearch,
-  (config) => new SpaceResearchRift(config)
+  (config) => new SpaceResearchRiftClass(config)
 );
