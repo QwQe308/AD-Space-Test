@@ -13,17 +13,12 @@ export default {
       abyssResearchSpeed: new Decimal(0),
       percentage: 0,
       timeToNext: "",
+      progress: new Decimal(0),
     };
   },
   computed: {
     getTooltip() {
       let tooltipContent = "";
-      this.timeToNext = this.abyssResearchSpeed.gt(0)
-        ? TimeSpan.fromSeconds(
-            AbyssResearches[this.id].cost.sub(AbyssResearches[this.id].progress).div(this.abyssResearchSpeed).toNumber()
-          ).toTimeEstimate()
-        : "Forever";
-
       switch (AbyssResearches[this.id].type) {
         case "single":
           tooltipContent += `${this.id}<br>----------[ ${formatPercents(
@@ -45,7 +40,7 @@ export default {
           )} | LV.${format(AbyssResearches[this.id].level)} ]----------<br>`;
           break;
       }
-      tooltipContent += `Progress: ${format(AbyssResearches[this.id].progress, 2, 2)}/${format(
+      tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(
         AbyssResearches[this.id].cost
       )}<br>
             (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})<br><br>
@@ -98,9 +93,15 @@ export default {
       AbyssResearches[this.id].click();
     },
     update() {
+      this.timeToNext = this.abyssResearchSpeed.gt(0)
+        ? TimeSpan.fromSeconds(
+            AbyssResearches[this.id].cost.sub(AbyssResearches[this.id].progress).div(this.abyssResearchSpeed).toNumber()
+          ).toTimeEstimate()
+        : "Forever";
       this.isResearching = AbyssResearches[this.id].isResearching;
       this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
       this.percentage = AbyssResearches[this.id].percentage;
+      this.progress = AbyssResearches[this.id].progress
     },
   },
 };
