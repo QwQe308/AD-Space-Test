@@ -4,6 +4,27 @@ import { dimInfinityMult } from "../../infinity/infinity-upgrades";
 let randomDelay = 0;
 let randomStr = "?????????????????????";
 
+function spawnString(){
+// Input might be either text or number
+  const text = `Memorial for Memories`;
+  let garbled = "";
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === " ") garbled += " ";
+    else {
+      const n = text[i].charCodeAt();
+      // Essentially seeded randomness so that the static parts of the randomized text are deterministic
+      garbled += String.fromCharCode(n + Math.floor(Math.random() * 3) - 1);
+    }
+  }
+
+  if ((typeof player) === "object" && player.options.breakPlaceHolder) //make sure it loaded
+    garbled += `(IP formula improves to ^1/280 & uncaps T3 Research "Continuous Dimensions" "Powered Power")`;
+  randomStr = garbled;
+}
+
+let stringSpawnInterval = setInterval(spawnString, 1500);
+spawnString()
+
 const thisInfinityMult = (thisInfinity) => {
   // All "this inf time" or "best inf time" mults are * 10
   const scaledInfinity = thisInfinity.times(25).add(1);
@@ -164,7 +185,9 @@ export const normalTimeStudies = [
     id: 72,
     cost: new Decimal(5),
     requirement: [
-      61, () => Perk.studyECRequirement.isBought || (!EternityChallenge(11).isUnlocked && !EternityChallenge(12).isUnlocked),
+      61,
+      () =>
+        Perk.studyECRequirement.isBought || (!EternityChallenge(11).isUnlocked && !EternityChallenge(12).isUnlocked),
     ],
     reqType: TS_REQUIREMENT_TYPE.DIMENSION_PATH,
     description: "Dimensional Sacrifice affects 4th Infinity Dimension with greatly reduced effect",
@@ -236,7 +259,10 @@ export const normalTimeStudies = [
     requirement: [83],
     reqType: TS_REQUIREMENT_TYPE.AT_LEAST_ONE,
     description: "Time Dimension multiplier & EP multiplier based on tick upgrades gained",
-    effect: () => Decimal.pow(player.totalTickGained, 0.4).mul(Decimal.pow(1.003, player.totalTickGained.pow(0.7))).clampMin(1),
+    effect: () =>
+      Decimal.pow(player.totalTickGained, 0.4)
+        .mul(Decimal.pow(1.003, player.totalTickGained.pow(0.7)))
+        .clampMin(1),
     formatEffect: (value) => formatX(value, 2, 1),
   },
   {
@@ -270,37 +296,17 @@ export const normalTimeStudies = [
   {
     id: 111,
     cost: new Decimal(30),
-    requirement: [101, 102, 103],//placeholder
+    requirement: [101, 102, 103], //placeholder
     reqType: TS_REQUIREMENT_TYPE.AT_LEAST_ONE,
     description: () => {
-      if(randomDelay){
-        randomDelay --
-        return randomStr
-      }
-      // Input might be either text or number
-      const text = `Memorial for Memories`;
-      let garbled = "";
-      for (let i = 0; i < text.length; i++) {
-        if (text[i] === " ") garbled += " ";
-        else {
-          const n = text[i].charCodeAt();
-          // Essentially seeded randomness so that the static parts of the randomized text are deterministic
-          garbled += String.fromCharCode( n + Math.floor(Math.random()*3) - 1 );
-        }
-      }
-
-      randomDelay = 30
-      if(player.options.breakPlaceHolder) garbled += `(IP formula improves to ^1/280 & uncaps T3 Research "Continuous Dimensions" "Powered Power")`
-      randomStr = garbled
-
-      return garbled;
+      return randomStr;
     },
-    effect: 280,//if breaks
+    effect: 280, //if breaks
   },
   {
     id: 112,
     cost: new Decimal(0),
-    requirement: [112],//placeholder
+    requirement: [112], //placeholder
     reqType: TS_REQUIREMENT_TYPE.PLACE_HOLDER,
     description: () => {
       return `Import "Memorial for Memories"(TS111) to play extra contents - to be removed next major update`;
@@ -584,7 +590,10 @@ export const normalTimeStudies = [
     requiresST: [221],
     description: () => `Research Speed is faster based on your total TT`,
     formatEffect: (value) => formatX(value, 2, 1),
-    effect: () => DC.D1_1.pow(Currency.timeTheorems.max.pow(0.825)).min(1e100).mul(Currency.timeTheorems.max.div(5e4).add(1).pow(15)),
+    effect: () =>
+      DC.D1_1.pow(Currency.timeTheorems.max.pow(0.825))
+        .min(1e100)
+        .mul(Currency.timeTheorems.max.div(5e4).add(1).pow(15)),
   },
   {
     id: 223,

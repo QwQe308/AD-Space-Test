@@ -6,6 +6,8 @@ import { AUTOMATOR_MODE, AUTOMATOR_TYPE } from "./automator/automator-backend";
 import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 
+import { abyssResearches } from "./_MOD/abyss/abyss-researches/abyssResearches";
+
 function getGlyphTypes() {
   const v = { ...GlyphInfo };
   for (const item in GlyphInfo) {
@@ -14,19 +16,36 @@ function getGlyphTypes() {
   return v;
 }
 
+function createAbyssResearchesData(){
+  let data = {}
+  for(let i in abyssResearches){
+    data[i] = {
+      level: DC.D0,
+      progress: DC.D0,
+      unlocked: false,
+      shown: false,
+    }
+    let scalingConfig = abyssResearches[i].scaling
+    if(scalingConfig && scalingConfig.type === "linear"){
+      data[i].cost = scalingConfig.cost
+    }
+  }
+  return data
+}
+
 // This is actually reassigned when importing saves
 // eslint-disable-next-line prefer-const
 window.player = {
   version: 103,
   //MOD
-  abyssResearches:{
-    A1:{
-      level: 0,
-      progress: 0
-    }
-  },
+  //abyss
+  currentAbyssResearchDepth: "1",
+  activeAbyssResearches: new Set(),
+  abyssResearches: createAbyssResearchesData(),
+  //imaginary influence
   imaginaryInfluence: [],
   pendingMessage:[],
+  //mirror
   light: {
     inMirror: false,
     prisms: 0,
@@ -35,10 +54,13 @@ window.player = {
     bluePercent: 0,
     presets: [],
   },
+  //space
   space: DC.D0,
   spaceDivisiorActivePercentage: 1,
   amProc: DC.D0,
+  //sc
   spaceChalls: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+  //space research
   spaceResearches: {
     r11: {
       progress: DC.D0,
@@ -464,6 +486,7 @@ window.player = {
       maxDT: DC.D0,
       bestRSmin: DC.D0,
       bestRSminVal: DC.D0,
+      maxSpace: DC.D0,
     },
     bestReality: {
       time: DC.BEMAX,

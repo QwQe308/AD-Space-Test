@@ -1,83 +1,106 @@
 <script>
 export default {
-  name: "ResearchNode",
+  name: "AbyssResearchNode",
   props: {
-    node: {
-      type: Object,
-      required: true,
-    },
-    isResearching: {
-      type: Boolean,
-      default: false,
-    },
-    isUnlocked: {
-      type: Boolean,
-      default: false,
-    },
-    x: {
-      type: Number,
-      required: true,
-    },
-    y: {
-      type: Number,
-      required: true,
-    },
-    color: {
+    id: {
       type: String,
-      default: "#3498db",
-    },
-    canStartResearch: {
-      type: Boolean,
-      default: false,
+      required: true,
     },
   },
   data() {
     return {
-      isHovered: false,
+      isResearching: false,
+      abyssResearchSpeed: new Decimal(0),
+      percentage: 0,
+      timeToNext: "",
     };
   },
   computed: {
-    shapeClass() {
+    getTooltip() {
+      let tooltipContent = "";
+      this.timeToNext = this.abyssResearchSpeed.gt(0)
+        ? TimeSpan.fromSeconds(
+            AbyssResearches[this.id].cost.sub(AbyssResearches[this.id].progress).div(this.abyssResearchSpeed).toNumber()
+          ).toTimeEstimate()
+        : "Forever";
+
+      switch (AbyssResearches[this.id].type) {
+        case "single":
+          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
+            AbyssResearches[this.id].percentage
+          )} ]----------<br>`;
+          break;
+
+        case "limited":
+          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
+            AbyssResearches[this.id].percentage
+          )} | LV.${format(AbyssResearches[this.id].level)} / ${format(
+            AbyssResearches[this.id].maxLevel
+          )} ]----------<br>`;
+          break;
+
+        case "unlimited":
+          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
+            AbyssResearches[this.id].percentage
+          )} | LV.${format(AbyssResearches[this.id].level)} ]----------<br>`;
+          break;
+      }
+      tooltipContent += `Progress: ${format(AbyssResearches[this.id].progress, 2, 2)}/${format(
+        AbyssResearches[this.id].cost
+      )}<br>
+            (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})<br><br>
+           ${AbyssResearches[this.id].description}`;
+      return tooltipContent;
+    },
+    getFillStyle() {
       return {
-        "research-node--unlimited": this.node.type === "unlimited",
-        "research-node--limited": this.node.type === "limited",
-        "research-node--single": this.node.type === "single",
+        transform: `scale(${this.percentage})`,
+      };
+    },
+    getNodeType() {
+      return AbyssResearches[this.id].type;
+    },
+    getNodeStyle() {
+      return {
+        left: `${AbyssResearches[this.id].x - 20}px`,
+        top: `${AbyssResearches[this.id].y - 20}px`,
+      };
+    },
+    getNodeClass() {
+      let style = {};
+      style[`research-node--${this.getNodeType}`] = true;
+      return style;
+    },
+    getContainerClass() {
+      return {
+        "research-node__container--active": this.isResearching,
+      };
+    },
+    getTextStyle() {
+      if (!(this.getNodeType === "limited")) return {};
+      return {
+        transform: "rotate(-45deg)",
       };
     },
     levelText() {
-      return this.node.maxLevel > 0 ? `${this.node.currentLevel}/${this.node.maxLevel}` : this.node.currentLevel;
-    },
-    nodeStyle() {
-      return {
-        left: `${this.x}px`,
-        top: `${this.y}px`,
-        opacity: this.isUnlocked ? 1 : 0.3,
-        cursor: this.canStartResearch ? "pointer" : "default",
-        pointerEvents: this.isUnlocked ? "auto" : "none",
-        "--node-color": this.color,
-      };
-    },
-    progressStyle() {
-      if (this.node.type == "limited")
-        return {
-          height: `${this.node.progress * 141.5}%`,
-        };
-      return {
-        height: `${this.node.progress * 100}%`,
-      };
+      switch (this.getNodeType) {
+        case "single":
+          return formatPercents(AbyssResearches[this.id].percentage);
+        case "limited":
+          return `${AbyssResearches[this.id].level}/${AbyssResearches[this.id].maxLevel}`;
+        case "unlimited":
+          return AbyssResearches[this.id].level;
+      }
     },
   },
   methods: {
-    handleClick(event) {
-      this.$emit("node-click", { node: this.node, event });
+    handleClick() {
+      AbyssResearches[this.id].click();
     },
-    handleMouseEnter() {
-      this.isHovered = true;
-      this.$emit("show-tooltip", this.node);
-    },
-    handleMouseLeave() {
-      this.isHovered = false;
-      this.$emit("hide-tooltip");
+    update() {
+      this.isResearching = AbyssResearches[this.id].isResearching;
+      this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
+      this.percentage = AbyssResearches[this.id].percentage;
     },
   },
 };
@@ -86,178 +109,88 @@ export default {
 <template>
   <div
     class="research-node"
-    :class="[
-      shapeClass,
-      {
-        'research-node--researching': isResearching,
-        'research-node--hovered': isHovered,
-      },
-    ]"
-    :style="nodeStyle"
-    @click="handleClick"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
+    :class="getNodeClass"
+    :style="getNodeStyle"
+    v-tooltip="{ content: getTooltip, classes: ['general-tooltip', 'abyss-research-tooltip'] }"
   >
-    <div class="research-node__shape">
-      <!-- 进度填充层 -->
-      <div class="research-node__progress-mask">
-        <div class="research-node__progress-fill" :style="progressStyle"></div>
-      </div>
-
-      <!-- 空心边框 -->
-      <div class="research-node__border"></div>
-
-      <!-- 等级文字 -->
-      <div class="research-node__level" :class="{ 'reverse-rotation': node.type === 'limited' }">
-        {{ levelText }}
-      </div>
+    <div class="research-node__container" @click="handleClick" :class="getContainerClass">
+      <div class="research-node__inner" :style="getFillStyle"></div>
+      <div class="research-node__level" :style="getTextStyle">{{ levelText }}</div>
     </div>
-    <div class="research-node__label">{{ node.name }}</div>
   </div>
 </template>
 
 <style scoped>
 .research-node {
   position: absolute;
-  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  overflow: visible;
   transition: all 0.3s ease;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  transition-duration: 0.5s;
 }
 
-.research-node__shape {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #111014;
-  overflow: hidden;
-}
-
-/* ========== 节点形状定义 ========== */
-.research-node--unlimited .research-node__shape {
-  /* 关键修复：使用伪元素创建完美圆形 */
-  position: relative;
-  border-radius: 50%;
-  border: 3px solid var(--node-color);
-  overflow: hidden;
-  background: #111014 !important; /* 清除背景 */
-}
-
-.research-node--unlimited .research-node__border {
-  border: 0px solid var(--node-color);
-}
-
-/* 有限型 - 菱形 */
-.research-node--limited .research-node__shape {
-  transform: rotate(45deg);
-}
-.research-node--limited .research-node__level {
-  transform: rotate(-45deg); /* 文字反向旋转 */
-}
-
-/* 单次型 - 六边形 */
-.research-node--single .research-node__shape {
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-}
-
-/* ========== 空心边框 ========== */
-.research-node__border {
-  position: absolute;
+.research-node__container {
+  z-index: 0;
   width: 100%;
   height: 100%;
-  border: 3px solid var(--node-color, #3498db);
-  box-sizing: border-box;
-  z-index: 4;
-  pointer-events: none;
+  position: relative;
+  background-color: #3498db;
+
+  transition-duration: 0.5s;
+  .research-node--unlimited & {
+    border-radius: 50%;
+  }
+  .research-node--limited & {
+    transform: rotate(45deg);
+  }
+  .research-node--single & {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
 }
 
-/* ========== 进度填充系统 ========== */
-.research-node__progress-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+.research-node__container--locked {
+  background-color: rgb(75, 75, 75);
+}
+
+.research-node__container--active {
+  background-color: #f39c12;
+}
+
+.research-node__container::before {
   z-index: 1;
-}
-
-/* 从下往上的填充效果 */
-.research-node__progress-fill {
+  content: "";
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0;
-  background: var(--node-color, #3498db);
+  inset: 2px;
+  background: #111014;
+  border-radius: inherit;
+  clip-path: inherit;
+}
+
+.research-node__inner {
+  z-index: 2;
+  position: absolute;
+  inset: 2px;
+  background: #3498db;
   opacity: 0.3;
-  transition: height 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-
-/* 特殊形状的填充修正 */
-.research-node--limited .research-node__progress-container,
-.research-node--limited .research-node__progress-fill {
-  transform: rotate(-45deg); /* 菱形填充修正 */
   transform-origin: center;
-  width: 200%;
-  left: -50%;
-  bottom: -41.4%;
+  border-radius: inherit;
+  clip-path: inherit;
 }
 
-/* ========== 状态效果 ========== */
-/* 研究中状态 */
-.research-node--researching .research-node__shape {
-  border-color: #f39c12;
-}
-.research-node--researching .research-node__border {
-  border-color: #f39c12;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.8;
-  }
+.research-node__level {
+  position: absolute;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  line-height: 40px;
+  top: 0;
+  left: 0;
 }
 
-/* 悬停效果 */
-.research-node--hovered {
-  transform: translate(-50%, -50%) scale(1.15);
+.research-node:hover {
+  transform: scale(1.15);
   z-index: 10;
   filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.4));
-}
-
-/* ========== 文字系统 ========== */
-.research-node__level {
-  position: relative;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.research-node__label {
-  margin-top: 10px;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 500;
-  max-width: 120px;
-  padding: 5px 8px;
-  background: rgba(30, 31, 40, 0.9);
-  border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  white-space: nowrap;
 }
 </style>

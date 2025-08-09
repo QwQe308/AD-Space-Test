@@ -1,51 +1,36 @@
 <script>
 export default {
-  name: "ResearchTabs",
+  name: "AbyssResearchPageSelector",
   props: {
-    categories: {
-      type: Array,
-      required: true
-    },
-    initialTab: {
+    depth: {
       type: String,
-      default: null
+      required: true
     }
   },
-  data() {
-    return {
-      activeTab: this.initialTab || (this.categories.length > 0 ? this.categories[0].id : null)
-    };
-  },
   computed: {
-    hasTabs() {
-      return this.categories.length > 0;
+    depthsList() {
+      return abyssDepths
     }
   },
   methods: {
     changeTab(tabId) {
-      if (this.activeTab === tabId) return;
-      this.activeTab = tabId;
+      if (player.currentAbyssResearchDepth === tabId) return;
       this.$emit("tab-change", tabId);
     }
   },
-  watch: {
-    initialTab(newVal) {
-      this.activeTab = newVal;
-    }
-  }
 };
 </script>
 
 <template>
-  <div class="research-tabs" v-if="hasTabs">
+  <div class="research-tabs">
     <div 
-      v-for="category in categories" 
-      :key="category.id"
+      v-for="depthID in depthsList" 
+      :key="depthID"
       class="research-tabs__item"
-      :class="{ 'research-tabs__item--active': activeTab === category.id }"
-      @click="changeTab(category.id)"
+      :class="{ 'research-tabs__item--active': depth === depthID }"
+      @click="changeTab(depthID)"
     >
-      <span class="research-tabs__label">{{ category.name }}</span>
+      <span class="research-tabs__label">{{ depthID }}</span>
       <div class="research-tabs__indicator"></div>
     </div>
   </div>

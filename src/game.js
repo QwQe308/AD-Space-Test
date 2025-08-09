@@ -153,9 +153,9 @@ function totalEPMult() {
     TimeStudy(121),
     TimeStudy(123),
     RealityUpgrade(12),
-    GlyphEffect.epMult
+    GlyphEffect.epMult,
+    SpaceResearchRifts.r51
   );
-  epMult = epMult.mul(SpaceResearchRifts.r51.effectValue);
   return epMult;
 }
 
@@ -333,11 +333,10 @@ export function gainedInfinities() {
     RealityUpgrade(7),
     Achievement(131).effects.infinitiesGain,
     Achievement(164),
-    Ra.unlocks.continuousTTBoost.effects.infinity
+    Ra.unlocks.continuousTTBoost.effects.infinity,
+    SpaceResearchRifts.r43
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
-
-  infGain = infGain.times(SpaceResearchRifts.r43.effectValue); //MOD r43
 
   infGain = infGain.powEffectOf(SingularityMilestone.infinitiedPow);
   return infGain;
@@ -717,6 +716,7 @@ export function gameLoop(passedDiff, options = {}) {
 
   //MOD update related
   updateSpaceItems(diff);
+  updateAbyssResearchProgress(diff)
 
   // Stopping these checks after CREDITS_START reduces lag and allows for the glyph customization modal to appear
   if (GameEnd.endState < END_STATE_MARKERS.CREDITS_START) {
@@ -785,7 +785,8 @@ function passivePrestigeGen() {
       infGen = infGen.timesEffectsOf(
         RealityUpgrade(5),
         RealityUpgrade(7),
-        Ra.unlocks.continuousTTBoost.effects.infinity
+        Ra.unlocks.continuousTTBoost.effects.infinity,
+        SpaceResearchRifts.r43
       );
       infGen = infGen.times(getAdjustedGlyphEffect("infinityinfmult"));
     }
@@ -804,7 +805,6 @@ function passivePrestigeGen() {
           .times(Time.deltaTime)
       );
     }
-    infGen = infGen.mul(SpaceResearchRifts.r43.effectValue);
     infGen = infGen.plus(player.partInfinitied);
     Currency.infinities.add(infGen.floor());
     player.partInfinitied = infGen.minus(infGen.floor()).toNumber();

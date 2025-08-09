@@ -519,6 +519,7 @@ export const GameStorage = {
           }
         }, 1000);
         player.options = JSON.parse(backUpOptions);
+        player.options.breakPlaceHolder = false
         return;
       }
 

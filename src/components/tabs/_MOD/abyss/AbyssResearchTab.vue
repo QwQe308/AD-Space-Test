@@ -1,98 +1,107 @@
 <script>
-import ResearchTabs from "./AbyssResearchPage.vue";
-import ResearchNode from "./AbyssResearchNode.vue";
-import ResearchConnection from "./AbyssResearchConnection.vue";
-import TooltipContent from "./AbyssResearchToolTip.vue";
+//This is a rewritten version of that code. Thats too junky.
+import AbyssResearchConnection from "./AbyssResearchConnection.vue";
+import AbyssResearchNode from "./AbyssResearchNode.vue";
+import AbyssResearchPageSelector from "./AbyssResearchPageSelector.vue";
 
 export default {
   name: "AbyssResearchTab",
-  components: {
-    ResearchTabs,
-    ResearchNode,
-    ResearchConnection,
-    TooltipContent,
-  },
   data() {
     return {
-      researchCategories: window.researchCategories,
-      researchNodes: window.abyssResearches,
-      researchManager: window.researchManager,
-      currentCategory: "1",
+      depth: "1",
+      shownNodes: [],
+      activeNodes: new Set(),
+      connections: [],
+
       zoomLevel: 1,
-      offsetX: 0,
-      offsetY: 0,
       isDragging: false,
       dragStartX: 0,
       dragStartY: 0,
+      offsetX: 750,
+      offsetY: 300,
       startOffsetX: 0,
       startOffsetY: 0,
-      tooltip: {
-        node: null,
-        x: 0,
-        y: 0,
-        visible: false,
-      },
-      activeResearches: new Set(),
+
+      maxConcurrent: 3,
+      activeNodeStats: [],
+      abyssResearchSpeed: new Decimal(0)
     };
   },
+  components: {
+    AbyssResearchConnection,
+    AbyssResearchNode,
+    AbyssResearchPageSelector,
+  },
   computed: {
-    currentNodes() {
-      return this.researchNodes[this.currentCategory] || [];
+    getCurrentNodes() {
+      // only give keys
+      return Object.keys(AbyssResearchesSortByDepth[this.depth]);
     },
-    filteredNodes() {
-      return this.currentNodes.filter((node) => node.unlocked());
-    },
-    currentCategoryName() {
-      const category = this.researchCategories.find((c) => c.id === this.currentCategory);
-      return category ? category.name : "";
-    },
-    connections() {
-      const conns = [];
-      this.currentNodes.forEach((node) => {
-        if (node.nextIds && node.nextIds.length) {
-          node.nextIds.forEach((nextId) => {
-            const targetNode = this.currentNodes.find((n) => n.id === nextId);
-            if (targetNode && targetNode.unlocked()) {
-              conns.push({
-                from: node.id,
-                to: nextId,
-                fromNode: node,
-                toNode: targetNode,
-              });
-            }
-          });
+    getConnections() {
+      // [[x1,y1],[x2,y2],isResearching]
+      let connections = [];
+      for (let id of this.shownNodes) {
+        for (let id2 of AbyssResearches[id].next) {
+          if (this.shownNodes.includes(id2)) {
+            connections.push([
+              [AbyssResearches[id].x, AbyssResearches[id].y],
+              [AbyssResearches[id2].x, AbyssResearches[id2].y],
+              AbyssResearches[id2].id,
+            ]);
+          }
         }
-      });
-      return conns;
-    },
-    tooltipStyle() {
-      return {
-        left: `${this.tooltip.x}px`,
-        top: `${this.tooltip.y}px`,
-        opacity: this.tooltip.visible ? 1 : 0,
-      };
-    },
-    maxConcurrent() {
-      return this.researchManager.maxConcurrent;
+      }
+      return connections;
     },
   },
   methods: {
     update() {
-      this.activeResearches = this.currentNodes.filter((node) => this.researchManager.isResearching(node));
+      this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
+      this.activeNodes = player.activeAbyssResearches;
+      this.maxConcurrent = AbyssResearches.A1.maxConcurrent//for any node thats same
+      this.abyssResearchSpeed.copyFrom(globalAbyssResearchSpeed())
+      let nodeIndex = 0
+      for(let id of this.activeNodes){
+        this.$set(this.activeNodeStats, nodeIndex, [id, AbyssResearches[id].percentage])
+        nodeIndex ++
+      }
+      for(let i = this.activeNodes.size;i<this.maxConcurrent;i++){
+        this.$delete(this.activeNodeStats, nodeIndex)
+        nodeIndex ++
+      }
     },
-    getCategoryColor(categoryId) {
-      const category = this.researchCategories.find((c) => c.id === categoryId);
-      return category ? category.color : "#3498db";
-    },
-    handleTabChange(categoryId) {
-      this.currentCategory = categoryId;
-      this.resetView();
+
+    resetView() {
+      this.zoomLevel = 1;
+      this.offsetX = 0;
+      this.offsetY = 0;
+      this.updateCanvasTransform();
     },
     updateCanvasTransform() {
       if (this.$refs.canvas) {
         this.$refs.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.zoomLevel})`;
       }
     },
+
+    startDrag(event) {
+      this.isDragging = true;
+      this.dragStartX = event.clientX;
+      this.dragStartY = event.clientY;
+      this.startOffsetX = this.offsetX;
+      this.startOffsetY = this.offsetY;
+    },
+    drag(event) {
+      //this.updateTooltipPosition(event);
+      if (this.isDragging) {
+        this.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
+        this.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
+        this.updateCanvasTransform();
+      }
+    },
+    endDrag() {
+      this.isDragging = false;
+    },
+
     handleZoom(event) {
       const delta = event.deltaY * -0.001;
       const newZoom = Math.min(Math.max(0.5, this.zoomLevel + delta), 2);
@@ -111,112 +120,15 @@ export default {
         this.updateCanvasTransform();
       }
     },
-    zoomIn() {
-      this.zoomLevel = Math.min(this.zoomLevel + 0.1, 2);
-      this.updateCanvasTransform();
-    },
-    zoomOut() {
-      this.zoomLevel = Math.max(this.zoomLevel - 0.1, 0.5);
-      this.updateCanvasTransform();
-    },
-    resetView() {
-      this.zoomLevel = 1;
-      this.offsetX = 0;
-      this.offsetY = 0;
-      this.updateCanvasTransform();
-    },
-    startDrag(event) {
-      this.isDragging = true;
-      this.dragStartX = event.clientX;
-      this.dragStartY = event.clientY;
-      this.startOffsetX = this.offsetX;
-      this.startOffsetY = this.offsetY;
-    },
-    drag(event) {
-      this.updateTooltipPosition(event);
-      if (this.isDragging) {
-        this.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
-        this.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
-        this.updateCanvasTransform();
-      }
-    },
-    endDrag() {
-      this.isDragging = false;
-    },
-    showTooltip(node, event) {
-      this.tooltip.node = node;
-      this.tooltip.visible = true;
-      if (event) {
-        this.tooltip.x = event.clientX + 15;
-        this.tooltip.y = event.clientY + 15;
-      }
-    },
-    hideTooltip() {
-      this.tooltip.visible = false;
-      this.tooltip.node = null;
-    },
-    handleNodeClick({ node, event }) {
-      if (event.ctrlKey || event.metaKey) {
-        this.showTooltip(node, event);
-      } else if (this.researchManager.canStartResearch(node)) {
-        this.startResearch(node);
-      }
-    },
-    startResearch(node) {
-      this.researchManager.startResearch(node)
-    },
-    startResearchFromTooltip(node) {
-      this.startResearch(node);
-      this.hideTooltip();
-    },
-    simulateProgress() {
-      this.activeResearches.forEach((node) => {
-        if (node.progress < 1) {
-          node.progress = Math.min(1, node.progress + 0.1);
-          if (node.progress === 1) {
-            this.researchManager.completeResearch(node);
-          }
-        }
-      });
-    },
-    calculateConnectionPositions(connection) {
-      const from = this.currentNodes.find((n) => n.id === connection.from);
-      const to = this.currentNodes.find((n) => n.id === connection.to);
-      return {
-        x1: from.x + from.width / 2,
-        y1: from.y + from.height / 2,
-        x2: to.x + to.width / 2,
-        y2: to.y + to.height / 2,
-      };
-    },
-    isConnectionActive(connection) {
-      const from = this.currentNodes.find((n) => n.id === connection.from);
-      const to = this.currentNodes.find((n) => n.id === connection.to);
-      return this.researchManager.isResearching(to);
-    },
-    updateTooltipPosition(event) {
-      const padding = 15;
-      const tooltip = this.$refs.tooltip;
 
-      if (!tooltip) return;
-
-      // 先显示以获取尺寸
-      tooltip.style.display = "block";
-      const rect = tooltip.getBoundingClientRect();
-
-      let x = event.clientX + padding;
-      let y = event.clientY + padding;
-
-      // 视窗边界检测
-      if (x + rect.width > window.innerWidth) {
-        x = event.clientX - rect.width - padding;
-      }
-      if (y + rect.height > window.innerHeight) {
-        y = event.clientY - rect.height - padding;
-      }
-
-      this.tooltip.x = x;
-      this.tooltip.y = y;
+    handleTabChange(newVal) {
+      player.currentAbyssResearchDepth = newVal;
+      this.depth = newVal;
+    },
+  },
+  watch: {
+    shownNodes() {
+      this.connections = this.getConnections;
     },
   },
   mounted() {
@@ -227,195 +139,66 @@ export default {
 
 <template>
   <div class="research-wrapper">
-    <!-- 新增的wrapper -->
-    <main class="research-container">
-      <div class="canvas-container" ref="canvasContainer">
-        <div class="canvas-background"></div>
-
-        <div
-          class="research-canvas"
-          ref="canvas"
-          @mousedown="startDrag"
-          @mousemove="drag"
-          @mouseup="endDrag"
-          @mouseleave="endDrag"
-          @wheel.prevent="handleZoom"
-        >
-          <!-- 添加 SVG 连接线图层 -->
-          <svg class="connections-layer" width="100%" height="100%">
-            <ResearchConnection
-              v-for="(connection, index) in connections"
-              :key="'conn-' + index"
-              :from="connection.fromNode"
-              :to="connection.toNode"
-              :is-active="isConnectionActive(connection)"
-              :is-unlocked="true"
-              :x1="connection.fromNode.x - 10"
-              :y1="connection.fromNode.y - 10"
-              :x2="connection.toNode.x - 10"
-              :y2="connection.toNode.y - 10"
-            />
-          </svg>
-          <div class="category-indicator">{{ currentCategoryName }}</div>
-
-          <ResearchNode
-            v-for="(node, index) in filteredNodes"
-            :key="index"
-            :node="node"
-            :is-researching="researchManager.isResearching(node)"
-            :is-unlocked="node.unlocked()"
-            :x="node.x"
-            :y="node.y"
-            :color="getCategoryColor(node.category)"
-            :can-start-research="researchManager.canStartResearch(node)"
-            @node-click="handleNodeClick"
-            @show-tooltip="showTooltip"
-            @hide-tooltip="hideTooltip"
+    <div class="canvas-container" ref="canvasContainer">
+      <div
+        class="research-canvas"
+        ref="canvas"
+        @mousedown="startDrag"
+        @mousemove="drag"
+        @mouseup="endDrag"
+        @mouseleave="endDrag"
+        @wheel.prevent="handleZoom"
+      >
+        <AbyssResearchNode v-for="id in shownNodes" :key="id" :id="id"></AbyssResearchNode>
+        <!-- lines -->
+        <svg class="connections-layer" width="100%" height="100%">
+          <defs>
+            <linearGradient id="linearGradient-right-upwards" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-left-upwards" x1="100%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-right-downwards" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-left-downwards" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+          </defs>
+          <AbyssResearchConnection
+            v-for="(connection, index) in connections"
+            :key="'conn-' + index"
+            :data="connection"
+            :id="'conn-' + index"
           />
-        </div>
-        <ResearchTabs :categories="researchCategories" :initial-tab="currentCategory" @tab-change="handleTabChange" />
+        </svg>
+      </div>
+      <AbyssResearchPageSelector :depth="depth" @tab-change="handleTabChange" />
+    </div>
 
-        <div class="zoom-info">
-          <i class="fas fa-search-plus"></i>
-          <span>Scale: {{ (zoomLevel * 100).toFixed(0) }}%</span>
-        </div>
-
-        <div class="tooltip" ref="tooltip" :style="tooltipStyle">
-          <TooltipContent
-            v-if="tooltip.node"
-            :node="tooltip.node"
-            :is-researching="researchManager.isResearching(tooltip.node)"
-            :is-completed="tooltip.node.progress === 1"
-            :is-unlocked="tooltip.node.unlocked()"
-            :can-start-research="researchManager.canStartResearch(tooltip.node)"
-            :requirements-met="tooltip.node.requirements()"
-            @start-research="startResearchFromTooltip"
-          />
-        </div>
-
-        <div class="active-research-info" v-if="activeResearches.length > 0">
-          <h3>Researching ({{ activeResearches.length }}/{{ maxConcurrent }})</h3>
-          <div class="active-list">
-            <div v-for="research in activeResearches" :key="research.id" class="active-item">
-              {{ research.name }} ({{ (research.progress * 100).toFixed(1) }}%)
-            </div>
-          </div>
+    <div class="active-research-info" v-if="activeNodeStats.length > 0">
+      <h3>Researching ({{ activeNodeStats.length }}/{{ maxConcurrent }})</h3>
+      <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
+      <div class="active-list">
+        <div v-for="(stat, index) in activeNodeStats" :key="index" class="active-item">
+          {{ stat[0] }} ({{ formatPercents(stat[1]) }})
         </div>
       </div>
+    </div>
 
-      <div class="controls">
-        <button class="btn btn-outline" @click="resetView">
-          <i class="fas fa-sync-alt"></i>
-          <span>Relocate</span>
-        </button>
-        <button class="btn btn-outline" @click="simulateProgress">
-          <i class="fas fa-flask"></i>
-          <span>Simulate(test)</span>
-        </button>
-      </div>
-    </main>
   </div>
 </template>
 
 <style scoped>
-.connections-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.research-wrapper {
-  height: 71vh;
-  display: flex;
-  overflow: hidden;
-}
-
-.research-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-/* 修改canvas容器 */
-.canvas-container {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  min-height: 300px;
-  overflow: hidden; /* 改为 auto 允许滚动 */
-}
-
-.research-canvas {
-  position: absolute;
-  top: -5000px;
-  left: -5000px;
-  width: 10000px; /* 确保画布足够大 */
-  height: 10000px;
-  transform-origin: 5000px 5000px;
-  cursor: grab;
-}
-
-.research-canvas:active {
-  cursor: grabbing;
-}
-
-.canvas-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px); */
-  background-size: 40px 40px;
-}
-
-.category-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.05);
-  text-transform: uppercase;
-  letter-spacing: 5px;
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-}
-
-.zoom-info {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(20, 21, 30, 0.8);
-  padding: 10px 15px;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 5;
-}
-
-.tooltip {
-  position: fixed;
-  z-index: 100;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
 .active-research-info {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
+  bottom: 15px;
+  right: 20px;
   background: rgba(20, 21, 30, 0.9);
   padding: 15px;
   border-radius: 10px;
@@ -425,7 +208,7 @@ export default {
 
 .active-research-info h3 {
   margin-bottom: 10px;
-  color: #f39c12;
+  color: rgba(80,160,255, 0.9);
 }
 
 .active-list {
@@ -440,84 +223,31 @@ export default {
   border-radius: 5px;
 }
 
-.controls {
+.research-wrapper {
+  height: 71vh;
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  background: #111014;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  user-select: none;
 }
 
-.btn {
-  padding: 12px 25px;
-  background: linear-gradient(to right, #3498db, #2ecc71);
-  color: white;
-  border: none;
-  border-radius: 30px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.research-canvas {
+  position: absolute;
+  top: -5000px;
+  left: -5000px;
+  width: 10000px; /* 确保画布足够大 */
+  height: 10000px;
+  cursor: grab;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+.research-canvas:active {
+  cursor: grabbing;
 }
 
-.btn-outline {
-  background: transparent;
-  border: 2px solid #3498db;
-  color: #3498db;
-}
-
-.legend {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  padding: 20px;
-  background: rgba(20, 21, 30, 0.7);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.legend-shape {
-  width: 20px;
-  height: 20px;
-  border: 2px solid;
+.canvas-container {
+  flex: 1;
   position: relative;
-}
-
-.legend-diamond {
-  transform: rotate(45deg);
-  border-color: #3498db;
-}
-
-.legend-circle {
-  border-radius: 50%;
-  border-color: #2ecc71;
-}
-
-.legend-hexagon {
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  border-color: #9b59b6;
-}
-
-@media (max-width: 768px) {
-  .controls {
-    flex-wrap: wrap;
-  }
-
-  .legend {
-    flex-wrap: wrap;
-  }
+  overflow: hidden;
+  min-height: 300px;
+  overflow: hidden; /* 改为 auto 允许滚动 */
 }
 </style>

@@ -79,11 +79,11 @@ export const breakInfinityUpgrades = {
     formatEffect: value => {
       if (value === Number.MAX_VALUE && !Pelle.isDoomed) return "No Infinity generation";
       let infinities = DC.D4;
-      infinities = infinities.mul(SpaceResearchRifts.r43.effectValue);
       infinities = infinities.timesEffectsOf(
         RealityUpgrade(5),
         RealityUpgrade(7),
-        Ra.unlocks.continuousTTBoost.effects.infinity
+        Ra.unlocks.continuousTTBoost.effects.infinity,
+        SpaceResearchRifts.r43
       );
       infinities = infinities.times(getAdjustedGlyphEffect("infinityinfmult"));
       const timeStr = Time.bestInfinity.totalMilliseconds.lte(50)

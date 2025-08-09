@@ -1,42 +1,208 @@
-export class ResearchManager {
-  constructor() {
-    this.activeResearches = new Set();
+import { DC } from "../../../constants";
+import { GameMechanicState } from "../../../utils";
+import { abyssDepths, globalAbyssResearchSpeed } from "./abyssResearches";
+
+//currently only allows linear
+class AbyssResearchClass extends GameMechanicState {
+  id;
+  depth;
+  type;
+  x;
+  y;
+  scaling;
+  scalingType;
+  next;
+  previous;
+  constructor(config) {
+    super(config);
+    this.id = config.id;
+    this.depth = config.depth;
+    this.type = config.type;
+    this.x = config.position[0] * 150 + 5000;
+    this.y = config.position[1] * 150 + 5000;
+    this.next = config.next;
+    this.previous = config.previous;
+    if (!(config.type === "single")) this.scalingType = config.scaling.type;
   }
 
-  get maxConcurrent(){
-    return 3
+  get level() {
+    return player.abyssResearches[this.id].level;
   }
 
-  canStartResearch(node) {
-    return (
-      this.activeResearches.size < this.maxConcurrent &&
-      node.requirements() &&
-      node.unlocked()
-    );
+  set level(data) {
+    player.abyssResearches[this.id].level = data;
   }
 
-  startResearch(node) {
-    if(node.isResearching){
-      this.activeResearches.delete(node.id);
-      node.isResearching = false;
-      return true
+  get maxLevel() {
+    if (this.type === "single") return DC.D1;
+    if (this.type === "unlimited") return DC.BEMAX;
+    return this.config.maxLevel;
+  }
+
+  get description() {
+    return this.config.description(this.level);
+  }
+
+  get isEffectActive() {
+    return this.level.gte(1);
+  }
+
+  get effectValue() {
+    return this.config.effectValue(this.level);
+  }
+
+  get cost() {
+    if (this.type === "single") return this.config.cost;
+    switch (this.scalingType) {
+      case "linear":
+        return player.abyssResearches[this.id].cost;
     }
-    if (this.canStartResearch(node)) {
-      this.activeResearches.add(node.id);
-      node.isResearching = true;
-      return true;
+  }
+
+  set cost(data) {
+    player.abyssResearches[this.id].cost = data;
+  }
+
+  get percentage() {
+    if (this.level.gte(this.maxLevel)) return 1;
+    return this.progress.div(this.cost).min(1).toNumber();
+  }
+
+  get progress() {
+    return player.abyssResearches[this.id].progress;
+  }
+
+  set progress(data) {
+    player.abyssResearches[this.id].progress = data;
+    if (!(this.type === "single")) this.updateScaling();
+    this.updateLevel();
+  }
+
+  updateScaling() {
+    if (!this.scalingType) return;
+    switch (this.scalingType) {
+      case "linear":
+        this.scaling = new LinearCostScaling(
+          this.progress,
+          player.abyssResearches[this.id].cost,
+          this.config.scaling.costIncrease,
+          this.maxLevel
+        );
     }
-    return false;
   }
 
-  completeResearch(node) {
-    this.activeResearches.delete(node.id);
-    node.isResearching = false;
+  updateLevel() {
+    let isFirstLevel = this.level.eq(0);
+    switch (this.type) {
+      case "single":
+        if (this.progress.gte(this.config.cost)) {
+          this.level = DC.D1;
+
+          if (isFirstLevel) this.updateCompletion();
+          this.stop();
+        }
+        return;
+      case "limited":
+        switch (this.scalingType) {
+          case "linear": // limited - linear
+            if (this.scaling.purchases.lt(1)) return;
+            this.level = this.level.add(this.scaling.purchases);
+            this.cost = this.scaling.nextCost;
+            player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); //to avoid unwanted update
+
+            if (isFirstLevel) this.updateCompletion();
+            if (this.level.gte(this.maxLevel)) this.stop();
+            return;
+        }
+        return;
+      case "unlimited":
+        switch (this.scalingType) {
+          case "linear": // unlimited - linear
+            if (this.scaling.purchases.lt(1)) return;
+            this.level = this.level.add(this.scaling.purchases);
+            this.cost = this.scaling.nextCost;
+            player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); //to avoid unwanted update
+
+            if (isFirstLevel) this.updateCompletion();
+            return;
+        }
+        return;
+    }
   }
 
-  isResearching(node) {
-    return this.activeResearches.has(node.id);
+  updateCompletion() {
+    for (let next1 of this.next) {
+      player.abyssResearches[next1].unlocked = true;
+      player.abyssResearches[next1].shown = true;
+      for (let next2 of AbyssResearches[next1].next) {
+        player.abyssResearches[next2].shown = true;
+      }
+    }
+  }
+
+  start() {
+    if (player.activeAbyssResearches.size >= this.maxConcurrent) return;
+    player.activeAbyssResearches.add(this.id);
+  }
+
+  stop() {
+    player.activeAbyssResearches.delete(this.id);
+  }
+
+  click() {
+    if (this.isResearching) this.stop();
+    else this.start();
+  }
+
+  get canResearch() {
+    return player.activeAbyssResearches.size < this.maxConcurrent && player.abyssResearches[this.id].unlocked;
+  }
+
+  get maxConcurrent() {
+    //maxiumn concurrent researches
+    return 3;
+  }
+
+  addProgress(data) {
+    this.progress = this.progress.add(data);
+  }
+
+  reset() {
+    player.abyssResearches[this.id].level = DC.D0;
+    player.abyssResearches[this.id].progress = DC.D0;
+    if (player.abyssResearches[this.id].cost) player.abyssResearches[this.id].cost = this.config.scaling.cost;
+    this.updateScaling();
+  }
+
+  get isResearching() {
+    return player.activeAbyssResearches.has(this.id);
+  }
+
+  get researchSpeed() {
+    return globalAbyssResearchSpeed();
   }
 }
 
-export const researchManager = new ResearchManager()
+export const AbyssResearches = mapGameDataToObject(
+  GameDatabase.space.abyssResearches,
+  (config) => new AbyssResearchClass(config)
+);
+
+let abyssResearchesSortByDepth = {};
+for (let i of abyssDepths) {
+  abyssResearchesSortByDepth[i] = {};
+}
+for (let i in AbyssResearches) {
+  if (i === "all") continue;
+  abyssResearchesSortByDepth[AbyssResearches[i].depth][i] = AbyssResearches[i];
+}
+export const AbyssResearchesSortByDepth = abyssResearchesSortByDepth;
+
+export function updateAbyssResearchProgress(diff) {
+  if (player.records.thisReality.maxSpace.lt(player.space)) {
+    player.records.thisReality.maxSpace = player.space;
+  }
+  player.activeAbyssResearches.forEach((research) => {
+    AbyssResearches[research].addProgress(AbyssResearches[research].researchSpeed.mul(diff).div(1000));
+  });
+}

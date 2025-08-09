@@ -111,8 +111,14 @@ export const eternityMilestones = {
     pelleUseless: true,
   },
   unlockAllND: {
-    eternities: 18,
-    reward: "Start with all Antimatter Dimensions available for purchase",
+    get eternities(){
+      return PlayerProgress.imaginaryUnlocked() && player.eternities.lte(100)? 101 : 18
+    },
+    get reward() {
+      return PlayerProgress.imaginaryUnlocked() && player.eternities.lte(100)
+        ? "????????????????????????\n???????????????????????\n?????????"
+        : "Start with all Antimatter Dimensions available for purchase";
+    },
   },
   autobuyerID7: {
     eternities: 19,

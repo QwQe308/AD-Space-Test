@@ -1,3 +1,5 @@
+import { DC } from "../../constants";
+
 let swapDelay = 1000;
 
 function waitForInterval() {
@@ -129,6 +131,7 @@ let abyssTexts = [
   [".", 1000],
   [".", 500],
   [".", 500],
+  ["<br>Please refresh the page. Antimatter Dimensions Eternal.", 2000],
 ];
 
 export async function abyssAnimation() {
@@ -161,6 +164,9 @@ export async function abyssAnimation() {
   }
   Laitela.setContinuum(false);
   //reset values
+  for (let i = 0; i < player.achievementBits.length; i++) {
+    player.achievementBits[i] = 0;
+  }
   eternity(true, true);
   player.eternityPoints = new Decimal(0);
   fullResetTimeDimensions();
@@ -185,10 +191,19 @@ export async function abyssAnimation() {
   player.imaginaryInfluence.push("abyss");
   eternity(true, true);
   player.eternities = new Decimal(100);
+  player.abyssResearches.A1.unlocked = true;
+  player.abyssResearches.A1.shown = true;
+  player.infinityUpgrades = new Set();
+  player.replicanti.unl = false;
+  bigCrunchReset(true)
+  player.amProc = DC.D0
+  player.space = DC.D0
+  player.records.thisReality.maxSpace = DC.D0
   //end
   AutomatorBackend.pause();
-  Tab.imaginary.analyzer.show(true, true);
+  Tab.imaginary.analyzer.show(false, true);
   for (const tab of Tabs.currentUIFormat) if (!tab.isHidden) tab.toggleVisibility();
-  EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER);
-  console.log("test completed");
+  GameStorage.save(true);
+  GameIntervals.stop();
+  //EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER); //no after lol
 }

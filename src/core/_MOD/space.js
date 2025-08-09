@@ -7,8 +7,10 @@ function getSpaceNerfExponent() {
 export function getSpaceDivisor() {
   //space amount divisor
   let divisor = new Decimal(1);
-  divisor = divisor.mul(SpaceResearchRifts.r22.effectValue);
-  divisor = divisor.timesEffectsOf(DilationUpgrade.spaceDivisorDT)
+  divisor = divisor.timesEffectsOf(
+    DilationUpgrade.spaceDivisorDT,
+    SpaceResearchRifts.r22
+  )
   if (isSCRunningOnTier(3, 2)) {
     let sc3Nerf = DC.D1;
     SpaceResearchTierDetail[0].forEach((x) => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.1))));
@@ -31,18 +33,19 @@ export function getSpaceAfterCalc() {
 
 export function getEffectiveSpaceMult() {
   let effectiveMult = new Decimal(1);
-  effectiveMult = effectiveMult.mul(SpaceResearchRifts.r42.effectValue);
+  effectiveMult = effectiveMult.timesEffectsOf(SpaceResearchRifts.r42);
   return effectiveMult;
 }
 
 export function getAMMultplier() {
   let amMult = new Decimal(1);
-  amMult = amMult.mul(SpaceResearchRifts.r11.effectValue);
   amMult = amMult.timesEffectsOf(
     InfinityUpgrade.dim45mult,
     TimeStudy(71),
-    TimeStudy(101)
-    );
+    TimeStudy(101),
+    SpaceResearchRifts.r11,
+    AbyssResearches.A1,
+  );
   amMult = amMult.mul(light.red.effectValue());
   return amMult;
 }

@@ -7,7 +7,6 @@ class SpaceResearchRiftClass extends GameMechanicState {
     super(config);
     this.name = config.name;
     this.tier = config.tier;
-
   }
 
   get canBeApplied() {
@@ -195,6 +194,6 @@ class SpaceResearchRiftClass extends GameMechanicState {
 }
 
 export const SpaceResearchRifts = mapGameDataToObject(
-  GameDatabase.space.spaceResearch,
+  GameDatabase.space.spaceResearches,
   (config) => new SpaceResearchRiftClass(config)
 );

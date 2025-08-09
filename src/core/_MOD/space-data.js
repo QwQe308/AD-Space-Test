@@ -1,4 +1,6 @@
-import { spaceResearch } from "./space-researches/spaceResearches"
+import { spaceResearches } from "./space-researches/spaceResearches"
+import { abyssResearches } from "./abyss/abyss-researches/abyssResearches"
 export const space = {
-    spaceResearch,
+    spaceResearches,
+    abyssResearches
 }

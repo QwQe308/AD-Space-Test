@@ -40,26 +40,7 @@ export function tierBasedResearchSpeed(tier) {
   return researchSpd;
 }
 
-/* export const spaceResearches = {
-  tier1: {
-    1: {
-      researchReq: level => DC.D2.pow(level).mul(100),
-      effectDescription: eff => `AM gain ${formatX(eff, 2, 2)}`,
-      effect: level => {
-        return DC.D2.pow(level);
-      },
-    },
-    2: {
-      researchReq: level => DC.D5.pow(level).mul(1000),
-      effectDescription: eff => `AD cost /${format(eff, 2, 2)}`,
-      effect: level => {
-        return DC.E1.pow(level);
-      },
-    },
-  }
-}; */
-
-export const spaceResearch = {
+export const spaceResearches = {
   //AM - Tier 0
   r11: {
     key: "r11",
@@ -384,7 +365,7 @@ export const spaceResearch = {
 
 export const maxTier = 4;
 export const SpaceResearchTierDetail = Array.range(0, maxTier + 1).map((tier) =>
-  Object.keys(spaceResearch).filter((i) => spaceResearch[i].tier == tier)
+  Object.keys(spaceResearches).filter((i) => spaceResearches[i].tier == tier)
 );
 export const SpaceResearchResetsNothing = [
   () => true,

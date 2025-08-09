@@ -273,8 +273,11 @@ function askEternityConfirmation() {
 
 export function gainedEternities() {
   if (Pelle.isDisabled("eternityMults")) return new Decimal(1);
-  let esMult = new Decimal(getAdjustedGlyphEffect("timeetermult")).timesEffectsOf(RealityUpgrade(3), Achievement(113));
-  esMult = esMult.mul(SpaceResearchRifts.r53.effectValue);
+  let esMult = new Decimal(getAdjustedGlyphEffect("timeetermult")).timesEffectsOf(
+    RealityUpgrade(3), 
+    Achievement(113),
+    SpaceResearchRifts.r53
+  );
   esMult = esMult.pow(AlchemyResource.eternity.effectValue);
   return esMult;
 }

@@ -152,10 +152,10 @@ export function totalReplicantiSpeedMult(overCap) {
     TimeStudy(213),
     RealityUpgrade(2),
     RealityUpgrade(6),
-    RealityUpgrade(23)
+    RealityUpgrade(23),
+    SpaceResearchRifts.r52
   );
-
-  totalMult = totalMult.mul(SpaceResearchRifts.r52.effectValue);
+  
   if (TimeStudy(21).isBought) {
     totalMult = totalMult.div(3);
   }

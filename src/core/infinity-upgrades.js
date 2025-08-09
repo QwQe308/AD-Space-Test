@@ -98,10 +98,10 @@ export function totalIPMult() {
     Achievement(125),
     Achievement(141).effects.ipGain,
     InfinityUpgrade.ipMult,
-    GlyphEffect.ipMult
+    GlyphEffect.ipMult,
+    SpaceResearchRifts.r41//MOD r41
   );
   ipMult = ipMult.times(Replicanti.amount.powEffectOf(AlchemyResource.exponential));
-  ipMult = ipMult.times(SpaceResearchRifts.r41.effectValue); //MOD r41
   return ipMult;
 }
 
