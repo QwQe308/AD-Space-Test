@@ -6,7 +6,7 @@ import { AUTOMATOR_MODE, AUTOMATOR_TYPE } from "./automator/automator-backend";
 import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 
-import { abyssResearches } from "./_MOD/abyss/abyss-researches/abyssResearches";
+import { abyssResearches, extraAbyssResearchTooltips } from "./_MOD/abyss/abyss-researches/abyssResearches";
 
 function getGlyphTypes() {
   const v = { ...GlyphInfo };
@@ -39,9 +39,10 @@ window.player = {
   version: 103,
   //MOD
   //abyss
-  currentAbyssResearchDepth: "1",
+  currentAbyssResearchDepth: "i",
   activeAbyssResearches: new Set(),
   abyssResearches: createAbyssResearchesData(),
+  abyssResearchTooltipsShown: new Set(),
   //imaginary influence
   imaginaryInfluence: [],
   pendingMessage:[],

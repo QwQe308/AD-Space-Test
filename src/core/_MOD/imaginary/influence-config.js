@@ -2,7 +2,7 @@ export const influence = {
   abyss: {
     id: "abyss",
     name: "Abyss",
-    info: `Disables Achievements, part of the Time Studies, nullifies part of the Eternity and$#^%*(^`,
+    info: `Disables Achievements, part of the Time Studies, Divides Research Speed by 10 and$#^%*(^`,
     influenceStat: 50,
     requirement() {
       return TimeStudy(111).isBought;

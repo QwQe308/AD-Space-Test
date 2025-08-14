@@ -13,15 +13,17 @@ class AbyssResearchClass extends GameMechanicState {
   scalingType;
   next;
   previous;
+  tooltipTags;
   constructor(config) {
     super(config);
     this.id = config.id;
     this.depth = config.depth;
     this.type = config.type;
     this.x = config.position[0] * 150 + 5000;
-    this.y = config.position[1] * 150 + 5000;
+    this.y = config.position[1] * -150 + 5000;
     this.next = config.next;
     this.previous = config.previous;
+    this.tooltipTags = config.tooltipTags;
     if (!(config.type === "single")) this.scalingType = config.scaling.type;
   }
 
@@ -134,6 +136,23 @@ class AbyssResearchClass extends GameMechanicState {
     for (let next1 of this.next) {
       player.abyssResearches[next1].unlocked = true;
       player.abyssResearches[next1].shown = true;
+      for (let tag of this.tooltipTags) {
+        player.abyssResearchTooltipsShown.add(tag);
+      }
+      for (let next2 of AbyssResearches[next1].next) {
+        player.abyssResearches[next2].shown = true;
+        for (let next3 of AbyssResearches[next2].next) {
+          player.abyssResearches[next3].shown = true;
+        }
+      }
+    }
+  }
+
+  updateCompletionWithCondition() {
+    if (this.level.gte(1)) return this.updateCompletion();
+    if (!player.abyssResearches[this.id].unlocked) return;
+    for (let next1 of AbyssResearches[this.id].next) {
+      player.abyssResearches[next1].shown = true;
       for (let next2 of AbyssResearches[next1].next) {
         player.abyssResearches[next2].shown = true;
       }
@@ -141,7 +160,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   start() {
-    if (player.activeAbyssResearches.size >= this.maxConcurrent) return;
+    if (!this.canResearch) return;
     player.activeAbyssResearches.add(this.id);
   }
 
@@ -205,4 +224,10 @@ export function updateAbyssResearchProgress(diff) {
   player.activeAbyssResearches.forEach((research) => {
     AbyssResearches[research].addProgress(AbyssResearches[research].researchSpeed.mul(diff).div(1000));
   });
+}
+
+export function updateAbyssResearchStatus() {
+  for (let i of AbyssResearches.all) {
+    i.updateCompletionWithCondition();
+  }
 }

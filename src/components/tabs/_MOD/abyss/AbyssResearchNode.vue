@@ -14,6 +14,7 @@ export default {
       percentage: 0,
       timeToNext: "",
       progress: new Decimal(0),
+      unlocked: false,
     };
   },
   computed: {
@@ -40,11 +41,16 @@ export default {
           )} | LV.${format(AbyssResearches[this.id].level)} ]----------<br>`;
           break;
       }
-      tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(
-        AbyssResearches[this.id].cost
-      )}<br>
+      tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost)}<br>
             (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})<br><br>
            ${AbyssResearches[this.id].description}`;
+
+      //extra tooltips
+      for(let tip of AbyssResearches[this.id].tooltipTags){
+        if(player.abyssResearchTooltipsShown.has(tip)) continue
+        tooltipContent += `<br>--------------------------<br>`
+        tooltipContent += extraAbyssResearchTooltips[tip]
+      }
       return tooltipContent;
     },
     getFillStyle() {
@@ -69,6 +75,7 @@ export default {
     getContainerClass() {
       return {
         "research-node__container--active": this.isResearching,
+        "research-node__container--locked": !this.unlocked,
       };
     },
     getTextStyle() {
@@ -101,7 +108,8 @@ export default {
       this.isResearching = AbyssResearches[this.id].isResearching;
       this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
       this.percentage = AbyssResearches[this.id].percentage;
-      this.progress = AbyssResearches[this.id].progress
+      this.progress.copyFrom(AbyssResearches[this.id].progress);
+      this.unlocked = player.abyssResearches[this.id].unlocked;
     },
   },
 };
@@ -151,7 +159,7 @@ export default {
 }
 
 .research-node__container--locked {
-  background-color: rgb(75, 75, 75);
+  background-color: rgb(100, 100, 100);
 }
 
 .research-node__container--active {

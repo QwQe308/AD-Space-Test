@@ -22,7 +22,7 @@ export default {
 <template>
   <div class="influence">
     <span class="name">
-      {{ config.name }}
+      {{ config.name }} ({{ config.influenceStat }})
     </span>
     <span class="description">
       {{ config.info }}

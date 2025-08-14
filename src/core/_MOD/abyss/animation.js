@@ -23,10 +23,10 @@ function showText(info) {
 
 let abyssTexts = [
   [
-    "<br>FATAL ERROR: JavaScript heap out of memory",
+    "<br>Uncaught out of memory",
     4000,
     () => {
-      console.error("FATAL ERROR: JavaScript heap out of memory");
+      console.error("Uncaught out of memory");
     },
   ],
   ["<br>.", 1000],
@@ -199,6 +199,7 @@ export async function abyssAnimation() {
   player.amProc = DC.D0
   player.space = DC.D0
   player.records.thisReality.maxSpace = DC.D0
+  player.infinityPoints = DC.D0
   //end
   AutomatorBackend.pause();
   Tab.imaginary.analyzer.show(false, true);

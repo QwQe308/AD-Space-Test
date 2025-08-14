@@ -1,7 +1,7 @@
 import { DC } from "../../../constants";
-import { AbyssResearchesDepth1 } from "./configs/abyss-research-depth1";
+import { AbyssResearchesDepth_i } from "./configs/abyss-research-depth-i";
 
-export const abyssDepths = ["1", "2"];
+export const abyssDepths = ["i", "1", "2"];
 
 export function quickSpawnResearches(config, layer) {
   for (let i in config) {
@@ -15,9 +15,13 @@ export function quickSpawnResearches(config, layer) {
   }
 }
 
-export const abyssResearches = { ...AbyssResearchesDepth1 };
+export const abyssResearches = { ...AbyssResearchesDepth_i };
 
 export function globalAbyssResearchSpeed(){
-  let abyssResearchspeed = player.records.thisReality.maxSpace.pow(0.5).div(25)
+  let abyssResearchspeed = player.records.thisReality.maxSpace.pow(0.5).div(40)
   return abyssResearchspeed
+}
+
+export const extraAbyssResearchTooltips = {
+  ARS: `*Note that Abyss Research uses an<br>independent value called<br>Abyss Research Speed (ARS),<br>differed from Research Speed (RS).`,
 }

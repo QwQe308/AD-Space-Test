@@ -58,7 +58,7 @@ export const spaceResearches = {
       return level.pow_base(2);
     },
     effect: (value) => {
-      return `AM * ${format(value, 2)}`;
+      return `AM × ${format(value, 2)}`;
     },
   },
   r12: {
@@ -117,7 +117,7 @@ export const spaceResearches = {
       return [level, level.pow_base(1.6)];
     },
     effect: (value) => {
-      return `+ ${format(value[0], 2)} extra DB & x ${format(value[1], 2, 2)} Research Speed`;
+      return `+ ${format(value[0], 2)} extra DB & × ${format(value[1], 2, 2)} Research Speed`;
     },
   },
   r22: {
@@ -159,7 +159,7 @@ export const spaceResearches = {
       return [level.pow_base(1.05), level.mul(0.005).add(1)];
     },
     effect: (value) => {
-      return `x ${format(value[0], 2, 3)} & ^ ${format(value[1], 2, 3)} Buy 10 AD mult`;
+      return `× ${format(value[0], 2, 3)} & ^ ${format(value[1], 2, 3)} Buy 10 AD mult`;
     },
   },
 
@@ -180,7 +180,7 @@ export const spaceResearches = {
       return level.pow_base(2);
     },
     effect: (value) => {
-      return `x ${format(value, 2)} Infinity Points`;
+      return `× ${format(value, 2)} Infinity Points`;
     },
     levelUP: (lastLevel, newLevel) => {
       if(!TimeStudy(181).isBought) Autobuyer.bigCrunch.bumpAmount(newLevel.sub(lastLevel).pow_base(2))
@@ -205,7 +205,7 @@ export const spaceResearches = {
       return level.pow_base(1.1);
     },
     effect: (value) => {
-      return `x ${format(value, 2, 2)} Effective Space`;
+      return `× ${format(value, 2, 2)} Effective Space`;
     },
   },
 
@@ -225,7 +225,7 @@ export const spaceResearches = {
       return level.pow_base(1.33).mul(level.div(2).add(1).pow(2));
     },
     effect: (value) => {
-      return `x ${format(value, 2, 0)} Infinities`;
+      return `× ${format(value, 2, 0)} Infinities`;
     },
   },
 
@@ -293,7 +293,7 @@ export const spaceResearches = {
       return level.pow_base(2);
     },
     effect: (value) => {
-      return `x ${format(value, 2)} EP`;
+      return `× ${format(value, 2)} EP`;
     },
     levelUP: (lastLevel, newLevel) => {
       Autobuyer.eternity.bumpAmount(newLevel.sub(lastLevel).pow_base(2))
@@ -316,7 +316,7 @@ export const spaceResearches = {
       return level.mul(0.25).add(1).mul(level.pow_base(1.1));
     },
     effect: (value) => {
-      return `x ${format(value, 2, 2)} Rep Speed`;
+      return `× ${format(value, 2, 2)} Rep Speed`;
     },
   },
 
@@ -336,7 +336,7 @@ export const spaceResearches = {
       return level.add(1).mul(level.pow_base(1.1));
     },
     effect: (value) => {
-      return `x ${format(value, 2, 0)} Eternities`;
+      return `× ${format(value, 2, 0)} Eternities`;
     },
   },
 
@@ -356,7 +356,7 @@ export const spaceResearches = {
       return level.mul(0.3).add(1).mul(level.pow(0.65).pow_base(2.25));
     },
     effect: (value) => {
-      return `x ${format(value, 2, 1)} DT`;
+      return `× ${format(value, 2, 1)} DT`;
     },
     unlocked: () => PlayerProgress.dilationUnlocked(),
   },

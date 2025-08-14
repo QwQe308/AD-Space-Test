@@ -56,6 +56,7 @@ export default {
   },
   methods: {
     update() {
+      this.depth = player.currentAbyssResearchDepth
       this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
       this.maxConcurrent = AbyssResearches.A1.maxConcurrent//for any node thats same
