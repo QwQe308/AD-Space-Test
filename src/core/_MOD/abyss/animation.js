@@ -164,6 +164,7 @@ export async function abyssAnimation() {
   }
   Laitela.setContinuum(false);
   //reset values
+  player.imaginaryInfluence.push("abyss");
   for (let i = 0; i < player.achievementBits.length; i++) {
     player.achievementBits[i] = 0;
   }
@@ -188,7 +189,6 @@ export async function abyssAnimation() {
   player.challenge.eternity.unlocked = 0;
   player.challenge.eternity.requirementBits = 0;
   SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].reset());
-  player.imaginaryInfluence.push("abyss");
   eternity(true, true);
   player.eternities = new Decimal(100);
   player.abyssResearches.A1.unlocked = true;

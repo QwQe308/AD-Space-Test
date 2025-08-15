@@ -45,7 +45,7 @@ class AchievementState extends GameMechanicState {
   }
 
   tryUnlock(args) {
-    if(imaginaryInfluences.abyss.isUnlocked) return
+    if (PlayerProgress.imaginaryUnlocked()) return;
     if (this.isUnlocked) return;
     if (!this.config.checkRequirement(args)) return;
     this.unlock();
@@ -56,7 +56,7 @@ class AchievementState extends GameMechanicState {
   }
 
   unlock(auto) {
-    if(imaginaryInfluences.abyss.isUnlocked) return
+    if (PlayerProgress.imaginaryUnlocked()) return;
     if (this.isUnlocked) return;
     player.achievementBits[this.row - 1] |= this._bitmask;
     if (this.id === 85 || this.id === 93) {
@@ -141,6 +141,7 @@ export const Achievements = {
   },
 
   autoAchieveUpdate(diff) {
+    if (PlayerProgress.imaginaryUnlocked()) return;
     if (!PlayerProgress.realityUnlocked()) return;
     if (!player.reality.autoAchieve || RealityUpgrade(8).isLockingMechanics) {
       player.reality.achTimer = Decimal.clampMax(player.reality.achTimer.add(diff), this.period);
