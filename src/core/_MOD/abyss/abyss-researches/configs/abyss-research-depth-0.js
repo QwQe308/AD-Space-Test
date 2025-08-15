@@ -40,7 +40,7 @@ let baseConfig = {
     type: "single",
     cost: new Decimal(20),
     description(level) {
-      return `x3 Research Speed (RS)`;
+      return `×3 Research Speed (RS)`;
     },
     effectValue(level) {
       return new Decimal(3);
