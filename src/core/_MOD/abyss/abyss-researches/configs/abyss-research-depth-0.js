@@ -28,10 +28,10 @@ let baseConfig = {
     type: "single",
     cost: new Decimal(20),
     description(level) {
-      return `+ 4 free Tickspeed Upgrades`;
+      return `+ 6 free Tickspeed Upgrades`;
     },
     effectValue(level) {
-      return new Decimal(4);
+      return new Decimal(6);
     },
     next: ["A4", "A5", "A6"],
   },
@@ -40,10 +40,10 @@ let baseConfig = {
     type: "single",
     cost: new Decimal(20),
     description(level) {
-      return `x2 Research Speed (RS)`;
+      return `x3 Research Speed (RS)`;
     },
     effectValue(level) {
-      return new Decimal(2);
+      return new Decimal(3);
     },
     tooltipTags: ["ARS"],
     next: ["A6", "A7", "A8"],
@@ -53,7 +53,7 @@ let baseConfig = {
   A4: {
     position: [-2, 0],
     type: "limited",
-    maxLevel: new Decimal(2),
+    maxLevel: new Decimal(3),
     scaling: {
       type: "linear",
       cost: new Decimal(50),
@@ -137,7 +137,7 @@ let baseConfig = {
   A8: {
     position: [2, 0],
     type: "limited",
-    maxLevel: new Decimal(2),
+    maxLevel: new Decimal(3),
     scaling: {
       type: "linear",
       cost: new Decimal(75),
