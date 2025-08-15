@@ -42,7 +42,7 @@ export default {
             )} ]----------<br>`;
             break;
         }
-        tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost)}<br>
+        tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost, 2)}<br>
             (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})`;
       } else {
         switch (AbyssResearches[this.id].type) {
