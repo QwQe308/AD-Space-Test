@@ -17,6 +17,8 @@ export default {
       unlocked: false,
       restrictionMet: false,
       isMaxed: false,
+      level: new Decimal(0),
+      maxLevel: new Decimal(0),
     };
   },
   computed: {
@@ -122,9 +124,9 @@ export default {
         case "single":
           return formatPercents(this.percentage);
         case "limited":
-          return `${AbyssResearches[this.id].level}/${AbyssResearches[this.id].maxLevel}`;
+          return `${this.level}/${this.maxLevel}`;
         case "unlimited":
-          return AbyssResearches[this.id].level;
+          return this.level;
       }
     },
   },
@@ -145,6 +147,8 @@ export default {
       this.unlocked = player.abyssResearches[this.id].unlocked;
       this.restrictionMeet = AbyssResearches[this.id].checkRestriction;
       this.isMaxed = AbyssResearches[this.id].maxed;
+      this.level.copyFrom(AbyssResearches[this.id].level)
+      this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel)
     },
   },
 };

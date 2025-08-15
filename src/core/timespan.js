@@ -297,6 +297,20 @@ window.TimeSpan = class TimeSpan {
     return this.toStringShort();
   }
 
+  toSimplifiedTimeEstimate() {
+    const seconds = this.totalSeconds;
+    if (seconds.gt(86400 * 365.25)) return `> ${formatInt(1)}y`;
+    function formatHMS(value) {
+      const s = value.toString();
+      return s.length === 1 ? `0${s}` : s;
+    }
+    if (this.totalDays.gte(2)) return `${format(Decimal.floor(this.totalDays))}d${format(this.hours)}h`;
+    if (this.totalHours.gte(1))
+      return `${formatHMS(Decimal.floor(this.totalHours))}:${formatHMS(this.minutes)}:${formatHMS(this.seconds)}`;
+    if (this.totalMinutes.gte(1)) return `${formatHMS(this.minutes)}:${formatHMS(this.seconds)}`;
+    return `${format(seconds, 1, 1)} sec`;
+  }
+
   static get zero() {
     return new TimeSpan(new Decimal("0"));
   }
@@ -325,5 +339,5 @@ const Guard = {
     if (value instanceof TimeSpan) return;
     if (message) throw message;
     throw "Value is not a TimeSpan";
-  }
+  },
 };

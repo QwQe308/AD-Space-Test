@@ -119,6 +119,17 @@ export const tabNotifications = {
       PlayerProgress.reachedEternities(1) && !PlayerProgress.reachedEternities(2),
     events: [GAME_EVENT.ETERNITY_RESET_BEFORE]
   },
+  enterAbyss: {
+    id: 19,
+    tabsToHighLight: [
+      {
+        parent: "space",
+        tab: "abyssResearch",
+      },
+    ],
+    condition: () => !PlayerProgress.imaginaryUnlocked(),
+    events: [GAME_EVENT.ABYSS_ANIMATION_BEFORE]
+  },
   dilationAfterUnlock: {
     id: 6,
     tabsToHighLight: [

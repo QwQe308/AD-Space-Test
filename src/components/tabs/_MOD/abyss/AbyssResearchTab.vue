@@ -22,10 +22,6 @@ export default {
       dragStartY: 0,
       startOffsetX: 0,
       startOffsetY: 0,
-
-      maxConcurrent: 3,
-      activeNodeStats: [],
-      abyssResearchSpeed: new Decimal(0),
     };
   },
   components: {
@@ -63,23 +59,12 @@ export default {
       this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
       this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
-      this.maxConcurrent = AbyssResearches.A1.maxConcurrent; //for any node thats same so thats it
-      this.abyssResearchSpeed.copyFrom(globalAbyssResearchSpeed());
-      let nodeIndex = 0;
-      for (let id of this.activeNodes) {
-        this.$set(this.activeNodeStats, nodeIndex, [id, AbyssResearches[id].percentage]);
-        nodeIndex++;
-      }
-      for (let i = this.activeNodes.size; i < this.maxConcurrent; i++) {
-        this.$delete(this.activeNodeStats, nodeIndex);
-        nodeIndex++;
-      }
     },
 
     updateCanvasTransform() {
       this.offsetX = player.abyssResearchCanvas.offsetX;
       this.offsetY = player.abyssResearchCanvas.offsetY;
-      this.zoomLevel = player.abyssResearchCanvas.zoomLevel
+      this.zoomLevel = player.abyssResearchCanvas.zoomLevel;
       if (this.$refs.canvas) {
         this.$refs.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.zoomLevel})`;
       }
@@ -190,48 +175,10 @@ export default {
       </div>
       <AbyssResearchPageSelector :depth="depth" @tab-change="handleTabChange" @relocate="relocate" />
     </div>
-
-    <div class="active-research-info" >
-      <h3>Researching ({{ activeNodeStats.length }}/{{ maxConcurrent }})</h3>
-      <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
-      <div class="active-list">
-        <div v-for="(stat, index) in activeNodeStats" :key="index" class="active-item">
-          {{ stat[0] }} ({{ formatPercents(stat[1]) }})
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <style scoped>
-.active-research-info {
-  position: absolute;
-  bottom: 15px;
-  right: 20px;
-  background: rgba(20, 21, 30, 0.9);
-  padding: 15px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 5;
-}
-
-.active-research-info h3 {
-  margin-bottom: 10px;
-  color: rgba(80, 160, 255, 0.9);
-}
-
-.active-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.active-item {
-  padding: 5px 10px;
-  background: rgba(30, 31, 40, 0.8);
-  border-radius: 5px;
-}
-
 .research-wrapper {
   height: 71.5vh;
   display: flex;

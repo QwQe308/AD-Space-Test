@@ -37,7 +37,7 @@ export default {
       <div class="research-tabs__indicator"></div>
     </div>
 
-    <div class="relocate-button" @click="relocate">
+    <div class="relocate-button" @click="relocate" v-tooltip="'Relocate'">
       <span class="relocate-label">↻</span>
     </div>
   </div>

@@ -1,7 +1,7 @@
 import { DC } from "../../../constants";
 import { AbyssResearchesDepth_0 } from "./configs/abyss-research-depth-0";
 
-export const abyssDepths = ["0", "1"];
+export const abyssDepths = ["0"];
 
 export function quickSpawnResearches(config, layer) {
   //safety checker
