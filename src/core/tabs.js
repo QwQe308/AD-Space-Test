@@ -140,7 +140,7 @@ class TabState {
 
   show(manual, subtab = undefined, force = false) {
     if(isSCRunningOnTierOrHigher(6,1) && !force) return GameUI.notify.error("Tabs cannot be switched in SC6")
-    if (!manual && !player.options.automaticTabSwitching || Quote.isOpen) return;
+    if (!force && !manual && !player.options.automaticTabSwitching || Quote.isOpen) return;
     if (subtab !== undefined) {
       if (!Enslaved.isRunning) subtab.unhideTab();
       this._currentSubtab = subtab;
