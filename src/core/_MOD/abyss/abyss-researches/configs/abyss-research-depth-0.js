@@ -295,7 +295,7 @@ let baseConfig = {
   A15: {
     position: [-1, 4],
     type: "single",
-    cost: new Decimal(400),
+    cost: new Decimal(600),
     description(level) {
       return `Instant: [Multplies Infinities by 5]`;
     },
@@ -308,7 +308,7 @@ let baseConfig = {
   A16: {
     position: [0, 4],
     type: "single",
-    cost: new Decimal(600),
+    cost: new Decimal(900),
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
     },
@@ -332,7 +332,7 @@ let baseConfig = {
   A17: {
     position: [1, 4],
     type: "single",
-    cost: new Decimal(400),
+    cost: new Decimal(600),
     description(level) {
       return `Continuum + 1%`;
     },
@@ -348,7 +348,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(800),
+      cost: new Decimal(1200),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -364,7 +364,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(1000),
+      cost: new Decimal(1500),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -382,7 +382,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(800),
+      cost: new Decimal(1200),
       costIncrease: new Decimal(2),
     },
     description(level) {
