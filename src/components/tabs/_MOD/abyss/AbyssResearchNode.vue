@@ -145,7 +145,7 @@ export default {
       this.percentage = AbyssResearches[this.id].percentage;
       this.progress.copyFrom(AbyssResearches[this.id].progress);
       this.unlocked = player.abyssResearches[this.id].unlocked;
-      this.restrictionMeet = AbyssResearches[this.id].checkRestriction;
+      this.restrictionMet = AbyssResearches[this.id].checkRestriction;
       this.isMaxed = AbyssResearches[this.id].maxed;
       this.level.copyFrom(AbyssResearches[this.id].level)
       this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel)
