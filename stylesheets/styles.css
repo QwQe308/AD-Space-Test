@@ -376,6 +376,7 @@ button:focus {
 /* #region CustomizeableTooltip */
 .abyss-research-tooltip .tooltip-inner{
   width: auto !important;
+  max-width: 50rem !important;
 }
 
 .c-tooltip-content,
