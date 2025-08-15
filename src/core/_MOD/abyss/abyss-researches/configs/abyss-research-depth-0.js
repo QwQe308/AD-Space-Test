@@ -242,7 +242,7 @@ let baseConfig = {
     effectValue(level) {
       return new Decimal(3);
     },
-    tooltipTags: ["Restrictions", "ARS"],
+    tooltipTags: ["Restrictions"],
     next: ["A15"],
   },
   A13: {
@@ -265,7 +265,7 @@ let baseConfig = {
     checkRestriction(level) {
       return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
     },
-    tooltipTags: ["Instant Effect"],
+    tooltipTags: ["Instant Effect","Restrictions"],
     next: ["A16"],
   },
   A14: {
@@ -302,7 +302,7 @@ let baseConfig = {
     onLevelUp(pre, now) {
       player.infinities = player.infinities.mul(5);
     },
-    tooltipTags: [],
+    tooltipTags: ["Instant Effect"],
     next: ["A18"],
   },
   A16: {

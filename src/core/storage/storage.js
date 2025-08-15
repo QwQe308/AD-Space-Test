@@ -555,7 +555,7 @@ export const GameStorage = {
     AutomatorBackend.initializeFromSave();
     Lazy.invalidateAll();
 
-    updateAbyssResearchProgress()
+    updateAbyssResearchStatus()
 
     const rawDiff = Date.now() - player.lastUpdate;
     // We set offlineEnabled externally on importing or loading a backup; otherwise this is just a local load
