@@ -204,30 +204,30 @@ class AbyssResearchClass extends GameMechanicState {
     if (this.level.gte(1)) return this.updateCompletion();
     if (!player.abyssResearches[this.id].unlocked) return;
     for (let next1 of this.next) {
-        player.abyssResearches[next1].shown = true;
-        //++
-        for (let next2 of AbyssResearches[next1].next) {
-          player.abyssResearches[next2].shown = true;
-        }
-
-        //+-
-        for (let prev2 of AbyssResearches[next1].previous) {
-          player.abyssResearches[prev2].shown = true;
-        }
+      player.abyssResearches[next1].shown = true;
+      //++
+      for (let next2 of AbyssResearches[next1].next) {
+        player.abyssResearches[next2].shown = true;
       }
 
-      for (let prev1 of this.previous) {
-        player.abyssResearches[prev1].shown = true;
-        //-+
-        for (let next2 of AbyssResearches[prev1].next) {
-          player.abyssResearches[next2].shown = true;
-        }
-
-        //--
-        for (let prev2 of AbyssResearches[prev1].previous) {
-          player.abyssResearches[prev2].shown = true;
-        }
+      //+-
+      for (let prev2 of AbyssResearches[next1].previous) {
+        player.abyssResearches[prev2].shown = true;
       }
+    }
+
+    for (let prev1 of this.previous) {
+      player.abyssResearches[prev1].shown = true;
+      //-+
+      for (let next2 of AbyssResearches[prev1].next) {
+        player.abyssResearches[next2].shown = true;
+      }
+
+      //--
+      for (let prev2 of AbyssResearches[prev1].previous) {
+        player.abyssResearches[prev2].shown = true;
+      }
+    }
   }
 
   start() {
@@ -294,6 +294,14 @@ class AbyssResearchClass extends GameMechanicState {
   get checkRestriction() {
     return !this.config.checkRestriction || this.config.checkRestriction(this.level);
   }
+
+  initializeCost() {
+    if (this.config.scaling && this.config.scaling.type === "linear") {
+      this.cost = this.config.scaling.cost.mul(
+        this.config.scaling.costIncrease.pow(this.level)
+      );
+    }
+  }
 }
 
 export const AbyssResearches = mapGameDataToObject(
@@ -323,5 +331,6 @@ export function updateAbyssResearchProgress(diff) {
 export function updateAbyssResearchStatus() {
   for (let i of AbyssResearches.all) {
     i.updateCompletionWithCondition();
+    i.initializeCost();
   }
 }

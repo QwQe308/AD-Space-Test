@@ -56,7 +56,7 @@ let baseConfig = {
     maxLevel: new Decimal(2),
     scaling: {
       type: "linear",
-      cost: new Decimal(40),
+      cost: new Decimal(50),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -71,9 +71,9 @@ let baseConfig = {
   A5: {
     position: [-1, 0],
     type: "single",
-    cost: new Decimal(30),
+    cost: new Decimal(50),
     description(level) {
-      return `Abyss Research Speed is 0.6% faster per Tickspeed Upgrade (additive, up to ×3, locked to max if infinitied once)
+      return `Abyss Research Speed is 1% faster per Tickspeed Upgrade (additive, up to ×4, locked to max if infinitied once)
       <br>Current: ×${format(this.effectValue(), 2, 2)}`;
     },
     restrictionInfo(level) {
@@ -86,8 +86,8 @@ let baseConfig = {
       return AntimatterDimensions.all.filter((x) => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8;
     },
     effectValue(level) {
-      if (player.infinities.gt(0)) return new Decimal(3);
-      return Tickspeed.totalUpgrades.mul(0.006).add(1).min(3);
+      if (player.infinities.gt(0)) return new Decimal(4);
+      return Tickspeed.totalUpgrades.mul(0.01).add(1).min(4);
     },
     tooltipTags: ["Restrictions"],
     next: ["A9"],
@@ -96,7 +96,7 @@ let baseConfig = {
   A6: {
     position: [0, 0],
     type: "single",
-    cost: new Decimal(60),
+    cost: new Decimal(75),
     description(level) {
       return `+ 1 max concurrent Abyss Researches`;
     },
@@ -109,7 +109,7 @@ let baseConfig = {
   A7: {
     position: [1, 0],
     type: "single",
-    cost: new Decimal(30),
+    cost: new Decimal(50),
     description(level) {
       return `Start with 1e25 AM (pre-space nerf)`;
     },
@@ -129,7 +129,7 @@ let baseConfig = {
       return primes.includes(Math.round(Tickspeed.totalUpgrades.toNumber())); // break_eternity.js may have some precision losses so heres a round
     },
     effectValue(level) {
-      return new Decimal(1e10);
+      return new Decimal(1e25);
     },
     tooltipTags: ["Restrictions"],
     next: ["A10"],
@@ -140,7 +140,7 @@ let baseConfig = {
     maxLevel: new Decimal(2),
     scaling: {
       type: "linear",
-      cost: new Decimal(60),
+      cost: new Decimal(75),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -158,7 +158,7 @@ let baseConfig = {
   A9: {
     position: [-1, 1],
     type: "single",
-    cost: new Decimal(100),
+    cost: new Decimal(250),
     description(level) {
       return `Double your Infinities(IS) gain & ARS is multplied by (IS+1)^0.25, up to ×4 (255 Infinities)`;
     },
@@ -181,7 +181,7 @@ let baseConfig = {
   A10: {
     position: [1, 1],
     type: "single",
-    cost: new Decimal(100),
+    cost: new Decimal(250),
     description(level) {
       return `Double your IP gain`;
     },
@@ -205,7 +205,7 @@ let baseConfig = {
   A11: {
     position: [0, 2],
     type: "single",
-    cost: new Decimal(160),
+    cost: new Decimal(400),
     description(level) {
       return `Instant: [Complete all NC and multply IP by 2]`;
     },
