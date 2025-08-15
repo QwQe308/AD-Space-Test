@@ -19,7 +19,8 @@ export function infinityDimensionCommonMultiplier() {
       EternityUpgrade.idMultICRecords,
       AlchemyResource.dimensionality,
       ImaginaryUpgrade(8),
-      PelleRifts.recursion.milestones[1]
+      PelleRifts.recursion.milestones[1],
+      AbyssResearches.A18
     )
     .mul(light.yellow.effectValue());
 
@@ -230,11 +231,15 @@ class InfinityDimensionState extends DimensionState {
   }
 
   get isCapped() {
-    return this.purchases.gte(this.purchaseCap) || (this.purchases.gte(this.purchaseSoftcap) && !InfinityDimensions.unSoftCapped);
+    return (
+      this.purchases.gte(this.purchaseCap) ||
+      (this.purchases.gte(this.purchaseSoftcap) && !InfinityDimensions.unSoftCapped)
+    );
   }
 
   get hardcapIPAmount() {
-    if(!InfinityDimensions.unSoftCapped && this.purchaseSoftcap.lt(this.purchaseCap)) return this._baseCost.times(Decimal.pow(this.costMultiplier, this.purchaseCap));
+    if (!InfinityDimensions.unSoftCapped && this.purchaseSoftcap.lt(this.purchaseCap))
+      return this._baseCost.times(Decimal.pow(this.costMultiplier, this.purchaseCap));
     return this._baseCost.times(Decimal.pow(this.costMultiplier, this.purchaseCap));
   }
 
@@ -384,12 +389,13 @@ export const InfinityDimensions = {
   },
 
   get totalDimCap() {
-    if(!this.unSoftCapped) return this.HARDCAP_PURCHASES.add(this.capIncrease).min(this.SOFTCAP_PURCHASES);
+    if (!this.unSoftCapped) return this.HARDCAP_PURCHASES.add(this.capIncrease).min(this.SOFTCAP_PURCHASES);
     return this.HARDCAP_PURCHASES.add(this.capIncrease);
   },
 
-  get unSoftCapped() {//All unsoftcappers works here
-    return TimeStudy(42).isBought
+  get unSoftCapped() {
+    //All unsoftcappers works here
+    return TimeStudy(42).isBought;
   },
 
   canBuy() {

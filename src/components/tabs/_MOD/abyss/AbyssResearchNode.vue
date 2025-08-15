@@ -56,7 +56,7 @@ export default {
         }
       }
 
-      if (AbyssResearches[this.id].hasRestriction) {
+      if (!this.isMaxed && AbyssResearches[this.id].hasRestriction) {
         tooltipContent += `<br><span style="color:${this.restrictionMet ? "lime" : "red"}">Efficiency /${format(
           AbyssResearches[this.id].restrictionNerf
         )}</span>`;
@@ -67,7 +67,7 @@ export default {
       tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
 
       //restriction
-      if (AbyssResearches[this.id].hasRestriction) {
+      if (!this.isMaxed && AbyssResearches[this.id].hasRestriction) {
         //#FFFFAF yellow
         tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br>`;
         tooltipContent += AbyssResearches[this.id].restrictionInfo;
@@ -140,15 +140,20 @@ export default {
             AbyssResearches[this.id].cost.sub(AbyssResearches[this.id].progress).div(this.abyssResearchSpeed).toNumber()
           ).toTimeEstimate()
         : "Forever";
-      this.isResearching = AbyssResearches[this.id].isResearching;
-      this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
       this.percentage = AbyssResearches[this.id].percentage;
-      this.progress.copyFrom(AbyssResearches[this.id].progress);
       this.unlocked = player.abyssResearches[this.id].unlocked;
-      this.restrictionMet = AbyssResearches[this.id].checkRestriction;
       this.isMaxed = AbyssResearches[this.id].maxed;
-      this.level.copyFrom(AbyssResearches[this.id].level)
-      this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel)
+      this.level.copyFrom(AbyssResearches[this.id].level);
+      this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel);
+
+      if (!this.isMaxed) {
+        this.restrictionMet = AbyssResearches[this.id].checkRestriction;
+        this.progress.copyFrom(AbyssResearches[this.id].progress);
+        this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
+        this.isResearching = AbyssResearches[this.id].isResearching;
+      }else{
+        this.isResearching = false
+      }
     },
   },
 };

@@ -234,7 +234,8 @@ export const FreeTickspeed = {
     let extraTickspeeds = light.purple.effectValue();
     extraTickspeeds = extraTickspeeds.plusEffectsOf(
       SpaceResearchRifts.r13,
-      AbyssResearches.A2
+      AbyssResearches.A2,
+      AbyssResearches.A11
     );
     return extraTickspeeds;
   },

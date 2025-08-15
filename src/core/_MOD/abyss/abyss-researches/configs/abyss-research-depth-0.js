@@ -1,5 +1,6 @@
 import { quickSpawnResearches } from "../abyssResearches";
 import { DC } from "../../../../constants";
+import { Currency } from "../../../../currency";
 
 let baseConfig = {
   //row 0
@@ -61,7 +62,9 @@ let baseConfig = {
     },
     description(level) {
       if (this.maxLevel.eq(level)) return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))})`;
-      return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))} → /${format(this.effectValue(level.add(1)))})`;
+      return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))} → /${format(
+        this.effectValue(level.add(1))
+      )})`;
     },
     effectValue(level) {
       return level.pow_base(10);
@@ -103,7 +106,7 @@ let baseConfig = {
     effectValue(level) {
       return 1;
     },
-    next: ["A9","A10"],
+    next: ["A9", "A10"],
   },
 
   A7: {
@@ -111,7 +114,7 @@ let baseConfig = {
     type: "single",
     cost: new Decimal(50),
     description(level) {
-      return `Start with 1e25 AM (pre-space nerf)`;
+      return `Start with 1e30 AM (pre-space nerf)`;
     },
     restrictionInfo(level) {
       return `Tickspeed upgrades' amount is a prime lower than 308. (includes free ones)`;
@@ -129,7 +132,10 @@ let baseConfig = {
       return primes.includes(Math.round(Tickspeed.totalUpgrades.toNumber())); // break_eternity.js may have some precision losses so heres a round
     },
     effectValue(level) {
-      return new Decimal(1e25);
+      return new Decimal(1e30);
+    },
+    onLevelUp(pre, now) {
+      Currency.antimatter.bumpTo(1e30);
     },
     tooltipTags: ["Restrictions"],
     next: ["A10"],
@@ -154,32 +160,116 @@ let baseConfig = {
     },
     next: ["A10"],
   },
+
   //row 4
   A9: {
     position: [-1, 1],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(100),
+      costIncrease: new Decimal(2.5),
+    },
+    description(level) {
+      return `/1.08 Space<br>(/${format(this.effectValue(level), 2, 3)} → /${format(
+        this.effectValue(level.add(1)),
+        2,
+        3
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(1.08);
+    },
+    next: ["A11"],
+  },
+  A10: {
+    position: [1, 1],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(100),
+      costIncrease: new Decimal(2.5),
+    },
+    description(level) {
+      return `×1.02 Antimatter Dimensions' buy-10 multplier<br>(×${format(this.effectValue(level), 2, 3)} → ×${format(
+        this.effectValue(level.add(1)),
+        2,
+        3
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(1.02);
+    },
+    next: ["A11"],
+  },
+  //row 5
+  A11: {
+    position: [0, 2],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(100),
+      costIncrease: new Decimal(2),
+    },
+    description(level) {
+      return `+5 Tickspeed Upgrades<br>(+${format(this.effectValue(level))} → +${format(
+        this.effectValue(level.add(1))
+      )})`;
+    },
+    effectValue(level) {
+      return level.mul(5);
+    },
+    next: ["A12","A13","A14"],
+  },
+
+  //row 6
+  A12: {
+    position: [-1, 3],
     type: "single",
     cost: new Decimal(250),
     description(level) {
-      return `Double your Infinities(IS) gain & ARS is multplied by (IS+1)^0.25, up to ×4 (255 Infinities)`;
+      return `Triples your Infinities(IS) gain`;
     },
     restrictionInfo(level) {
-      return `Infinitied at least once`;
+      return `Infinitied at least twice`;
     },
     restrictionNerf(level) {
       return new Decimal(4);
     },
     checkRestriction(level) {
-      return player.infinities.gte(1); // break_eternity.js may have some precision losses so heres a round
+      return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
     },
     effectValue(level) {
-      return player.infinities.add(1).pow(0.25).min(4);
+      return new Decimal(3);
     },
     tooltipTags: ["Restrictions", "ARS"],
-    next: ["A11"],
+    next: ["A15"],
   },
-  
-  A10: {
-    position: [1, 1],
+  A13: {
+    position: [0, 3],
+    type: "single",
+    cost: new Decimal(400),
+    description(level) {
+      return `Instant: [Complete all NC and multply IP by 2]`;
+    },
+    onLevelUp(pre, now) {
+      player.challenge.normal.completedBits = 8190;
+      player.infinityPoints = player.infinityPoints.mul(2);
+    },
+    restrictionInfo(level) {
+      return `Infinitied at least twice`;
+    },
+    restrictionNerf(level) {
+      return new Decimal(4);
+    },
+    checkRestriction(level) {
+      return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
+    },
+    tooltipTags: ["Instant Effect"],
+    next: ["A16"],
+  },
+  A14: {
+    position: [1, 3],
     type: "single",
     cost: new Decimal(250),
     description(level) {
@@ -198,22 +288,111 @@ let baseConfig = {
       return new Decimal(2);
     },
     tooltipTags: ["Restrictions"],
-    next: ["A11"],
+    next: ["A17"],
   },
 
-  //row 5
-  A11: {
-    position: [0, 2],
+  //row 7
+  A15: {
+    position: [-1, 4],
     type: "single",
     cost: new Decimal(400),
     description(level) {
-      return `Instant: [Complete all NC and multply IP by 2]`;
+      return `Instant: [Multplies Infinities by 5]`;
     },
-    onLevelUp(pre, now){
-      player.challenge.normal.completedBits = 8190
-      player.infinityPoints = player.infinityPoints.mul(2)
+    onLevelUp(pre, now) {
+      player.infinities = player.infinities.mul(5);
     },
-    tooltipTags: ["Instant Effect"],
+    tooltipTags: [],
+    next: ["A18"],
+  },
+  A16: {
+    position: [0, 4],
+    type: "single",
+    cost: new Decimal(600),
+    description(level) {
+      return `Galaxies won't reset Dimensional Boosts`;
+    },
+    restrictionInfo(level) {
+      return `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (including free ones)`;
+    },
+    restrictionNerf(level) {
+      return new Decimal(2);
+    },
+    checkRestriction(level) {
+      function gcd(a, b) {
+        if (b === 0) {
+          return a;
+        }
+        return gcd(b, a % b);
+      }
+      return gcd(DimBoost.totalBoosts.round().toNumber(), player.galaxies.round().toNumber());
+    },
+    next: ["A19"],
+  },
+  A17: {
+    position: [1, 4],
+    type: "single",
+    cost: new Decimal(400),
+    description(level) {
+      return `Continuum + 1%`;
+    },
+    effectValue(level) {
+      return new Decimal(0.01);
+    },
+    next: ["A20"],
+  },
+
+  //row 8
+  A18: {
+    position: [-1, 5],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(800),
+      costIncrease: new Decimal(2),
+    },
+    description(level) {
+      return `×2 Infinities<br>(×${format(this.effectValue(level))} → ×${format(this.effectValue(level.add(1)))})`;
+    },
+    effectValue(level) {
+      return level.pow_base(2);
+    },
+    next: [],
+  },
+  A19: {
+    position: [0, 5],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(1000),
+      costIncrease: new Decimal(2),
+    },
+    description(level) {
+      return `×1.5 Replicanti Speed<br>(×${format(this.effectValue(level))} → ×${format(
+        this.effectValue(level.add(1))
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(1.5);
+    },
+    next: [],
+  },
+  A20: {
+    position: [1, 5],
+    type: "unlimited",
+    scaling: {
+      type: "linear",
+      cost: new Decimal(800),
+      costIncrease: new Decimal(2),
+    },
+    description(level) {
+      return `×2 Infinity Dimensions<br>(×${format(this.effectValue(level))} → ×${format(
+        this.effectValue(level.add(1))
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(2);
+    },
     next: [],
   },
 };

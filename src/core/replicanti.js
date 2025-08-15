@@ -154,7 +154,8 @@ export function totalReplicantiSpeedMult(overCap) {
     RealityUpgrade(2),
     RealityUpgrade(6),
     RealityUpgrade(23),
-    SpaceResearchRifts.r52
+    SpaceResearchRifts.r52,
+    AbyssResearches.A19,
   );
   
   if (TimeStudy(21).isBought) {

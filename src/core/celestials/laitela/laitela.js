@@ -46,7 +46,9 @@ export const Laitela = {
   },
   get matterExtraPurchaseFactor() {
     let extraPurchases = Decimal.pow(Currency.darkMatter.max.add(1).max(1).log10().div(50), 0.4).div(2).add(1)
-    extraPurchases = extraPurchases.add(SpaceResearchRifts.r44.effectValue)
+    extraPurchases = extraPurchases.plusEffectsOf(SpaceResearchRifts.r44,
+      AbyssResearches.A17
+    )
     //multpliers
     extraPurchases = extraPurchases.times((SingularityMilestone.continuumMult.effectOrDefault(DC.D0)).add(1));
     return extraPurchases

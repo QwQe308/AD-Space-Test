@@ -335,7 +335,8 @@ export function gainedInfinities() {
     Achievement(164),
     Ra.unlocks.continuousTTBoost.effects.infinity,
     SpaceResearchRifts.r43,
-    AbyssResearches.A9
+    AbyssResearches.A12,
+    AbyssResearches.A18
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
 
@@ -788,7 +789,8 @@ function passivePrestigeGen() {
         RealityUpgrade(7),
         Ra.unlocks.continuousTTBoost.effects.infinity,
         SpaceResearchRifts.r43,
-        AbyssResearches.A9
+        AbyssResearches.A12,
+        AbyssResearches.A18
       );
       infGen = infGen.times(getAdjustedGlyphEffect("infinityinfmult"));
     }

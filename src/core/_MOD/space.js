@@ -9,7 +9,8 @@ export function getSpaceDivisor() {
   let divisor = new Decimal(1);
   divisor = divisor.timesEffectsOf(
     DilationUpgrade.spaceDivisorDT,
-    SpaceResearchRifts.r22
+    SpaceResearchRifts.r22,
+    AbyssResearches.A9
   )
   if (isSCRunningOnTier(3, 2)) {
     let sc3Nerf = DC.D1;

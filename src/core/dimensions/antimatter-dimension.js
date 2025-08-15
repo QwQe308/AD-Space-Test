@@ -667,7 +667,8 @@ export const AntimatterDimensions = {
     mult = mult.timesEffectsOf(
       InfinityUpgrade.buy10Mult,
       TimeStudy(83),
-      Achievement(58)
+      Achievement(58),
+      AbyssResearches.A10
     ).times(getAdjustedGlyphEffect("powerbuy10"));
 
     mult = mult.mul(SpaceResearchRifts.r31.effectValue[0]);
