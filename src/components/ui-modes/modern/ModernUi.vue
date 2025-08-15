@@ -26,6 +26,7 @@ export default {
     return {
       bigCrunch: false,
       hasReality: false,
+      inAbyssResearchTab: false,
       newGameKey: "",
     };
   },
@@ -36,12 +37,18 @@ export default {
     topMargin() {
       return this.$viewModel.news ? "" : "margin-top: 3.9rem";
     },
+    informationHeaderClass(){
+      return {
+        "remove-marign": this.inAbyssResearchTab
+      }
+    }
   },
   methods: {
     update() {
       const crunchButtonVisible = !player.break && Player.canCrunch;
       this.bigCrunch = crunchButtonVisible && Time.bestInfinityRealTime.totalMinutes.gt(1);
       this.hasReality = PlayerProgress.realityUnlocked();
+      this.inAbyssResearchTab = Tab.space.abyssResearch.isOpen//marign-bottom is so annoying in this tab
       // This only exists to force a key-swap after pressing the button to start a new game; the news ticker can break
       // if it isn't redrawn
       this.newGameKey = Pelle.isDoomed;
@@ -62,7 +69,7 @@ export default {
       <BigCrunchButton />
       <div v-if="!bigCrunch" class="tab-container">
         <HeaderPrestigeGroup />
-        <div class="information-header">
+        <div class="information-header" :class="informationHeaderClass">
           <HeaderChallengeDisplay />
           <HeaderChallengeEffects />
           <GameSpeedDisplay v-if="hasReality" />
@@ -76,4 +83,8 @@ export default {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.remove-marign{
+  margin-bottom: 0 !important;
+}
+</style>

@@ -16,42 +16,51 @@ export default {
       progress: new Decimal(0),
       unlocked: false,
       restrictionMet: false,
+      isMaxed: false,
     };
   },
   computed: {
     getTooltip() {
-      let tooltipContent = ``;
-      switch (AbyssResearches[this.id].type) {
-        case "single":
-          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
-            AbyssResearches[this.id].percentage
-          )} ]----------<br>`;
-          break;
+      let tooltipContent = `${this.id}<br>`;
+      if (!this.isMaxed) {
+        switch (AbyssResearches[this.id].type) {
+          case "single":
+            tooltipContent += `----------[ ${formatPercents(this.percentage)} ]----------<br>`;
+            break;
 
-        case "limited":
-          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
-            AbyssResearches[this.id].percentage
-          )} | LV.${format(AbyssResearches[this.id].level)} / ${format(
-            AbyssResearches[this.id].maxLevel
-          )} ]----------<br>`;
-          break;
+          case "limited":
+            tooltipContent += `----------[ ${formatPercents(this.percentage)} | LV.${format(
+              AbyssResearches[this.id].level
+            )} / ${format(AbyssResearches[this.id].maxLevel)} ]----------<br>`;
+            break;
 
-        case "unlimited":
-          tooltipContent += `${this.id}<br>----------[ ${formatPercents(
-            AbyssResearches[this.id].percentage
-          )} | LV.${format(AbyssResearches[this.id].level)} ]----------<br>`;
-          break;
-      }
-      tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost)}<br>
+          case "unlimited":
+            tooltipContent += `----------[ ${formatPercents(this.percentage)} | LV.${format(
+              AbyssResearches[this.id].level
+            )} ]----------<br>`;
+            break;
+        }
+        tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost)}<br>
             (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})`;
-      
+      } else {
+        switch (AbyssResearches[this.id].type) {
+          case "single":
+            tooltipContent += `----------[ Completed ]----------`;
+            break;
+
+          case "limited":
+            tooltipContent += `----------[ LV.${format(AbyssResearches[this.id].level)} | Completed ]----------`;
+            break;
+        }
+      }
+
       if (AbyssResearches[this.id].hasRestriction) {
         tooltipContent += `<br><span style="color:${this.restrictionMet ? "lime" : "red"}">Efficiency /${format(
           AbyssResearches[this.id].restrictionNerf
         )}</span>`;
       }
 
-      tooltipContent += `<br><br>`
+      tooltipContent += `<br><br>`;
 
       tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
 
@@ -96,7 +105,11 @@ export default {
       return {
         "research-node__container--active": this.isResearching,
         "research-node__container--locked": !this.unlocked,
+        "research-node__container--completed": this.isMaxed,
       };
+    },
+    getFillClass() {
+      return {};
     },
     getTextStyle() {
       if (!(this.getNodeType === "limited")) return {};
@@ -107,7 +120,7 @@ export default {
     levelText() {
       switch (this.getNodeType) {
         case "single":
-          return formatPercents(AbyssResearches[this.id].percentage);
+          return formatPercents(this.percentage);
         case "limited":
           return `${AbyssResearches[this.id].level}/${AbyssResearches[this.id].maxLevel}`;
         case "unlimited":
@@ -131,6 +144,7 @@ export default {
       this.progress.copyFrom(AbyssResearches[this.id].progress);
       this.unlocked = player.abyssResearches[this.id].unlocked;
       this.restrictionMeet = AbyssResearches[this.id].checkRestriction;
+      this.isMaxed = AbyssResearches[this.id].maxed;
     },
   },
 };
@@ -144,7 +158,7 @@ export default {
     v-tooltip="{ content: getTooltip, classes: ['general-tooltip', 'abyss-research-tooltip'] }"
   >
     <div class="research-node__container" @click="handleClick" :class="getContainerClass">
-      <div class="research-node__inner" :style="getFillStyle"></div>
+      <div class="research-node__inner" :style="getFillStyle" :class="getFillClass"></div>
       <div class="research-node__level" :style="getTextStyle">{{ levelText }}</div>
     </div>
   </div>
@@ -181,6 +195,10 @@ export default {
 
 .research-node__container--locked {
   background-color: rgb(100, 100, 100);
+}
+
+.research-node__container--completed {
+  background-color: #aeae77;
 }
 
 .research-node__container--active {

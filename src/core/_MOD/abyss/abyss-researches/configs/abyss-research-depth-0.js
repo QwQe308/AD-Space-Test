@@ -18,12 +18,11 @@ let baseConfig = {
     effectValue(level) {
       return level.pow_base(2);
     },
-    tooltipTags: ["Tips"],
+    tooltipTags: ["Tips", "Shapes"],
     next: ["A2", "A3"],
   },
 
   //row 1
-  //following researches are not done
   A2: {
     position: [-1, -1],
     type: "single",
@@ -61,13 +60,13 @@ let baseConfig = {
       costIncrease: new Decimal(2),
     },
     description(level) {
-      if (this.maxLevel.eq(level)) return `/10 AD cost<br>(/${format(this.effectValue(level))})`;
-      return `/10 AD cost<br>(/${format(this.effectValue(level))} → /${format(this.effectValue(level.add(1)))})`;
+      if (this.maxLevel.eq(level)) return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))})`;
+      return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))} → /${format(this.effectValue(level.add(1)))})`;
     },
     effectValue(level) {
       return level.pow_base(10);
     },
-    next: [],
+    next: ["A9"],
   },
   A5: {
     position: [-1, 0],
@@ -91,7 +90,7 @@ let baseConfig = {
       return Tickspeed.totalUpgrades.mul(0.006).add(1).min(3);
     },
     tooltipTags: ["Restrictions"],
-    next: [],
+    next: ["A9"],
   },
 
   A6: {
@@ -104,7 +103,7 @@ let baseConfig = {
     effectValue(level) {
       return 1;
     },
-    next: [],
+    next: ["A9","A10"],
   },
 
   A7: {
@@ -133,7 +132,7 @@ let baseConfig = {
       return new Decimal(1e10);
     },
     tooltipTags: ["Restrictions"],
-    next: [],
+    next: ["A10"],
   },
   A8: {
     position: [2, 0],
@@ -153,7 +152,7 @@ let baseConfig = {
     effectValue(level) {
       return level;
     },
-    next: [],
+    next: ["A10"],
   },
   //row 4
   A9: {
@@ -176,7 +175,7 @@ let baseConfig = {
       return player.infinities.add(1).pow(0.25).min(4);
     },
     tooltipTags: ["Restrictions", "ARS"],
-    next: [],
+    next: ["A11"],
   },
   
   A10: {
@@ -199,11 +198,11 @@ let baseConfig = {
       return new Decimal(2);
     },
     tooltipTags: ["Restrictions"],
-    next: [],
+    next: ["A11"],
   },
 
   //row 5
-  A10: {
+  A11: {
     position: [0, 2],
     type: "single",
     cost: new Decimal(160),

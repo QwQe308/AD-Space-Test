@@ -15,7 +15,7 @@ export default {
 
       zoomLevel: 1,
       offsetX: 750,
-      offsetY: 300,
+      offsetY: 333,
 
       isDragging: false,
       dragStartX: 0,
@@ -131,7 +131,7 @@ export default {
 
     relocate() {
       player.abyssResearchCanvas.offsetX = 750;
-      player.abyssResearchCanvas.offsetY = 300;
+      player.abyssResearchCanvas.offsetY = 333;
       player.abyssResearchCanvas.zoomLevel = 1;
       this.updateCanvasTransform();
     },
@@ -233,10 +233,11 @@ export default {
 }
 
 .research-wrapper {
-  height: 71vh;
+  height: 71.5vh;
   display: flex;
   overflow: hidden;
   user-select: none;
+  padding-bottom: 0 !important;
 }
 
 .research-canvas {

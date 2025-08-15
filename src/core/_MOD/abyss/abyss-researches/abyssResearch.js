@@ -34,6 +34,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   set level(data) {
+    if (this.config.onLevelUp && this.level.lt(data)) this.config.onLevelUp(this.level, data);
     player.abyssResearches[this.id].level = data;
   }
 
@@ -131,20 +132,69 @@ class AbyssResearchClass extends GameMechanicState {
         break;
     }
     if (isFirstLevel) this.updateCompletion();
-    if (this.config.onLevelUp) this.config.onLevelUp(preLevel, this.level);
   }
 
   updateCompletion() {
+    for (let tag of this.tooltipTags) {
+      player.abyssResearchTooltipsShown.add(tag);
+    }
+
     for (let next1 of this.next) {
       player.abyssResearches[next1].unlocked = true;
       player.abyssResearches[next1].shown = true;
-      for (let tag of this.tooltipTags) {
-        player.abyssResearchTooltipsShown.add(tag);
-      }
       for (let next2 of AbyssResearches[next1].next) {
         player.abyssResearches[next2].shown = true;
+        //+++
         for (let next3 of AbyssResearches[next2].next) {
           player.abyssResearches[next3].shown = true;
+        }
+
+        //++-
+        for (let prev3 of AbyssResearches[next2].previous) {
+          player.abyssResearches[prev3].shown = true;
+        }
+      }
+
+      for (let prev2 of AbyssResearches[next1].previous) {
+        player.abyssResearches[prev2].shown = true;
+        //+-+
+        for (let next3 of AbyssResearches[prev2].next) {
+          player.abyssResearches[next3].shown = true;
+        }
+
+        //+--
+        for (let prev3 of AbyssResearches[prev2].previous) {
+          player.abyssResearches[prev3].shown = true;
+        }
+      }
+    }
+
+    for (let prev1 of this.previous) {
+      player.abyssResearches[prev1].unlocked = true;
+      player.abyssResearches[prev1].shown = true;
+      for (let next2 of AbyssResearches[prev1].next) {
+        player.abyssResearches[next2].shown = true;
+        //-++
+        for (let next3 of AbyssResearches[next2].next) {
+          player.abyssResearches[next3].shown = true;
+        }
+
+        //-+-
+        for (let prev3 of AbyssResearches[next2].previous) {
+          player.abyssResearches[prev3].shown = true;
+        }
+      }
+
+      for (let prev2 of AbyssResearches[prev1].previous) {
+        player.abyssResearches[prev2].shown = true;
+        //--+
+        for (let next3 of AbyssResearches[prev2].next) {
+          player.abyssResearches[next3].shown = true;
+        }
+
+        //---
+        for (let prev3 of AbyssResearches[prev2].previous) {
+          player.abyssResearches[prev3].shown = true;
         }
       }
     }
@@ -153,12 +203,31 @@ class AbyssResearchClass extends GameMechanicState {
   updateCompletionWithCondition() {
     if (this.level.gte(1)) return this.updateCompletion();
     if (!player.abyssResearches[this.id].unlocked) return;
-    for (let next1 of AbyssResearches[this.id].next) {
-      player.abyssResearches[next1].shown = true;
-      for (let next2 of AbyssResearches[next1].next) {
-        player.abyssResearches[next2].shown = true;
+    for (let next1 of this.next) {
+        player.abyssResearches[next1].shown = true;
+        //++
+        for (let next2 of AbyssResearches[next1].next) {
+          player.abyssResearches[next2].shown = true;
+        }
+
+        //+-
+        for (let prev2 of AbyssResearches[next1].previous) {
+          player.abyssResearches[prev2].shown = true;
+        }
       }
-    }
+
+      for (let prev1 of this.previous) {
+        player.abyssResearches[prev1].shown = true;
+        //-+
+        for (let next2 of AbyssResearches[prev1].next) {
+          player.abyssResearches[next2].shown = true;
+        }
+
+        //--
+        for (let prev2 of AbyssResearches[prev1].previous) {
+          player.abyssResearches[prev2].shown = true;
+        }
+      }
   }
 
   start() {
@@ -208,6 +277,10 @@ class AbyssResearchClass extends GameMechanicState {
 
   get completed() {
     return this.level.gte(1);
+  }
+
+  get maxed() {
+    return this.level.gte(this.maxLevel);
   }
 
   get restrictionInfo() {
