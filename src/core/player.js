@@ -39,7 +39,12 @@ window.player = {
   version: 103,
   //MOD
   //abyss
-  currentAbyssResearchDepth: "i",
+  abyssResearchCanvas:{
+    currentAbyssResearchDepth: "0",
+    offsetX: 750,
+    offsetY: 300,
+    zoomLevel: 1,
+  },
   activeAbyssResearches: new Set(),
   abyssResearches: createAbyssResearchesData(),
   abyssResearchTooltipsShown: new Set(),

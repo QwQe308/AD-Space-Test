@@ -200,6 +200,8 @@ export async function abyssAnimation() {
   player.space = DC.D0
   player.records.thisReality.maxSpace = DC.D0
   player.infinityPoints = DC.D0
+  player.eternityUpgrades = new Set()
+  player.epmultUpgrades = DC.D0
   //end
   AutomatorBackend.pause();
   Tab.imaginary.analyzer.show(false, true);

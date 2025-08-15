@@ -4,27 +4,30 @@ export default {
   props: {
     depth: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     depthsList() {
-      return abyssDepths
-    }
+      return abyssDepths;
+    },
   },
   methods: {
     changeTab(tabId) {
-      if (player.currentAbyssResearchDepth === tabId) return;
+      if (player.abyssResearchCanvas.currentAbyssResearchDepth === tabId) return;
       this.$emit("tab-change", tabId);
-    }
+    },
+    relocate() {
+      this.$emit("relocate");
+    },
   },
 };
 </script>
 
 <template>
   <div class="research-tabs">
-    <div 
-      v-for="depthID in depthsList" 
+    <div
+      v-for="depthID in depthsList"
       :key="depthID"
       class="research-tabs__item"
       :class="{ 'research-tabs__item--active': depth === depthID }"
@@ -33,10 +36,32 @@ export default {
       <span class="research-tabs__label">{{ depthID }}</span>
       <div class="research-tabs__indicator"></div>
     </div>
+
+    <div class="relocate-button" @click="relocate">
+      <span class="relocate-label">↻</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.relocate-button {
+  position: absolute;
+  padding: 10px 32px;
+  cursor: pointer;
+  font-size: 1.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+  right: 0px
+}
+.relocate-lable{
+  font-size: 1.5rem
+}
+.relocate-button:hover {
+  background: rgba(52, 152, 219, 0.2);
+  opacity: 1;
+}
+
 .research-tabs {
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -77,7 +102,7 @@ export default {
   .research-tabs {
     flex-wrap: wrap;
   }
-  
+
   .research-tabs__item {
     padding: 12px 20px;
     font-size: 0.9rem;

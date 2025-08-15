@@ -8,23 +8,24 @@ export default {
   name: "AbyssResearchTab",
   data() {
     return {
-      depth: "1",
+      depth: "0",
       shownNodes: [],
       activeNodes: new Set(),
       connections: [],
 
       zoomLevel: 1,
+      offsetX: 750,
+      offsetY: 300,
+
       isDragging: false,
       dragStartX: 0,
       dragStartY: 0,
-      offsetX: 750,
-      offsetY: 300,
       startOffsetX: 0,
       startOffsetY: 0,
 
       maxConcurrent: 3,
       activeNodeStats: [],
-      abyssResearchSpeed: new Decimal(0)
+      abyssResearchSpeed: new Decimal(0),
     };
   },
   components: {
@@ -56,29 +57,29 @@ export default {
   },
   methods: {
     update() {
-      this.depth = player.currentAbyssResearchDepth
+      this.offsetX = player.abyssResearchCanvas.offsetX;
+      this.offsetY = player.abyssResearchCanvas.offsetY;
+      this.zoomLevel = player.abyssResearchCanvas.zoomLevel;
+      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
       this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
-      this.maxConcurrent = AbyssResearches.A1.maxConcurrent//for any node thats same
-      this.abyssResearchSpeed.copyFrom(globalAbyssResearchSpeed())
-      let nodeIndex = 0
-      for(let id of this.activeNodes){
-        this.$set(this.activeNodeStats, nodeIndex, [id, AbyssResearches[id].percentage])
-        nodeIndex ++
+      this.maxConcurrent = AbyssResearches.A1.maxConcurrent; //for any node thats same so thats it
+      this.abyssResearchSpeed.copyFrom(globalAbyssResearchSpeed());
+      let nodeIndex = 0;
+      for (let id of this.activeNodes) {
+        this.$set(this.activeNodeStats, nodeIndex, [id, AbyssResearches[id].percentage]);
+        nodeIndex++;
       }
-      for(let i = this.activeNodes.size;i<this.maxConcurrent;i++){
-        this.$delete(this.activeNodeStats, nodeIndex)
-        nodeIndex ++
+      for (let i = this.activeNodes.size; i < this.maxConcurrent; i++) {
+        this.$delete(this.activeNodeStats, nodeIndex);
+        nodeIndex++;
       }
     },
 
-    resetView() {
-      this.zoomLevel = 1;
-      this.offsetX = 0;
-      this.offsetY = 0;
-      this.updateCanvasTransform();
-    },
     updateCanvasTransform() {
+      this.offsetX = player.abyssResearchCanvas.offsetX;
+      this.offsetY = player.abyssResearchCanvas.offsetY;
+      this.zoomLevel = player.abyssResearchCanvas.zoomLevel
       if (this.$refs.canvas) {
         this.$refs.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.zoomLevel})`;
       }
@@ -94,8 +95,8 @@ export default {
     drag(event) {
       //this.updateTooltipPosition(event);
       if (this.isDragging) {
-        this.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
-        this.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
+        player.abyssResearchCanvas.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
+        player.abyssResearchCanvas.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
         this.updateCanvasTransform();
       }
     },
@@ -114,17 +115,25 @@ export default {
 
         const zoomFactor = newZoom / this.zoomLevel;
 
-        this.offsetX -= (x - this.offsetX) * (zoomFactor - 1);
-        this.offsetY -= (y - this.offsetY) * (zoomFactor - 1);
+        player.abyssResearchCanvas.offsetX -= (x - this.offsetX) * (zoomFactor - 1);
+        player.abyssResearchCanvas.offsetY -= (y - this.offsetY) * (zoomFactor - 1);
 
+        player.abyssResearchCanvas.zoomLevel = newZoom;
         this.zoomLevel = newZoom;
         this.updateCanvasTransform();
       }
     },
 
     handleTabChange(newVal) {
-      player.currentAbyssResearchDepth = newVal;
+      player.abyssResearchCanvas.currentAbyssResearchDepth = newVal;
       this.depth = newVal;
+    },
+
+    relocate() {
+      player.abyssResearchCanvas.offsetX = 750;
+      player.abyssResearchCanvas.offsetY = 300;
+      player.abyssResearchCanvas.zoomLevel = 1;
+      this.updateCanvasTransform();
     },
   },
   watch: {
@@ -179,10 +188,10 @@ export default {
           />
         </svg>
       </div>
-      <AbyssResearchPageSelector :depth="depth" @tab-change="handleTabChange" />
+      <AbyssResearchPageSelector :depth="depth" @tab-change="handleTabChange" @relocate="relocate" />
     </div>
 
-    <div class="active-research-info" v-if="activeNodeStats.length > 0">
+    <div class="active-research-info" >
       <h3>Researching ({{ activeNodeStats.length }}/{{ maxConcurrent }})</h3>
       <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
       <div class="active-list">
@@ -191,7 +200,6 @@ export default {
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -209,7 +217,7 @@ export default {
 
 .active-research-info h3 {
   margin-bottom: 10px;
-  color: rgba(80,160,255, 0.9);
+  color: rgba(80, 160, 255, 0.9);
 }
 
 .active-list {

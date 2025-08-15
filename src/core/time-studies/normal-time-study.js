@@ -74,7 +74,7 @@ export class NormalTimeStudyState extends TimeStudyState {
   }
 
   get canBeBought() {
-    return this.checkRequirement() && this.checkSetRequirement() && (this.id <= 111 || player.options.breakPlaceHolder);
+    return this.checkRequirement() && this.checkSetRequirement() && (this.id <= 111 || player.options.breakPlaceHolder) && (player.options.testServer || this.id != 111);
   }
 
   get isEffectActive() {

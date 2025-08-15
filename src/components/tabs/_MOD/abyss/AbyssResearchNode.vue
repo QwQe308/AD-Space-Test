@@ -15,11 +15,12 @@ export default {
       timeToNext: "",
       progress: new Decimal(0),
       unlocked: false,
+      restrictionMet: false,
     };
   },
   computed: {
     getTooltip() {
-      let tooltipContent = "";
+      let tooltipContent = ``;
       switch (AbyssResearches[this.id].type) {
         case "single":
           tooltipContent += `${this.id}<br>----------[ ${formatPercents(
@@ -42,14 +43,33 @@ export default {
           break;
       }
       tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost)}<br>
-            (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})<br><br>
-           ${AbyssResearches[this.id].description}`;
+            (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})`;
+      
+      if (AbyssResearches[this.id].hasRestriction) {
+        tooltipContent += `<br><span style="color:${this.restrictionMet ? "lime" : "red"}">Efficiency /${format(
+          AbyssResearches[this.id].restrictionNerf
+        )}</span>`;
+      }
+
+      tooltipContent += `<br><br>`
+
+      tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
+
+      //restriction
+      if (AbyssResearches[this.id].hasRestriction) {
+        //#FFFFAF yellow
+        tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br>`;
+        tooltipContent += AbyssResearches[this.id].restrictionInfo;
+        tooltipContent += `</span>`;
+      }
 
       //extra tooltips
-      for(let tip of AbyssResearches[this.id].tooltipTags){
-        if(player.abyssResearchTooltipsShown.has(tip)) continue
-        tooltipContent += `<br>--------------------------<br>`
-        tooltipContent += extraAbyssResearchTooltips[tip]
+      for (let tip of AbyssResearches[this.id].tooltipTags) {
+        if (player.abyssResearchTooltipsShown.has(tip)) continue;
+        tooltipContent += ``;
+        tooltipContent += `<span style="color:#bbffff"><br><br>----------Tip: ${tip}-----------<br>`;
+        tooltipContent += extraAbyssResearchTooltips[tip];
+        tooltipContent += `</span>`;
       }
       return tooltipContent;
     },
@@ -110,6 +130,7 @@ export default {
       this.percentage = AbyssResearches[this.id].percentage;
       this.progress.copyFrom(AbyssResearches[this.id].progress);
       this.unlocked = player.abyssResearches[this.id].unlocked;
+      this.restrictionMeet = AbyssResearches[this.id].checkRestriction;
     },
   },
 };

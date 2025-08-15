@@ -44,6 +44,8 @@ export default {
       scrambledText: "",
       maxReplicanti: new Decimal(),
       estimateToMax: 0,
+      prismNerf: new Decimal(1),
+      normalUnlock: false
     };
   },
   computed: {
@@ -130,7 +132,7 @@ export default {
   methods: {
     update() {
       this.isUnlocked = Replicanti.areUnlocked;
-      this.unlockCost = new Decimal(1e140).dividedByEffectOf(PelleRifts.vacuum.milestones[1]).dividedByEffectOf(TimeStudy(22));
+      this.unlockCost = Replicanti.unlockCost;
       if (this.isDoomed) this.scrambledText = this.vacuumText();
       if (!this.isUnlocked) {
         this.isUnlockAffordable = Currency.infinityPoints.gte(this.unlockCost);
@@ -170,6 +172,9 @@ export default {
         Replicanti.galaxies.max.gte(1) || PlayerProgress.eternityUnlocked();
       this.maxReplicanti.copyFrom(player.records.thisReality.maxReplicanti);
       this.estimateToMax = this.calculateEstimate();
+
+      this.prismNerf = getPrismReplicantiNerf()
+      this.normalUnlock = PlayerProgress.eternityUnlocked() || player.infinityPoints.gte(1e140)
     },
     vacuumText() {
       return wordShift.wordCycle(PelleRifts.vacuum.name);
@@ -190,7 +195,12 @@ export default {
 
 <template>
   <div class="l-replicanti-tab">
-    <br>
+    <div v-if="!isUnlocked && !normalUnlock" class="prismNerf">Your replicanti speed is divided due to lack of prisms.
+        <br>
+        Note that replicanti is not essential for progress of mirror until e140 IP.
+        <br>
+        You may not want to unlock it if you are going to challenge yourself. It's not that hard.
+      </div>
     <PrimaryButton
       v-if="!isUnlocked"
       :enabled="isUnlockAffordable"
@@ -219,6 +229,10 @@ export default {
         <br>
         {{ quantifyInt("extra Replicanti Galaxy", effarigInfinityBonusRG) }}
         (Next Replicanti Galaxy at {{ format(nextEffarigRGThreshold, 2) }} cap)
+      </div>
+      <div class="prismNerf" v-if="prismNerf.neq(1)">Your replicanti speed is divided by {{ format(prismNerf,2,2) }} due to lack of prisms.
+        <br>
+        Note that replicanti is not essential for progress of mirror until e140 IP.
       </div>
       <p class="c-replicanti-description">
         You have
@@ -261,6 +275,9 @@ export default {
 </template>
 
 <style scoped>
+.prismNerf{
+  color: #aaaaaa
+}
 .max-accent {
   color: var(--color-accent);
   text-shadow: 0 0 0.2rem var(--color-reality-dark);

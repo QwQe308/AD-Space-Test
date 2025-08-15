@@ -357,10 +357,15 @@ class AntimatterDimensionState extends DimensionState {
    * @returns {ExponentialCostScaling}
    */
   get costScale() {
+    let baseCost = NormalChallenge(6).isRunning
+      ? this._c6BaseCost
+      : this._baseCost
+    baseCost = baseCost.dividedByEffectsOf(
+      SpaceResearchRifts.r12,
+      AbyssResearches.A4
+    )
     return new ExponentialCostScaling({
-      baseCost: NormalChallenge(6).isRunning
-      ? this._c6BaseCost.div(SpaceResearchRifts.r12.effectValue)
-      : this._baseCost.div(SpaceResearchRifts.r12.effectValue),
+      baseCost: baseCost,
       baseIncrease: NormalChallenge(6).isRunning ? this._c6BaseCostMultiplier : this._baseCostMultiplier,
       costScale: new Decimal(Player.dimensionMultDecrease),
       scalingCostThreshold: DC.NUMMAX

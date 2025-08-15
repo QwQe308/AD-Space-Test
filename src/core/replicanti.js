@@ -147,6 +147,7 @@ export function totalReplicantiSpeedMult(overCap) {
   totalMult = totalMult.times(Pelle.specialGlyphEffect.replication);
   if (Pelle.isDisabled("replicantiIntervalMult")) return totalMult;
 
+  totalMult = totalMult.div(getPrismReplicantiNerf())
   const preCelestialEffects = Effects.product(
     TimeStudy(52),
     TimeStudy(213),
@@ -674,8 +675,11 @@ export const Replicanti = {
       galCost: DC.E270,
     };
   },
+  get unlockCost(){
+    return DC.E55.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1])
+  },
   unlock(freeUnlock = false) {
-    const cost = DC.E140.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1]);
+    const cost = this.unlockCost;
     if (player.replicanti.unl) return;
     if (freeUnlock || Currency.infinityPoints.gte(cost)) {
       Achievement(95).unlock();

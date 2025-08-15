@@ -1,4 +1,5 @@
 import { DC } from "../../constants";
+import { TimeStudy } from "../../time-studies/normal-time-study";
 
 export function reverseMirror() {
   if (player.light.inMirror) {
@@ -21,4 +22,9 @@ export function getMirrorRequirement() {
 
 export function getPendingPrisms() {
   return player.light.redPercent + player.light.greenPercent + player.light.bluePercent;
+}
+
+export function getPrismReplicantiNerf(){
+  if(TimeStudy(22).isBought) return DC.D1
+  return new Decimal(((player.light.prisms + 20) / 320) ** (-1))
 }

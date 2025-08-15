@@ -14,9 +14,11 @@ export function globalResearchSpeed() {
     TimeStudy(91),
     TimeStudy(92),
     TimeStudy(102),
-    TimeStudy(222)
+    TimeStudy(222),
+    AbyssResearches.A3
   );
   if (isSCRunningOnTier(5, 1)) otherFactors = otherFactors.div(SpaceChallenge(5).effectValue);
+  if(PlayerProgress.imaginaryUnlocked()) otherFactors = otherFactors.div(100)
   return spaceFactor.mul(dbFactor).mul(researchFactor).mul(achievementFactor).mul(otherFactors);
 }
 

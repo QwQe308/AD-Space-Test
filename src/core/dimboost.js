@@ -174,6 +174,9 @@ export class DimBoost {
   static get imaginaryBoosts() {
     let imaginaryBoosts = ImaginaryUpgrade(12).effectOrDefault(DC.D0)
     imaginaryBoosts = imaginaryBoosts.add(SpaceResearchRifts.r21.effectValue[0])
+    imaginaryBoosts = imaginaryBoosts.plusEffectsOf(
+      AbyssResearches.A8
+    )
     let multiplier = ImaginaryUpgrade(23).effectOrDefault(DC.D1)
     return Ra.isRunning
       ? DC.D0

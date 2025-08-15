@@ -334,7 +334,8 @@ export function gainedInfinities() {
     Achievement(131).effects.infinitiesGain,
     Achievement(164),
     Ra.unlocks.continuousTTBoost.effects.infinity,
-    SpaceResearchRifts.r43
+    SpaceResearchRifts.r43,
+    AbyssResearches.A9
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
 
@@ -716,7 +717,7 @@ export function gameLoop(passedDiff, options = {}) {
 
   //MOD update related
   updateSpaceItems(diff);
-  updateAbyssResearchProgress(diff)
+  updateAbyssResearchProgress(diff);
 
   // Stopping these checks after CREDITS_START reduces lag and allows for the glyph customization modal to appear
   if (GameEnd.endState < END_STATE_MARKERS.CREDITS_START) {
@@ -786,7 +787,8 @@ function passivePrestigeGen() {
         RealityUpgrade(5),
         RealityUpgrade(7),
         Ra.unlocks.continuousTTBoost.effects.infinity,
-        SpaceResearchRifts.r43
+        SpaceResearchRifts.r43,
+        AbyssResearches.A9
       );
       infGen = infGen.times(getAdjustedGlyphEffect("infinityinfmult"));
     }
