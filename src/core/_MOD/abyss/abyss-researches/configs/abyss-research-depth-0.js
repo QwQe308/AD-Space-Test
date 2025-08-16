@@ -226,7 +226,7 @@ let baseConfig = {
   A12: {
     position: [-1, 3],
     type: "single",
-    cost: new Decimal(250),
+    cost: new Decimal(500),
     description(level) {
       return `Triples your Infinities(IS) gain`;
     },
@@ -248,7 +248,7 @@ let baseConfig = {
   A13: {
     position: [0, 3],
     type: "single",
-    cost: new Decimal(400),
+    cost: new Decimal(750),
     description(level) {
       return `Instant: [Complete all NC and multply IP by 2]`;
     },
@@ -271,7 +271,7 @@ let baseConfig = {
   A14: {
     position: [1, 3],
     type: "single",
-    cost: new Decimal(250),
+    cost: new Decimal(500),
     description(level) {
       return `Double your IP gain`;
     },
@@ -295,7 +295,7 @@ let baseConfig = {
   A15: {
     position: [-1, 4],
     type: "single",
-    cost: new Decimal(600),
+    cost: new Decimal(1500),
     description(level) {
       return `Instant: [Multplies Infinities by 5]`;
     },
@@ -308,7 +308,7 @@ let baseConfig = {
   A16: {
     position: [0, 4],
     type: "single",
-    cost: new Decimal(900),
+    cost: new Decimal(2100),
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
     },
@@ -332,7 +332,7 @@ let baseConfig = {
   A17: {
     position: [1, 4],
     type: "single",
-    cost: new Decimal(600),
+    cost: new Decimal(1500),
     description(level) {
       return `Continuum + 1%`;
     },
@@ -348,7 +348,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(1200),
+      cost: new Decimal(2500),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -364,7 +364,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(1500),
+      cost: new Decimal(4000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -382,11 +382,11 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(1200),
+      cost: new Decimal(2500),
       costIncrease: new Decimal(2),
     },
     description(level) {
-      return `×2 Infinity Dimensions<br>(×${format(this.effectValue(level))} → ×${format(
+      return `×2 Infinity Dimensions' Multiplier<br>(×${format(this.effectValue(level))} → ×${format(
         this.effectValue(level.add(1))
       )})`;
     },
