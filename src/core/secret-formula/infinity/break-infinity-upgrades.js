@@ -1,4 +1,5 @@
 import { DC } from "../../constants";
+import { PlayerProgress } from "../../player-progress";
 import { dimInfinityExponent } from "./infinity-upgrades";
 
 function rebuyable(config) {
@@ -58,8 +59,10 @@ export const breakInfinityUpgrades = {
   achievementMult: {
     id: "achievementMult",
     cost: DC.E6,
-    description: "Antimatter Dimensions gain a multiplier based on Achievements completed",
-    effect: () => Math.max(Math.pow((Achievements.effectiveCount - 30), 3) / 40, 1),
+    get description(){
+      if(PlayerProgress.imaginaryUnlocked()) return "Antimatter Dimensions gain a multiplier based on total Abyss Research Nodes Researched"
+      return "Antimatter Dimensions gain a multiplier based on Achievements completed"},
+    effect: () => Math.max(Math.pow((AbyssResearches.all.fliter(x=>x.level.gt(1)).length), 3) / 40, 1),
     formatEffect: value => formatX(value, 2, 2)
   },
   slowestChallengeMult: {

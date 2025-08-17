@@ -168,7 +168,7 @@ let baseConfig = {
     scaling: {
       type: "linear",
       cost: new Decimal(100),
-      costIncrease: new Decimal(2.5),
+      costIncrease: new Decimal(3),
     },
     description(level) {
       return `/1.08 Space<br>(/${format(this.effectValue(level), 2, 3)} → /${format(
@@ -188,7 +188,7 @@ let baseConfig = {
     scaling: {
       type: "linear",
       cost: new Decimal(100),
-      costIncrease: new Decimal(2.5),
+      costIncrease: new Decimal(3),
     },
     description(level) {
       return `×1.02 Antimatter Dimensions' buy-10 multplier<br>(×${format(this.effectValue(level), 2, 3)} → ×${format(
@@ -226,7 +226,7 @@ let baseConfig = {
   A12: {
     position: [-1, 3],
     type: "single",
-    cost: new Decimal(500),
+    cost: new Decimal(750),
     description(level) {
       return `Triples your Infinities(IS) gain`;
     },
@@ -248,7 +248,7 @@ let baseConfig = {
   A13: {
     position: [0, 3],
     type: "single",
-    cost: new Decimal(750),
+    cost: new Decimal(1000),
     description(level) {
       return `Instant: [Complete all NC and multply IP by 2]`;
     },
@@ -271,7 +271,7 @@ let baseConfig = {
   A14: {
     position: [1, 3],
     type: "single",
-    cost: new Decimal(500),
+    cost: new Decimal(750),
     description(level) {
       return `Double your IP gain`;
     },
@@ -295,7 +295,7 @@ let baseConfig = {
   A15: {
     position: [-1, 4],
     type: "single",
-    cost: new Decimal(1500),
+    cost: new Decimal(2000),
     description(level) {
       return `Instant: [Multplies Infinities by 5]`;
     },
@@ -308,7 +308,7 @@ let baseConfig = {
   A16: {
     position: [0, 4],
     type: "single",
-    cost: new Decimal(2100),
+    cost: new Decimal(3000),
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
     },
@@ -332,7 +332,7 @@ let baseConfig = {
   A17: {
     position: [1, 4],
     type: "single",
-    cost: new Decimal(1500),
+    cost: new Decimal(2000),
     description(level) {
       return `Continuum + 1%`;
     },
@@ -348,7 +348,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(2500),
+      cost: new Decimal(4000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -364,7 +364,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(4000),
+      cost: new Decimal(6000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -382,7 +382,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(2500),
+      cost: new Decimal(4000),
       costIncrease: new Decimal(2),
     },
     description(level) {
