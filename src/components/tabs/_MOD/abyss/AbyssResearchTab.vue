@@ -148,6 +148,23 @@ export default {
         <!-- lines -->
         <svg class="connections-layer" width="100%" height="100%">
           <defs>
+            <linearGradient id="linearGradient-rightwards" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-leftwards" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-upwards" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            <linearGradient id="linearGradient-downwards" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+            </linearGradient>
+            
             <linearGradient id="linearGradient-right-upwards" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
               <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />

@@ -226,7 +226,7 @@ let baseConfig = {
   A12: {
     position: [-1, 3],
     type: "single",
-    cost: new Decimal(750),
+    cost: new Decimal(500),
     description(level) {
       return `Triples your Infinities(IS) gain`;
     },
@@ -234,7 +234,7 @@ let baseConfig = {
       return `Infinitied at least twice`;
     },
     restrictionNerf(level) {
-      return new Decimal(4);
+      return new Decimal(6);
     },
     checkRestriction(level) {
       return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
@@ -248,7 +248,7 @@ let baseConfig = {
   A13: {
     position: [0, 3],
     type: "single",
-    cost: new Decimal(1000),
+    cost: new Decimal(750),
     description(level) {
       return `Instant: [Complete all NC and multply IP by 2]`;
     },
@@ -260,7 +260,7 @@ let baseConfig = {
       return `Infinitied at least twice`;
     },
     restrictionNerf(level) {
-      return new Decimal(4);
+      return new Decimal(6);
     },
     checkRestriction(level) {
       return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
@@ -271,7 +271,7 @@ let baseConfig = {
   A14: {
     position: [1, 3],
     type: "single",
-    cost: new Decimal(750),
+    cost: new Decimal(500),
     description(level) {
       return `Double your IP gain`;
     },
@@ -279,7 +279,7 @@ let baseConfig = {
       return `Infinitied at least twice`;
     },
     restrictionNerf(level) {
-      return new Decimal(4);
+      return new Decimal(6);
     },
     checkRestriction(level) {
       return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
@@ -295,7 +295,7 @@ let baseConfig = {
   A15: {
     position: [-1, 4],
     type: "single",
-    cost: new Decimal(2000),
+    cost: new Decimal(5000),
     description(level) {
       return `Instant: [Multplies Infinities by 5]`;
     },
@@ -308,7 +308,7 @@ let baseConfig = {
   A16: {
     position: [0, 4],
     type: "single",
-    cost: new Decimal(3000),
+    cost: new Decimal(5000),
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
     },
@@ -316,7 +316,7 @@ let baseConfig = {
       return `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (including free ones)`;
     },
     restrictionNerf(level) {
-      return new Decimal(2);
+      return new Decimal(3);
     },
     checkRestriction(level) {
       function gcd(a, b) {
@@ -332,7 +332,7 @@ let baseConfig = {
   A17: {
     position: [1, 4],
     type: "single",
-    cost: new Decimal(2000),
+    cost: new Decimal(5000),
     description(level) {
       return `Continuum + 1%`;
     },
@@ -348,7 +348,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(4000),
+      cost: new Decimal(7500),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -364,7 +364,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(6000),
+      cost: new Decimal(15000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -382,7 +382,7 @@ let baseConfig = {
     type: "unlimited",
     scaling: {
       type: "linear",
-      cost: new Decimal(4000),
+      cost: new Decimal(7500),
       costIncrease: new Decimal(2),
     },
     description(level) {

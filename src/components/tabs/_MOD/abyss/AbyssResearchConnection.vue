@@ -63,14 +63,40 @@ export default {
         }
         this.$set(this.positions, i, this.calcPosition(this.animationPercentages[i]))
       }
-      this.direction =
-        this.data[1][0] > this.data[0][0]
-          ? this.data[1][1] < this.data[0][1]
-            ? "right-upwards"
-            : "right-downwards"
-          : this.data[1][1] < this.data[0][1]
-          ? "left-upwards"
-          : "left-downwards";
+      this.direction = this.getDirection(this.data)
+    },
+    getDirection(data){
+      let x1 = data[0][0]
+      let x2 = data[1][0]
+      let y1 = data[0][1]
+      let y2 = data[1][1]
+      if(y2 === y1){
+        if(x2 > x1){
+          return "rightwards"
+        }else{
+          return "leftwards"
+        }
+      }
+      if(x2 === x1){
+        if(y2 > y1){
+          return "downwards"
+        }else{
+          return "upwards"
+        }
+      }
+      if(x2 > x1){
+        if(y2 > y1){
+          return "right-downwards"
+        }else{
+          return "right-upwards"
+        }
+      }else{
+        if(y2 > y1){
+          return "left-downwards"
+        }else{
+          return "left-upwards"
+        }
+      }
     },
     calcPosition(percentage) {
       let positions = [
