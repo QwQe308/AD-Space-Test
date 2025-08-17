@@ -51,7 +51,7 @@ export default {
     :autobuyer="autobuyer"
     :is-modal="isModal"
     name="Automatic Antimatter Galaxies"
-    :show-interval="!isBuyMaxUnlocked"
+    :show-interval="(!hasMaxedInterval) || (!isBuyMaxUnlocked)"
   >
     <template
       v-if="!hasMaxedInterval"

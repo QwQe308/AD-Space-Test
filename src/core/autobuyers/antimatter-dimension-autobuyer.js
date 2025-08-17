@@ -54,7 +54,7 @@ export class AntimatterDimensionAutobuyerState extends UpgradeableAutobuyerState
   }
 
   get hasUnlimitedBulk() {
-    return Achievement(61).isUnlocked;
+    return (player.break && PlayerProgress.imaginaryUnlocked() && this.hasMaxedBulk) || Achievement(61).isUnlocked;
   }
 
   get bulkCap() {
@@ -127,7 +127,7 @@ export class AntimatterDimensionAutobuyerState extends UpgradeableAutobuyerState
     if (this.hasMaxedBulk) return;
     if (!Currency.infinityPoints.purchase(this.cost)) return;
     this.data.bulk = Math.clampMax(this.bulk * 2, this.bulkCap);
-    this.data.cost = Math.ceil(2.4 * this.cost);
+    this.data.cost = Math.ceil(2 * this.cost);
     Achievement(61).tryUnlock();
     GameUI.update();
   }

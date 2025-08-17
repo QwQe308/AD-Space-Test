@@ -53,7 +53,7 @@ export class GalaxyAutobuyerState extends UpgradeableAutobuyerState {
   }
 
   get interval() {
-    return this.isBuyMaxUnlocked
+    return (this.isBuyMaxUnlocked && super.hasMaxedInterval)
       ? TimeSpan.fromSeconds(new Decimal(this.buyMaxInterval)).totalMilliseconds.toNumber()
       : super.interval;
   }
