@@ -20,7 +20,7 @@ export function infinityDimensionCommonMultiplier() {
       AlchemyResource.dimensionality,
       ImaginaryUpgrade(8),
       PelleRifts.recursion.milestones[1],
-      AbyssResearches.A18
+      AbyssResearches.A20
     )
     .mul(light.yellow.effectValue());
 
