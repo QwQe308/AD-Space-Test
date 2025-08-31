@@ -110,7 +110,7 @@ export const tabs = [
         symbol: "<i class='fas fa-calculator'></i>",
         component: "MultiplierBreakdownTab",
         // Enable at your own risk 0- the tab does not work and must be manually fixed by the modder.
-        condition: () => false && PlayerProgress.infinityUnlocked(),
+        condition: () => /* false &&  */PlayerProgress.infinityUnlocked(),
         id: 3,
         hidable: true,
       },

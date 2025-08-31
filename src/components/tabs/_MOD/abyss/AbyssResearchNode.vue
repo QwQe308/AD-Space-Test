@@ -19,6 +19,7 @@ export default {
       isMaxed: false,
       level: new Decimal(0),
       maxLevel: new Decimal(0),
+      type: "",
     };
   },
   computed: {
@@ -74,6 +75,16 @@ export default {
         tooltipContent += `</span>`;
       }
 
+      if(!this.isMaxed && (AbyssResearches[this.id].type === "core")){
+        tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------`;
+        let coreRestrictionStats = AbyssResearches[this.id].coreRestrictionStats
+        let coreRestrictionInfos = AbyssResearches[this.id].coreRestrictionInfos
+        for(let i = 0; i < coreRestrictionInfos.length; i++){
+          tooltipContent += `<br><span style="color:${coreRestrictionStats[i] ? "lime" : "red"}">${coreRestrictionInfos[i]}</span>`
+          if(i < coreRestrictionInfos.length-1) tooltipContent += "<br>"
+        }
+      }
+
       //extra tooltips
       for (let tip of AbyssResearches[this.id].tooltipTags) {
         if (player.abyssResearchTooltipsShown.has(tip)) continue;
@@ -93,6 +104,14 @@ export default {
       return AbyssResearches[this.id].type;
     },
     getNodeStyle() {
+      if (this.getNodeType === "core") {
+        return {
+          left: `${AbyssResearches[this.id].x - 30}px`,
+          top: `${AbyssResearches[this.id].y - 30}px`,
+          width: "60px",
+          height: "60px",
+        };
+      }
       return {
         left: `${AbyssResearches[this.id].x - 20}px`,
         top: `${AbyssResearches[this.id].y - 20}px`,
@@ -143,6 +162,7 @@ export default {
       this.percentage = AbyssResearches[this.id].percentage;
       this.unlocked = player.abyssResearches[this.id].unlocked;
       this.isMaxed = AbyssResearches[this.id].maxed;
+      this.type = AbyssResearches[this.id].type;
       this.level.copyFrom(AbyssResearches[this.id].level);
       this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel);
 
@@ -151,8 +171,8 @@ export default {
         this.progress.copyFrom(AbyssResearches[this.id].progress);
         this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
         this.isResearching = AbyssResearches[this.id].isResearching;
-      }else{
-        this.isResearching = false
+      } else {
+        this.isResearching = false;
       }
     },
   },
@@ -161,6 +181,7 @@ export default {
 
 <template>
   <div
+    v-if="type === 'single' || type === 'limited' || type === 'unlimited' || type === 'core'"
     class="research-node"
     :class="getNodeClass"
     :style="getNodeStyle"
@@ -171,9 +192,43 @@ export default {
       <div class="research-node__level" :style="getTextStyle">{{ levelText }}</div>
     </div>
   </div>
+  <div v-else-if="type === 'sink'" class="research-node">
+    <div class="sink" @click="handleClick">
+      <div v-for="i in 10" :id="i"></div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.sink div {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid hsl(calc(var(--i) * 30), 100%, 50%);
+  transform-origin: center;
+  animation: collapse 2s linear infinite;
+  animation-delay: calc(var(--i) * -0.2s);
+  box-sizing: border-box;
+}
+
+@keyframes collapse {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(90deg) scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotate(180deg) scale(0);
+    opacity: 0;
+  }
+}
+
 .research-node {
   position: absolute;
   width: 40px;
@@ -191,6 +246,7 @@ export default {
   background-color: #3498db;
 
   transition-duration: 0.5s;
+
   .research-node--unlimited & {
     border-radius: 50%;
   }
@@ -199,6 +255,22 @@ export default {
   }
   .research-node--single & {
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  .research-node--core & {
+    -webkit-mask: radial-gradient(circle at 0% 0%, transparent 70%, black 70%) top left,
+      radial-gradient(circle at 100% 0%, transparent 70%, black 70%) top right,
+      radial-gradient(circle at 100% 100%, transparent 70%, black 70%) bottom right,
+      radial-gradient(circle at 0% 100%, transparent 70%, black 70%) bottom left;
+    -webkit-mask-size: 50% 50%;
+    -webkit-mask-repeat: no-repeat;
+    mask: radial-gradient(circle at 0 0, transparent 70%, red 0) top left,
+      radial-gradient(circle at 100% 0, transparent 70%, red 0) top right,
+      radial-gradient(circle at 100% 100%, transparent 70%, red 0) bottom right,
+      radial-gradient(circle at 0 100%, transparent 70%, red 0) bottom left;
+    mask-size: 50% 50%;
+    mask-repeat: no-repeat;
+    --inset: 6px;
   }
 }
 
@@ -218,10 +290,16 @@ export default {
   z-index: 1;
   content: "";
   position: absolute;
-  inset: 2px;
+  inset: var(--inset, 2px);
   background: #111014;
   border-radius: inherit;
   clip-path: inherit;
+  -webkit-mask: inherit;
+  -webkit-mask-size: inherit;
+  -webkit-mask-repeat: inherit;
+  mask: inherit;
+  mask-size: inherit;
+  mask-repeat: inherit;
 }
 
 .research-node__inner {

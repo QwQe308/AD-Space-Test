@@ -21,19 +21,23 @@ export const galaxies = {
     displayOverride: () => {
       const num = Replicanti.galaxies.total;
       let rg = Replicanti.galaxies.bought;
-      rg *= (1 + Effects.sum(TimeStudy(132), TimeStudy(133)));
-      rg += Replicanti.galaxies.extra;
-      rg += Math.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value) *
-          Effects.sum(EternityChallenge(8).reward);
-      const mult = rg / Math.clampMin(num, 1) * MultiplierTabHelper.globalGalaxyMult();
+      rg = rg.mul(Effects.sum(TimeStudy(132), TimeStudy(133)).add(1));
+      rg = rg.add(Replicanti.galaxies.extra);
+      rg = Decimal.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value).mul(
+        Effects.sum(EternityChallenge(8).reward)
+      );
+      const mult = rg.div(Decimal.clampMin(num, 1)).mul(MultiplierTabHelper.globalGalaxyMult());
       return `${formatInt(num)}, ${formatX(mult, 2, 2)} strength`;
     },
     multValue: () => {
       let rg = Replicanti.galaxies.bought;
-      rg *= (1 + Effects.sum(TimeStudy(132), TimeStudy(133)));
-      rg += Replicanti.galaxies.extra;
-      rg += Math.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value) *
-          Effectsk(EternityChallenge(8).reward);
+      rg = rg.mul(Effects.sum(TimeStudy(132), TimeStudy(133)).add(1));
+      rg = rg.add(Replicanti.galaxies.extra);
+      rg = rg.add(
+        Decimal.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value).mul(
+          Effects.sum(EternityChallenge(8).reward)
+        )
+      );
       return Decimal.pow10(rg);
     },
     isActive: () => Replicanti.areUnlocked,
@@ -43,13 +47,15 @@ export const galaxies = {
     name: "Tachyon Galaxies",
     displayOverride: () => {
       const num = player.dilation.totalTachyonGalaxies;
-      const mult = MultiplierTabHelper.globalGalaxyMult() *
-          (1 + Math.max(0, Replicanti.amount.max(1).log10() / 1e6) * AlchemyResource.alternation.effectValue);
+      const mult = Decimal.mul(
+        MultiplierTabHelper.globalGalaxyMult(),
+        Decimal.max(0, Replicanti.amount.max(1).log10().div(1e6)).mul(AlchemyResource.alternation.effectValue).add(1)
+      );
       return `${format(num)}, ${formatX(mult, 2, 2)} strength`;
     },
     multValue: () => {
       const num = player.dilation.totalTachyonGalaxies;
-      const mult = 1 + Math.max(0, Replicanti.amount.max(1).log10() / 1e6) * AlchemyResource.alternation.effectValue;
+      const mult = Decimal.max(0, Replicanti.amount.max(1).log10().div(1e6)).mul(AlchemyResource.alternation.effectValue).add(1);
       return Decimal.pow10(num * mult);
     },
     isActive: () => player.dilation.totalTachyonGalaxies.gt(0),
@@ -61,5 +67,5 @@ export const galaxies = {
     powValue: 0.5,
     isActive: () => Pelle.isDoomed,
     icon: MultiplierTabIcons.PELLE,
-  }
+  },
 };

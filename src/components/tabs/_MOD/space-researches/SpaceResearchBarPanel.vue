@@ -71,7 +71,7 @@ export default {
     <div v-if="!isCollapsed" class="l-pelle-content-container">
       Researches can be progressed by clicking on their bars.<br />
       Research speed is based on dimension boosts and space amount.<br /><br />
-      <big>Current base research speed: {{ format(researchSpeed, 2) }} /s</big><br />
+      <big>Current global research speed: {{ format(researchSpeed, 2) }} /s</big><br />
 
       <PrimaryButton class="o-primary-btn--subtab-option" @click="showSpaceHowTo"> How to play </PrimaryButton
       ><br /><br />

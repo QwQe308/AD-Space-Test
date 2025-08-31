@@ -26,7 +26,7 @@ class AbyssResearchClass extends GameMechanicState {
     this.previous = config.previous;
     this.tooltipTags = config.tooltipTags;
     this.hasRestriction = Boolean(config.restrictionInfo);
-    if (!(config.type === "single")) this.scalingType = config.scaling.type;
+    if (!config.cost && !config.costs) this.scalingType = config.scaling.type;
   }
 
   get level() {
@@ -39,7 +39,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get maxLevel() {
-    if (this.type === "single") return DC.D1;
+    if (this.type === "single" || this.type === "core") return DC.D1;
     if (this.type === "unlimited") return DC.BEMAX;
     return this.config.maxLevel;
   }
@@ -57,7 +57,8 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get cost() {
-    if (this.type === "single") return this.config.cost;
+    if (this.config.cost) return this.config.cost;
+    if (this.config.costs) return this.config.costs[this.level];
     switch (this.scalingType) {
       case "linear":
         return player.abyssResearches[this.id].cost;
@@ -100,14 +101,23 @@ class AbyssResearchClass extends GameMechanicState {
     let preLevel = this.level;
     let isFirstLevel = preLevel.eq(0);
     switch (this.type) {
+      case "core":
+        if (this.coreRestrictionCompleted || this.progress.gte(this.config.cost)) {
+          this.level = DC.D1;
+        } else return;
       case "single":
         if (this.progress.gte(this.config.cost)) {
           this.level = DC.D1;
-
-          this.stop();
         } else return;
         break;
       case "limited":
+        if (this.config.costs) {
+          if (this.progress.lt(this.cost)) return;
+          while (this.progress.gte(this.cost)) {
+            this.level = this.level.add(1);
+          }
+          break;
+        }
         switch (this.scalingType) {
           case "linear": // limited - linear
             if (this.scaling.purchases.lt(1)) return;
@@ -115,7 +125,6 @@ class AbyssResearchClass extends GameMechanicState {
             this.cost = this.scaling.nextCost;
             player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); //to avoid unwanted update
 
-            if (this.level.gte(this.maxLevel)) this.stop();
             break;
         }
         break;
@@ -131,6 +140,7 @@ class AbyssResearchClass extends GameMechanicState {
         }
         break;
     }
+    if (this.level.gte(this.maxLevel)) this.stop();
     if (isFirstLevel) this.updateCompletion();
   }
 
@@ -199,6 +209,8 @@ class AbyssResearchClass extends GameMechanicState {
       }
     }
   }
+
+  unlock() {}
 
   updateCompletionWithCondition() {
     if (this.level.gte(1)) return this.updateCompletion();
@@ -297,10 +309,19 @@ class AbyssResearchClass extends GameMechanicState {
 
   initializeCost() {
     if (this.config.scaling && this.config.scaling.type === "linear") {
-      this.cost = this.config.scaling.cost.mul(
-        this.config.scaling.costIncrease.pow(this.level)
-      );
+      this.cost = this.config.scaling.cost.mul(this.config.scaling.costIncrease.pow(this.level));
     }
+  }
+
+  //type: Core
+  get coreRestrictionInfos() {
+    return this.config.coreRestrictions.map((x) => x[0]());
+  }
+  get coreRestrictionStats() {
+    return this.config.coreRestrictions.map((x) => x[1]());
+  }
+  get coreRestrictionCompleted() {
+    return !this.coreRestrictionStats.includes(false);
   }
 }
 

@@ -149,6 +149,11 @@ export function bigCrunchResetValues(enteringAntimatterChallenge) {
     Replicanti.amount = currentReplicanti;
     remainingGalaxies = remainingGalaxies.add(Decimal.min(currentReplicantiGalaxies, 1));
   }
+
+  if(AbyssResearches.A21.completed){
+    Replicanti.amount = currentReplicanti;
+    remainingGalaxies = remainingGalaxies.add(Decimal.ceil(currentReplicantiGalaxies.div(2)));
+  }
   if (TimeStudy(33).isBought && !Pelle.isDoomed) {
     remainingGalaxies = currentReplicantiGalaxies;
   }

@@ -7,6 +7,10 @@ export function updateSpaceResearches(diff) {
 export function globalResearchSpeed() {
   let spaceFactor = DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1));
   let dbFactor = DC.D2.pow(DimBoost.totalBoosts.pow(0.75));
+
+  let baseResearchSpeed = spaceFactor.mul(dbFactor)
+  if(PlayerProgress.imaginaryUnlocked()) baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9)
+
   let researchFactor = SpaceResearchRifts.r21.effectValue[1]; //r21
   let achievementFactor = Achievements.power;
   let otherFactors = DC.D1.timesEffectsOf(
@@ -18,8 +22,7 @@ export function globalResearchSpeed() {
     AbyssResearches.A3
   );
   if (isSCRunningOnTier(5, 1)) otherFactors = otherFactors.div(SpaceChallenge(5).effectValue);
-  if(PlayerProgress.imaginaryUnlocked()) otherFactors = otherFactors.div(100)
-  return spaceFactor.mul(dbFactor).mul(researchFactor).mul(achievementFactor).mul(otherFactors);
+  return baseResearchSpeed.mul(researchFactor).mul(achievementFactor).mul(otherFactors);
 }
 
 export function tierBasedResearchSpeed(tier) {

@@ -7,12 +7,15 @@ export const MultiplierTabHelper = {
       case "AD":
         // Technically not 100% correct, but within EC7 any AD8 production is going to be irrelevant compared to AD7
         // and making the UI behave as if it's inactive produces a better look overall
-        return Math.clamp(AntimatterDimensions.all.filter(ad => ad.isProducing).length,
-          1, EternityChallenge(7).isRunning ? 7 : 8);
+        return Math.clamp(
+          AntimatterDimensions.all.filter((ad) => ad.isProducing).length,
+          1,
+          EternityChallenge(7).isRunning ? 7 : 8
+        );
       case "ID":
-        return InfinityDimensions.all.filter(id => id.isProducing).length;
+        return InfinityDimensions.all.filter((id) => id.isProducing).length;
       case "TD":
-        return TimeDimensions.all.filter(td => td.isProducing).length;
+        return TimeDimensions.all.filter((td) => td.isProducing).length;
       default:
         throw new Error("Unrecognized Dimension type in Multiplier tab GameDB entry");
     }
@@ -34,7 +37,7 @@ export const MultiplierTabHelper = {
     ).mul(Pelle.specialGlyphEffect.power);
   },
 
-  // Helper method for galaxies and tickspeed, broken up as contributions of tickspeed*log(perGalaxy) and galaxyCount to
+ // Helper method for galaxies and tickspeed, broken up as contributions of tickspeed*log(perGalaxy) and galaxyCount to
   // their product, which is proportional to log(tickspeed)
   decomposeTickspeed() {
     let effectiveCount = effectiveBaseGalaxies();
@@ -43,34 +46,32 @@ export const MultiplierTabHelper = {
     let galFrac, tickFrac;
     if (effectiveCount.lt(3)) {
       let baseMult = 1.1245;
-      if (player.galaxies.eq(1)) baseMult = 1.11888888;
-      if (player.galaxies.eq(2)) baseMult = 1.11267177;
+      if (player.galaxies === 1) baseMult = 1.11888888;
+      if (player.galaxies === 2) baseMult = 1.11267177;
       if (NormalChallenge(5).isRunning) {
         baseMult = 1.08;
-        if (player.galaxies.eq(1)) baseMult = 1.07632;
-        if (player.galaxies.eq(2)) baseMult = 1.072;
+        if (player.galaxies === 1) baseMult = 1.07632;
+        if (player.galaxies === 2) baseMult = 1.072;
       }
       // This is needed for numerical consistency with the other conditional case
-      baseMult = new Decimal(baseMult).div(0.965 ** 2);
-      const logBase = Decimal.log10(baseMult);
+      baseMult /= 0.965 ** 2;
+      const logBase = Math.log10(baseMult);
 
       const perGalaxy = effects.mul(0.02);
       effectiveCount = effectiveCount.mul(Pelle.specialGlyphEffect.power);
 
       tickFrac = Tickspeed.totalUpgrades.mul(logBase);
-      galFrac = Decimal.log10(Decimal.max(0.01, new Decimal(1).div(baseMult).sub(effectiveCount.mul(perGalaxy))))
-        .mul(-1).div(logBase);
+      galFrac = Decimal.log10(Decimal.max(0.01, Decimal.sub(1 / baseMult, effectiveCount.mul(perGalaxy)))).div(logBase).neg();
     } else {
       effectiveCount = effectiveCount.sub(2);
       effectiveCount = effectiveCount.mul(effects);
-      effectiveCount = effectiveCount.mul(getAdjustedGlyphEffect("realitygalaxies")
-        .mul(ImaginaryUpgrade(9).effectOrDefault(0) + 1));
+      effectiveCount = effectiveCount.mul(getAdjustedGlyphEffect("realitygalaxies").mul(ImaginaryUpgrade(9).effectOrDefault(DC.D0).add(1)));
       effectiveCount = effectiveCount.mul(Pelle.specialGlyphEffect.power);
 
       // These all need to be framed as INCREASING x/sec tick rate (ie. all multipliers > 1, all logs > 0)
-      const baseMult = new Decimal(0.965 ** 2).div(NormalChallenge(5).isRunning ? 0.83 : 0.8);
-      const logBase = Decimal.log10(baseMult);
-      const logPerGalaxy = DC.D0_965.log10().mul(-1);
+      const baseMult = 0.965 ** 2 / (NormalChallenge(5).isRunning ? 0.83 : 0.8);
+      const logBase = Math.log10(baseMult);
+      const logPerGalaxy = DC.D0_965.log10().neg();
 
       tickFrac = Tickspeed.totalUpgrades.mul(logBase);
       galFrac = effectiveCount.div(logBase).mul(logPerGalaxy).add(1);
@@ -89,12 +90,12 @@ export const MultiplierTabHelper = {
     let baseFrac = base.log10().div(Tickspeed.perSecond.log10());
 
     // We want to make sure to zero out components in some edge cases
-    if (base.eq(1)) baseFrac = DC.D0;
-    if (effectiveCount.eq(0)) galFrac = DC.D0;
+    if (base.eq(1)) baseFrac = DC.D0
+    if (effectiveCount.eq(0)) galFrac =  DC.D0;
 
     // Normalize the sum by splitting tickspeed and galaxies across what's leftover besides the base value. These three
     // values must be scaled so that they sum to 1 and none are negative
-    let factor = baseFrac.sub(1).div(tickFrac.add(galFrac));
+    let factor = Decimal.sub(1, baseFrac).div(tickFrac.add(galFrac));
     // The actual base tickspeed calculation multiplies things in a different order, which can lead to precision issues
     // when no tickspeed upgrades have been bought if we don't explicitly set this to zero
     if (Tickspeed.totalUpgrades.eq(0)) factor = DC.D0;
@@ -185,19 +186,20 @@ export const MultiplierTabHelper = {
 
   blackHoleSpeeds() {
     const currBH = BlackHoles.list
-      .filter(bh => bh.isUnlocked)
-      .map(bh => (bh.isActive ? bh.power : 1))
-      .reduce((x, y) => x * y, 1);
+      .filter((bh) => bh.isUnlocked)
+      .map((bh) => (bh.isActive ? bh.power : DC.D1))
+      .reduce((x, y) => Decimal.mul(x, y), DC.D1);
 
     // Calculate an average black hole speedup factor
     const bh1 = BlackHole(1);
     const bh2 = BlackHole(2);
-    const avgBH = 1 + (bh1.isUnlocked ? bh1.dutyCycle * (bh1.power - 1) : 0) +
-        (bh2.isUnlocked ? bh1.dutyCycle * bh2.dutyCycle * bh1.power * (bh2.power - 1) : 0);
+    const avgBH = (bh1.isUnlocked ? bh1.power.sub(1).mul(bh1.dutyCycle) : DC.D0)
+      .add(bh2.isUnlocked ? bh1.power.mul(bh2.power.sub(1)).mul(bh1.dutyCycle).mul(bh2.dutyCycle) : DC.D0)
+      .add(1);
 
     return {
       current: currBH,
-      average: avgBH
+      average: avgBH,
     };
   },
 
@@ -209,11 +211,11 @@ export const MultiplierTabHelper = {
   // which set of Dimensions are actually producing within NC12 - in nearly every case, one of the odd/even sets will
   // produce significantly more than the other, so we simply assume the larger one is active and the other isn't
   evenDimNC12Production() {
-    const nc12Pow = tier => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
+    const nc12Pow = (tier) => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
     const maxTier = Math.clampMin(2 * Math.floor(MultiplierTabHelper.activeDimCount("AD") / 2), 2);
     return AntimatterDimensions.all
-      .filter(ad => ad.isProducing && ad.tier % 2 === 0)
-      .map(ad => ad.multiplier.times(ad.amount.pow(nc12Pow(ad.tier))))
+      .filter((ad) => ad.isProducing && ad.tier % 2 === 0)
+      .map((ad) => ad.multiplier.times(ad.amount.pow(nc12Pow(ad.tier))))
       .reduce((x, y) => x.times(y), DC.D1)
       .times(AntimatterDimension(maxTier).totalAmount);
   },
@@ -221,8 +223,8 @@ export const MultiplierTabHelper = {
   oddDimNC12Production() {
     const maxTier = Math.clampMin(2 * Math.floor(MultiplierTabHelper.activeDimCount("AD") / 2 - 0.5) + 1, 1);
     return AntimatterDimensions.all
-      .filter(ad => ad.isProducing && ad.tier % 2 === 1)
-      .map(ad => ad.multiplier)
+      .filter((ad) => ad.isProducing && ad.tier % 2 === 1)
+      .map((ad) => ad.multiplier)
       .reduce((x, y) => x.times(y), DC.D1)
       .times(AntimatterDimension(maxTier).totalAmount);
   },
@@ -232,12 +234,12 @@ export const MultiplierTabHelper = {
   },
 
   multInNC12(dim) {
-    const nc12Pow = tier => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
+    const nc12Pow = (tier) => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
     const ad = AntimatterDimension(dim);
     return ad.isProducing ? ad.multiplier.times(ad.totalAmount.pow(nc12Pow(dim))) : DC.D1;
   },
 
   isNC12ProducingEven() {
     return this.evenDimNC12Production().gt(this.oddDimNC12Production());
-  }
+  },
 };

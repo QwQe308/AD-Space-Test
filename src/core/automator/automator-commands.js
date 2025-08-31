@@ -153,6 +153,26 @@ export const AutomatorCommands = [
   },
 
   {
+    id: "mirrorBreak",
+    rule: ($) => () => {
+      $.CONSUME(T.Mirror);
+      $.CONSUME(T.Break);
+    },
+    validate: (ctx, V) => {
+      ctx.startLine = ctx.Mirror[0].startLine;
+      return true;
+    },
+    compile: (ctx) => () => {
+      if(!canBreakMirror() || !player.light.inMirror) return AUTOMATOR_COMMAND_STATUS.NEXT_TICK_SAME_INSTRUCTION
+      player.light.prisms = Math.max(player.light.prisms, getPendingPrisms());
+      bigCrunchReset(true, true);
+      player.light.inMirror = false;
+      return AUTOMATOR_COMMAND_STATUS.NEXT_TICK_NEXT_INSTRUCTION;
+    },
+    blockify: () => ({ ...automatorBlocksMap.START }),
+  },
+
+  {
     id: "buy",
     rule: ($) => () => {
       $.CONSUME(T.Buy);

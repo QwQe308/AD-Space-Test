@@ -624,6 +624,12 @@ export const automator = {
                 Don't forget Mirror goal is 1e10000 * (1e10000 ^ Highest Color Percentage) AM! (30,50,10 => 1e15000 AM goal)
               `,
             },
+            {
+              header: "<i>Break</i>",
+              description: `
+                Break the Mirror. This will wait until you reached the goal of Mirror and then quit mirror.
+              `,
+            },
           ],
         },
       ],

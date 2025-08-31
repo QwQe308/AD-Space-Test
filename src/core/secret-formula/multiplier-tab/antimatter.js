@@ -16,7 +16,7 @@ export const AM = {
       const baseProd = ad1.totalAmount.times(ad1.multiplier).times(Tickspeed.perSecond);
       return Math.pow(baseProd.log10(), getAdjustedGlyphEffect("effarigantimatter") - 1);
     },
-    isActive: () => getAdjustedGlyphEffect("effarigantimatter") > 1 && AntimatterDimension(1).isProducing,
+    isActive: () => getAdjustedGlyphEffect("effarigantimatter").gt(1) && AntimatterDimension(1).isProducing,
     icon: MultiplierTabIcons.SPECIFIC_GLYPH("effarig"),
   }
 };

@@ -219,7 +219,7 @@ let baseConfig = {
     effectValue(level) {
       return level.mul(5);
     },
-    next: ["A12","A13","A14"],
+    next: ["A12", "A13", "A14"],
   },
 
   //row 6
@@ -265,7 +265,7 @@ let baseConfig = {
     checkRestriction(level) {
       return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
     },
-    tooltipTags: ["Instant Effect","Restrictions"],
+    tooltipTags: ["Instant Effect", "Restrictions"],
     next: ["A16"],
   },
   A14: {
@@ -318,14 +318,15 @@ let baseConfig = {
     restrictionNerf(level) {
       return new Decimal(3);
     },
-    checkRestriction(level) {
+    checkRestriction(a = DimBoost.totalBoosts, b = player.galaxies) {
+      if(a.eq(0) || b.eq(0)) return false
       function gcd(a, b) {
         if (b === 0) {
           return a;
         }
         return gcd(b, a % b);
       }
-      return gcd(DimBoost.totalBoosts.round().toNumber(), player.galaxies.round().toNumber());
+      return gcd(a.round().toNumber(), b.round().toNumber()) === 1;
     },
     next: ["A19"],
   },
@@ -357,7 +358,7 @@ let baseConfig = {
     effectValue(level) {
       return level.pow_base(2);
     },
-    next: [],
+    next: ["A21"],
   },
   A19: {
     position: [0, 5],
@@ -375,7 +376,7 @@ let baseConfig = {
     effectValue(level) {
       return level.pow_base(1.5);
     },
-    next: [],
+    next: ["A21"],
   },
   A20: {
     position: [1, 5],
@@ -393,7 +394,49 @@ let baseConfig = {
     effectValue(level) {
       return level.pow_base(2);
     },
-    next: [],
+    next: ["A21"],
+  },
+
+  //row 9
+  A21: {
+    position: [0, 6],
+    type: "single",
+    cost: new Decimal(1e4),
+    permanent: true,
+    description(level) {
+      return `Infinities will only reset half your Replicanti Galaxies, and keeps your Replicanti.`;
+    },
+    next: ["C0"],
+  },
+
+  //row 10 *Core*
+  C0: {
+    position: [0, 7],
+    type: "core",
+    cost: new Decimal(5e4),
+    description(level) {
+      return `Auto Researches Depth 0 Abyss Researches at ${formatPercents(this.effectValue())} rate`;
+    },
+    effectValue(level) {
+      return new Decimal(0.2);
+    },
+    coreRestrictions: [
+      [
+        () => `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (Hint: Shift+Click to buy 1 AG/DB)`,
+        () => baseConfig.A16.checkRestriction(),
+      ],
+      [() => `In Mirror, Active a total of 200 (or more) percentages of RGB`, () => getPendingPrisms() >= 200 && player.light.inMirror],
+      [
+        () => `Only 3 (or less) pre-Inf Space Researches can be level 1 or higher`,
+        () =>
+          SpaceResearchTierDetail[0].filter((x) => SpaceResearchRifts[x].level.gte(1)).length +
+            SpaceResearchTierDetail[1].filter((x) => SpaceResearchRifts[x].level.gte(1)).length +
+            SpaceResearchTierDetail[2].filter((x) => SpaceResearchRifts[x].level.gte(1)).length <=
+          3,
+      ],
+      [() => `Reach Mirror goal`, () => canBreakMirror()],
+    ],
+    tooltipTags: ["Core", "Depth"],
   },
 };
 

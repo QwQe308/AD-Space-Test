@@ -369,6 +369,7 @@ createKeyword("Mirror", /mirror/i);
 createKeyword("Set", /set/i);
 createKeyword("Enter", /enter/i);
 createKeyword("Escape", /escape/i);
+createKeyword("Break", /break/i);
 
 createKeyword("Replicanti", /replicanti/i);
 

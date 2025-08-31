@@ -39,7 +39,7 @@ export const ID = {
     name: dim => (dim ? `Purchased ID ${dim}` : "Purchases"),
     multValue: dim => {
       const getMult = id => Decimal.pow(InfinityDimension(id).powerMultiplier,
-        Math.floor(InfinityDimension(id).baseAmount / 10));
+        Decimal.floor(InfinityDimension(id).baseAmount.div(10)));
       if (dim) return getMult(dim);
       return InfinityDimensions.all
         .filter(id => id.isProducing)
@@ -65,8 +65,8 @@ export const ID = {
     multValue: dim => {
       const getMult = id => {
         const purchases = id === 8
-          ? Math.floor(InfinityDimension(id).baseAmount / 10)
-          : Math.min(InfinityDimensions.HARDCAP_PURCHASES, Math.floor(InfinityDimension(id).baseAmount / 10));
+          ? Decimal.floor(InfinityDimension(id).baseAmount.div(10))
+          : Decimal.min(InfinityDimensions.HARDCAP_PURCHASES, Decimal.floor(InfinityDimension(id).baseAmount.div(10)));
         const baseMult = InfinityDimension(id)._powerMultiplier;
         return Decimal.pow(baseMult, purchases);
       };
@@ -84,9 +84,9 @@ export const ID = {
     multValue: dim => {
       const getMult = id => {
         if (id === 8) return DC.D1;
-        const purchases = Math.floor(InfinityDimension(id).baseAmount / 10);
+        const purchases = Decimal.floor(InfinityDimension(id).baseAmount.div(10));
         return Decimal.pow(InfinityDimension(id)._powerMultiplier,
-          Math.clampMin(purchases - InfinityDimensions.HARDCAP_PURCHASES, 0));
+          Decimal.clampMin(purchases.sub(InfinityDimensions.HARDCAP_PURCHASES), 0));
       };
       if (dim) return getMult(dim);
       return InfinityDimensions.all
@@ -94,15 +94,15 @@ export const ID = {
         .map(id => getMult(id.tier))
         .reduce((x, y) => x.times(y), DC.D1);
     },
-    isActive: () => Tesseracts.bought > 0,
+    isActive: () => Tesseracts.bought.gt(0),
     icon: MultiplierTabIcons.PURCHASE("tesseractID"),
   },
   infinityGlyphSacrifice: {
     name: "Infinity Glyph sacrifice",
     multValue: () => (InfinityDimension(8).isProducing
-      ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Math.floor(InfinityDimension(8).baseAmount / 10))
+      ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.siv(10)))
       : DC.D1),
-    isActive: () => GlyphSacrifice.infinity.effectValue > 1,
+    isActive: () => Decimal.gt(GlyphSacrifice.infinity.effectValue, 1),
     icon: MultiplierTabIcons.SACRIFICE("infinity"),
   },
   powPurchase: {
@@ -228,7 +228,7 @@ export const ID = {
   glyph: {
     name: "Glyph Effects",
     multValue: () => 1,
-    powValue: () => getAdjustedGlyphEffect("infinitypow") * getAdjustedGlyphEffect("effarigdimensions"),
+    powValue: () => getAdjustedGlyphEffect("infinitypow").mul(getAdjustedGlyphEffect("effarigdimensions")),
     isActive: () => PlayerProgress.realityUnlocked(),
     icon: MultiplierTabIcons.GENERIC_GLYPH,
   },
@@ -258,7 +258,7 @@ export const ID = {
         : DC.D1);
       return Decimal.pow(mult, dim ? 1 : maxActiveDim).times(decayMult);
     },
-    powValue: () => PelleRifts.paradox.effectOrDefault(DC.D1).toNumber(),
+    powValue: () => PelleRifts.paradox.effectOrDefault(DC.D1),
     isActive: () => Pelle.isDoomed,
     icon: MultiplierTabIcons.PELLE,
   },

@@ -18,14 +18,14 @@ export const DT = {
     dilationEffect: () => (Enslaved.isRunning ? 0.85 : 1),
     isDilated: true,
     overlay: ["Ψ"],
-  },
+  },/* i dont use it why i fix it
   achievement: {
     name: "Achievements",
-    multValue: () => Achievement(132).effectOrDefault(1) * Achievement(137).effectOrDefault(1),
+    multValue: () => Achievement(132).effectOrDefault(new Decimal(1)) * Achievement(137).effectOrDefault(1),
     isActive: () => (Achievement(132).canBeApplied || Achievement(137).canBeApplied) &&
       getDilationGainPerSecond().neq(0),
     icon: MultiplierTabIcons.ACHIEVEMENT,
-  },
+  }, */
   dilation: {
     name: "Repeatable Dilation Upgrades",
     multValue: () => DC.D1.timesEffectsOf(
@@ -33,11 +33,7 @@ export const DT = {
       DilationUpgrade.dtGainPelle,
       DilationUpgrade.flatDilationMult
     ),
-    isActive: () => DC.D1.timesEffectsOf(
-      DilationUpgrade.dtGain,
-      DilationUpgrade.dtGainPelle,
-      DilationUpgrade.flatDilationMult
-    ).gt(1),
+    isActive: () => this.multValue().gt(1),
     icon: MultiplierTabIcons.UPGRADE("dilation"),
   },
   amplifierDT: {
@@ -51,7 +47,7 @@ export const DT = {
     multValue: () => {
       const dtMult = getAdjustedGlyphEffect("dilationDT").times(Pelle.specialGlyphEffect.dilation);
       const repliDT = Replicanti.areUnlocked
-        ? Math.clampMin(Decimal.log10(Replicanti.amount) * getAdjustedGlyphEffect("replicationdtgain"), 1)
+        ? Decimal.clampMin(Decimal.log10(Replicanti.amount).mul(getAdjustedGlyphEffect("replicationdtgain")), 1)
         : DC.D1;
       return dtMult.times(repliDT);
     },
@@ -72,7 +68,7 @@ export const DT = {
   },
   alchemy: {
     name: "Glyph Alchemy",
-    multValue: () => AlchemyResource.dilation.effectOrDefault(1),
+    multValue: () => AlchemyResource.dilation.effectOrDefault(new Decimal(1)),
     isActive: () => Ra.unlocks.unlockGlyphAlchemy.canBeApplied && getDilationGainPerSecond().neq(0),
     icon: MultiplierTabIcons.ALCHEMY,
   },

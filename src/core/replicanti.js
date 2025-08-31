@@ -677,7 +677,9 @@ export const Replicanti = {
     };
   },
   get unlockCost(){
-    return DC.E55.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1])
+    let baseCost = DC.E55
+    if(PlayerProgress.imaginaryUnlocked()) baseCost = DC.E140
+    return baseCost.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1])
   },
   unlock(freeUnlock = false) {
     const cost = this.unlockCost;

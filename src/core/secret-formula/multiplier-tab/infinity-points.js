@@ -13,7 +13,7 @@ export const IP = {
     // This effectively hides everything if the player can't actually gain any
     multValue: () => (Player.canCrunch ? gainedInfinityPoints() : 1),
     isActive: () => PlayerProgress.infinityUnlocked() || Player.canCrunch,
-    dilationEffect: () => (Laitela.isRunning ? 0.75 * Effects.product(DilationUpgrade.dilationPenalty) : 1),
+    dilationEffect: () => (Laitela.isRunning ? Effects.product(DilationUpgrade.dilationPenalty).mul(0.75) : 1),
     isDilated: true,
     overlay: ["∞", "<i class='fa-solid fa-layer-group' />"],
   },
@@ -22,8 +22,8 @@ export const IP = {
     isBase: true,
     fakeValue: DC.D5,
     multValue: () => {
-      const div = Effects.min(308, Achievement(103)/* , TimeStudy(111) */);
-      return Decimal.pow10(player.records.thisInfinity.maxAM.log10() / div - 0.75);
+      const div = Effects.min(308, Achievement(103));
+      return Decimal.pow10(player.records.thisInfinity.maxAM.log10().div(div).sub(0.75));
     },
     isActive: () => player.break,
     icon: MultiplierTabIcons.CONVERT_FROM("AM"),
@@ -39,11 +39,11 @@ export const IP = {
   divisor: {
     name: "Formula Improvement",
     displayOverride: () => {
-      const div = Effects.min(308, Achievement(103)/* , TimeStudy(111) */);
+      const div = Effects.min(308, Achievement(103));
       return `log(AM)/${formatInt(308)} ➜ log(AM)/${format(div, 2, 1)}`;
     },
-    powValue: () => 308 / Effects.min(308, Achievement(103)/* , TimeStudy(111) */),
-    isActive: () => Achievement(103).canBeApplied/*  || TimeStudy(111).isBought */,
+    powValue: () => 308 / Effects.min(308, Achievement(103)),
+    isActive: () => Achievement(103).canBeApplied,
     icon: MultiplierTabIcons.DIVISOR("IP"),
   },
   infinityUpgrade: {

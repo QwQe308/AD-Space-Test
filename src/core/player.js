@@ -45,6 +45,7 @@ window.player = {
     offsetY: 300,
     zoomLevel: 1,
   },
+  abyssResearchDepthsUnlocked: new Set("0"),
   activeAbyssResearches: new Set(),
   abyssResearches: createAbyssResearchesData(),
   abyssResearchTooltipsShown: new Set(),

@@ -74,6 +74,15 @@ export function abyssResearchSafetyChecker(config, layer) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No scaling defined)`);
         error = true;
       }
+    } else if (config[i].type === "core"){
+      if(!config[i].coreRestrictions){
+        console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No coreRestrictions defined)`);
+        error = true;
+      }
+      if(!config[i].cost){
+        console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
+        error = true;
+      }
     } else {
       console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (Wrong type)`);
       error = true;
@@ -104,4 +113,14 @@ export const extraAbyssResearchTooltips = {
 
   "Instant Effect": `* Some Abyss Researches have Instant Effects on them. Be wisely, these effects only apply on current values once,
   and do not provide permanent multpliers.`,
+
+  Core: `* Core Nodes requires you to complete various strict requirements at the same time. Once you accomplished them,
+  you can simply research it and instantly claim *Permanent* boosts; Either, you can get the node by researching for a long time.
+  These will never be reseted.`,
+
+  Depth: `* Depths are similar to "pages" Abyss Researches are at. You could find unlocked depths in the left-upper corner,
+  and also quick switch depths here.`,
+
+  Sink: `* Sink nodes allows you to go deeper into the abyss. Once the node is used, the new depth will be permanently shown.
+  However, you may need to research nearby researches to unlock the node.`,
 };
