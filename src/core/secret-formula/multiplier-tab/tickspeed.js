@@ -67,6 +67,13 @@ export const tickspeed = {
   },
 };
 
+
+
+//to reuse a function more, it is here
+function getAbyssResearchTUs(){
+  return Effects.sum(AbyssResearches.A2, AbyssResearches.A11)
+}
+
 export const tickspeedUpgrades = {
   purchased: {
     name: "Purchased Tickspeed Upgrades",
@@ -83,5 +90,28 @@ export const tickspeedUpgrades = {
     multValue: () => Decimal.pow10(player.totalTickGained),
     isActive: () => Currency.timeShards.gt(0),
     icon: MultiplierTabIcons.SPECIFIC_GLYPH("time"),
-  }
+  },
+
+  SR13: {
+    name: "Space Research - Additive Temporality",
+    displayOverride: () => formatInt(SpaceResearchRifts.r13.effectValue),
+    multValue: () => Decimal.pow10(SpaceResearchRifts.r13.effectValue),
+    isActive: () => SpaceResearchRifts.r13.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(0),
+  },
+  lightPurple: {
+    name: "Mirror - Purple Light",
+    displayOverride: () => formatFloat(light.purple.effectValue(), 2, 2),
+    multValue: () => Decimal.pow10(light.purple.effectValue()),
+    isActive: () => light.purple.amount().neq(0),
+    icon: MultiplierTabIcons.LIGHT("purple"),
+  },
+
+  AR: {
+    name: "Abyss Researches (Static)",
+    displayOverride: () => formatInt(getAbyssResearchTUs()),
+    multValue: () => Decimal.pow10(getAbyssResearchTUs()),//see upper
+    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    icon: MultiplierTabIcons.ABYSS_RESEARCH,
+  },
 };

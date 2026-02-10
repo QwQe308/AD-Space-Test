@@ -50,6 +50,12 @@ export const EP = {
     isActive: () => PlayerProgress.eternityUnlocked() && !Pelle.isDoomed,
     icon: MultiplierTabIcons.UPGRADE("eternity"),
   },
+  SR51: {
+    name: () => `Space Research - Endless Amplifier`,
+    multValue: () => SpaceResearchRifts.r51.effectValue,
+    isActive: () => SpaceResearchRifts.r51.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(4),
+  },
   timeStudy: {
     name: "Time Studies",
     multValue: () => DC.D1.timesEffectsOf(

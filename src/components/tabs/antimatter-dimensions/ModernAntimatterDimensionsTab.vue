@@ -14,7 +14,7 @@ export default {
     AntimatterDimensionRow,
     AntimatterGalaxyRow,
     DimensionBoostRow,
-    TickspeedRow
+    TickspeedRow,
   },
   data() {
     return {
@@ -51,6 +51,10 @@ export default {
     },
     // Toggle single/10 without Continuum, otherwise cycle through all 3 if it's unlocked
     changeBuyMode() {
+      if (PlayerProgress.imaginaryUnlocked()) {
+        GameUI.notify.error("Continuum is permanent");
+        return;
+      }
       if (!this.hasContinuum) {
         player.buyUntil10 = !player.buyUntil10;
         return;
@@ -86,16 +90,18 @@ export default {
       this.buy10Mult.copyFrom(AntimatterDimensions.buyTenMultiplier);
 
       this.multiplierText = `Buy 10 Dimension purchase multiplier: ${formatX(this.buy10Mult, 2, 2)}`;
-      
-      this.amMult.copyFrom(getAMMultplier())
+
+      this.amMult.copyFrom(getAMMultiplier());
       if (this.amMult.neq(1)) {
-        const amMultText = ` | Direct Antimatter multiplier: ${formatMultplier(this.amMult, 2, 2)}`
+        const amMultText = ` | Direct Antimatter multiplier: ${formatMultplier(this.amMult, 2, 2)}`;
         this.multiplierText += amMultText;
       }
-      
+
       if (!isSacrificeUnlocked) return;
       this.isSacrificeAffordable = Sacrifice.canSacrifice;
-      this.isFullyAutomated = Autobuyer.sacrifice.isActive && Achievement(118).isEffectActive &&
+      this.isFullyAutomated =
+        Autobuyer.sacrifice.isActive &&
+        Achievement(118).isEffectActive &&
         (this.isSacrificeAffordable || Sacrifice.nextBoost.lte(1));
       this.currentSacrifice.copyFrom(Sacrifice.totalBoost);
       this.sacrificeBoost.copyFrom(Sacrifice.nextBoost);
@@ -104,18 +110,15 @@ export default {
         ? ` | Dimensional Sacrifice multiplier: ${formatX(this.currentSacrifice, 2, 2)}`
         : "";
       this.multiplierText += sacText;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <template>
   <div class="l-antimatter-dim-tab">
     <div class="modes-container">
-      <button
-        class="o-primary-btn l-button-container"
-        @click="changeBuyMode"
-      >
+      <button class="o-primary-btn l-button-container" @click="changeBuyMode">
         {{ getUntil10Display() }}
       </button>
       <PrimaryButton
@@ -126,26 +129,15 @@ export default {
         @click="sacrifice"
       >
         <span v-if="isSacrificeAffordable">Dimensional Sacrifice ({{ formatX(sacrificeBoost, 2, 2) }})</span>
-        <span v-else-if="isFullyAutomated">
-          Dimensional Sacrifice is Automated (Achievement 118)
-        </span>
+        <span v-else-if="isFullyAutomated"> Dimensional Sacrifice is Automated (Achievement 118) </span>
         <span v-else>Dimensional Sacrifice Disabled ({{ disabledCondition }})</span>
       </PrimaryButton>
-      <button
-        class="o-primary-btn l-button-container"
-        @click="maxAll"
-      >
-        Max All (M)
-      </button>
+      <button class="o-primary-btn l-button-container" @click="maxAll">Max All (M)</button>
     </div>
     <span>{{ multiplierText }}</span>
     <TickspeedRow />
     <div class="l-dimensions-container">
-      <AntimatterDimensionRow
-        v-for="tier in 8"
-        :key="tier"
-        :tier="tier"
-      />
+      <AntimatterDimensionRow v-for="tier in 8" :key="tier" :tier="tier" />
     </div>
     <div class="resets-container">
       <DimensionBoostRow />

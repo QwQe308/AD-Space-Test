@@ -9,6 +9,15 @@ import { reality } from "@/core/secret-formula/reality";
  * }
  */
 export const MultiplierTabIcons = {
+  LIGHT(color) {
+    return {
+      symbol: "<b>〖〗</b>",
+      color: color,
+    };
+  },
+  SPACE_RESEARCH(tier) {
+    return { symbol: `<b>Σ${tier}</b>`, color: "var(--color-space)" };
+  },
   DIMENSION(type, tier) {
     const tierText = tier ?? "";
     switch (type) {
@@ -36,7 +45,7 @@ export const MultiplierTabIcons = {
       case "tesseractID":
         return {
           symbol: `<i class="fas fa-up-right-and-down-left-from-center" />`,
-          color: "var(--color-enslaved--base)"
+          color: "var(--color-enslaved--base)",
         };
       default:
         throw new Error("Unrecognized purchase type in multiplier tab icons");
@@ -216,5 +225,23 @@ export const MultiplierTabIcons = {
   IAP: {
     symbol: `<i class="fas fa-coins" />`,
     color: "var(--color-accent)",
+  },
+  SPACE: {
+    symbol: "<b>Φ</b>",
+    color: "var(--color-space)",
+  },
+  IMAGINARY_INFLUENCE: {
+    symbol: "<b>※</b>",
+    color: "var(--color-imaginary)",
+  },
+  ABYSS_RESEARCH: {
+    symbol: "<b>∏</b>",
+    color: "var(--color-space)",
+  },
+  SPACE_CHALLENGE(x) {
+    return {
+      symbol: `<b>∮${x}</b>`,
+      color: "var(--color-space)",
+    };
   },
 };

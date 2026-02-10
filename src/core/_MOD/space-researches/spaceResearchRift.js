@@ -10,7 +10,7 @@ class SpaceResearchRiftClass extends GameMechanicState {
   }
 
   get canBeApplied() {
-    return true;
+    return this.level.gte(1);
   }
 
   get rift() {

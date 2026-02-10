@@ -96,15 +96,15 @@ export const ID = {
     },
     isActive: () => Tesseracts.bought.gt(0),
     icon: MultiplierTabIcons.PURCHASE("tesseractID"),
-  },
+  },/* 
   infinityGlyphSacrifice: {
     name: "Infinity Glyph sacrifice",
     multValue: () => (InfinityDimension(8).isProducing
-      ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.siv(10)))
+      ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.div(10)))
       : DC.D1),
     isActive: () => Decimal.gt(GlyphSacrifice.infinity.effectValue, 1),
     icon: MultiplierTabIcons.SACRIFICE("infinity"),
-  },
+  }, */
   powPurchase: {
     name: "Imaginary Upgrade - Recollection of Intrusion",
     powValue: () => ImaginaryUpgrade(14).effectOrDefault(1),
@@ -118,6 +118,21 @@ export const ID = {
     isActive: () => Replicanti.areUnlocked,
     icon: MultiplierTabIcons.SPECIFIC_GLYPH("replication"),
   },
+
+  lightYellow: {
+    name: "Mirror - Yellow Light",
+    multValue: (dim) => Decimal.pow(light.yellow.effectValue(), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
+    isActive: () => light.yellow.amount().neq(0),
+    icon: MultiplierTabIcons.LIGHT("yellow"),
+  },
+
+  AR: {
+    name: "Abyss Researches (Static)",
+    multValue: (dim) => Decimal.pow(Effects.product(AbyssResearches.A20), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
+    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    icon: MultiplierTabIcons.ABYSS_RESEARCH,
+  },
+
   achievementMult: {
     name: "Achievement Multiplier",
     multValue: dim => Decimal.pow(Achievements.power, dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
@@ -236,7 +251,7 @@ export const ID = {
     name: "Glyph Alchemy",
     multValue: dim => Decimal.pow(AlchemyResource.dimensionality.effectOrDefault(1),
       dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
-    powValue: () => AlchemyResource.infinity.effectOrDefault(1) * Ra.momentumValue,
+    powValue: () => Decimal.mul(AlchemyResource.infinity.effectOrDefault(1), Ra.momentumValue),
     isActive: () => Ra.unlocks.unlockGlyphAlchemy.canBeApplied,
     icon: MultiplierTabIcons.ALCHEMY,
   },
@@ -279,7 +294,7 @@ export const ID = {
   nerfCursed: {
     name: "Cursed Glyphs",
     powValue: () => getAdjustedGlyphEffect("curseddimensions"),
-    isActive: () => getAdjustedGlyphEffect("curseddimensions") !== 1,
+    isActive: () => getAdjustedGlyphEffect("curseddimensions").neq(1),
     icon: MultiplierTabIcons.SPECIFIC_GLYPH("cursed"),
   },
   nerfPelle: {

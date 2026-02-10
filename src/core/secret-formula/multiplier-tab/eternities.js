@@ -15,6 +15,12 @@ export const eternities = {
     isActive: () => Achievement(113).canBeApplied,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
+  SR51: {
+    name: () => `Space Research - Endless Intensifier`,
+    multValue: () => SpaceResearchRifts.r51.effectValue,
+    isActive: () => SpaceResearchRifts.r51.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(4),
+  },
   amplifierEter: {
     name: "Reality Upgrade - Eternal Amplifier",
     multValue: () => RealityUpgrade(3).effectOrDefault(1),

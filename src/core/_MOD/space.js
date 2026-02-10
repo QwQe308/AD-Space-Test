@@ -38,7 +38,7 @@ export function getEffectiveSpaceMult() {
   return effectiveMult;
 }
 
-export function getAMMultplier() {
+export function getAMMultiplier() {
   let amMult = new Decimal(1);
   amMult = amMult.timesEffectsOf(
     InfinityUpgrade.dim45mult,
@@ -72,7 +72,7 @@ export function getSpaceNerf(space = getSpaceAfterCalc()) {
 export function produceAM(proc, diff) {
   let recordAM = player.antimatter;
 
-  let amMult = getAMMultplier();
+  let amMult = getAMMultiplier();
   let realAM = player.antimatter.div(amMult).pow(getSpaceNerf());
   let pendingAM = realAM.add(proc);
   player.space = getSpaceAmount(pendingAM);

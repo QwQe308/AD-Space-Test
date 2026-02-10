@@ -43,7 +43,7 @@ export default {
         : "";
       this.multiplierText = `Buy 10 Dimension purchase multiplier: ${formatX(this.buy10Mult, 2, 2)}`;
 
-      this.amMult.copyFrom(getAMMultplier())
+      this.amMult.copyFrom(getAMMultiplier())
       if (this.amMult.neq(1)) {
         const amMultText = ` | Direct Antimatter multiplier: ${formatMultplier(this.amMult, 2, 2)}`
         this.multiplierText += amMultText;

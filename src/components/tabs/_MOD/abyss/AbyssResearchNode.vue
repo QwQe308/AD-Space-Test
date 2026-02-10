@@ -11,11 +11,13 @@ export default {
     return {
       isResearching: false,
       abyssResearchSpeed: new Decimal(0),
+      isAutoResearching: false,
+      autoResearchEfficiency: 0,
       percentage: 0,
       timeToNext: "",
       progress: new Decimal(0),
       unlocked: false,
-      restrictionMet: false,
+      restrictionStates: [],
       isMaxed: false,
       level: new Decimal(0),
       maxLevel: new Decimal(0),
@@ -23,69 +25,92 @@ export default {
     };
   },
   computed: {
-    getTooltip() {
-      let tooltipContent = `${this.id}<br>`;
-      if (!this.isMaxed) {
+    getMainInfosTooltip() {
+      let tooltipContent = `${this.id}`;
+      if (!this.isMaxed && this.type !== "sink") {
         switch (AbyssResearches[this.id].type) {
           case "single":
-            tooltipContent += `----------[ ${formatPercents(this.percentage)} ]----------<br>`;
+            tooltipContent += `<br>----------[ ${formatPercents(this.percentage)} ]----------`;
             break;
 
           case "limited":
-            tooltipContent += `----------[ ${formatPercents(this.percentage)} | LV.${format(
+            tooltipContent += `<br>----------[ ${formatPercents(this.percentage)} | LV.${format(
               AbyssResearches[this.id].level
-            )} / ${format(AbyssResearches[this.id].maxLevel)} ]----------<br>`;
+            )} / ${format(AbyssResearches[this.id].maxLevel)} ]----------`;
             break;
 
           case "unlimited":
-            tooltipContent += `----------[ ${formatPercents(this.percentage)} | LV.${format(
+            tooltipContent += `<br>----------[ ${formatPercents(this.percentage)} | LV.${format(
               AbyssResearches[this.id].level
-            )} ]----------<br>`;
+            )} ]----------`;
+            break;
+
+          default:
+            tooltipContent += `<br>------------------------------`;
             break;
         }
-        tooltipContent += `Progress: ${format(this.progress, 2, 2)}/${format(AbyssResearches[this.id].cost, 2)}<br>
-            (${format(this.abyssResearchSpeed, 2, 3)}/s, in ${this.timeToNext})`;
+        tooltipContent += `<br>Progress: ${format(this.progress, 2, 2)}/${format(
+          AbyssResearches[this.id].cost,
+          2
+        )}<br>`;
+        if (this.isResearching || !this.isAutoResearching)
+          tooltipContent += `(${format(this.abyssResearchSpeed.mul(1 + this.autoResearchEfficiency), 2, 3)}/s, in ${
+            this.timeToNext
+          })`;
+        else {
+          tooltipContent += `(${format(this.abyssResearchSpeed.mul(this.autoResearchEfficiency), 2, 3)}/s, in ${
+            this.autoTimeToNext
+          })<br>`;
+          tooltipContent += `<span style="color:#888">(${format(
+            this.abyssResearchSpeed.mul(this.autoResearchEfficiency + 1),
+            2,
+            3
+          )}/s, in ${this.timeToNext} if active)</span>`;
+        }
       } else {
         switch (AbyssResearches[this.id].type) {
           case "single":
-            tooltipContent += `----------[ Completed ]----------`;
+            tooltipContent += `<br>----------[ Completed ]----------`;
             break;
 
           case "limited":
-            tooltipContent += `----------[ LV.${format(AbyssResearches[this.id].level)} | Completed ]----------`;
+            tooltipContent += `<br>----------[ LV.${format(AbyssResearches[this.id].level)} | Completed ]----------`;
+            break;
+
+          default:
+            tooltipContent += `<br>------------------------------`;
             break;
         }
       }
 
-      if (!this.isMaxed && AbyssResearches[this.id].hasRestriction) {
-        tooltipContent += `<br><span style="color:${this.restrictionMet ? "lime" : "red"}">Efficiency /${format(
-          AbyssResearches[this.id].restrictionNerf
-        )}</span>`;
+      if (!this.isMaxed && !AbyssResearches[this.id].hasRestriction) {
+        tooltipContent += `<br><span style="color:${
+          this.restrictionsAllCompleted ? "red" : "lime"
+        }">Efficiency /${format(AbyssResearches[this.id].restrictionNerf)}</span>`;
       }
 
-      tooltipContent += `<br><br>`;
+      return tooltipContent;
+    },
 
-      tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
+    getRestrictionsTooltip() {
+      let tooltipContent = "";
 
-      //restriction
-      if (!this.isMaxed && AbyssResearches[this.id].hasRestriction) {
-        //#FFFFAF yellow
-        tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br>`;
-        tooltipContent += AbyssResearches[this.id].restrictionInfo;
-        tooltipContent += `</span>`;
+      //#FFFFAF yellow
+      tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br></span>`;
+      let restrictions = this.getNode.restrictions;
+      for (let index = 0; index < restrictions.length; index++) {
+        tooltipContent += `<br><span style="color:${this.restrictionStates ? "lime" : "red"}">${restrictions[
+          i
+        ].description(this.level)}</span>`;
+        if (i < restrictions.length - 1) tooltipContent += "<br>";
       }
 
-      if(!this.isMaxed && (AbyssResearches[this.id].type === "core")){
-        tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------`;
-        let coreRestrictionStats = AbyssResearches[this.id].coreRestrictionStats
-        let coreRestrictionInfos = AbyssResearches[this.id].coreRestrictionInfos
-        for(let i = 0; i < coreRestrictionInfos.length; i++){
-          tooltipContent += `<br><span style="color:${coreRestrictionStats[i] ? "lime" : "red"}">${coreRestrictionInfos[i]}</span>`
-          if(i < coreRestrictionInfos.length-1) tooltipContent += "<br>"
-        }
-      }
+      return tooltipContent;
+    },
 
-      //extra tooltips
+    getTipsTooltip() {
+      let tooltipContent = "";
+
       for (let tip of AbyssResearches[this.id].tooltipTags) {
         if (player.abyssResearchTooltipsShown.has(tip)) continue;
         tooltipContent += ``;
@@ -93,8 +118,27 @@ export default {
         tooltipContent += extraAbyssResearchTooltips[tip];
         tooltipContent += `</span>`;
       }
+
       return tooltipContent;
     },
+
+    getTooltip() {
+      let tooltipContent = this.getMainInfosTooltip;
+
+      if (this.type !== "core" && this.type !== "sink") tooltipContent += `<br><br>`;
+      else tooltipContent += "<br>";
+
+      tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
+
+      if (!this.isMaxed && AbyssResearches[this.id].hasRestriction) {
+        tooltipContent += this.getRestrictionsTooltip;
+      }
+
+      tooltipContent += this.getTipsTooltip;
+
+      return tooltipContent;
+    },
+
     getFillStyle() {
       return {
         transform: `scale(${this.percentage})`,
@@ -119,14 +163,14 @@ export default {
     },
     getNodeClass() {
       let style = {};
-      style[`research-node--${this.getNodeType}`] = true;
+      style[`${this.getNodeType}`] = true;
       return style;
     },
     getContainerClass() {
       return {
-        "research-node__container--active": this.isResearching,
-        "research-node__container--locked": !this.unlocked,
-        "research-node__container--completed": this.isMaxed,
+        active: this.isResearching,
+        locked: !this.unlocked,
+        completed: this.isMaxed,
       };
     },
     getFillClass() {
@@ -146,31 +190,63 @@ export default {
           return `${this.level}/${this.maxLevel}`;
         case "unlimited":
           return this.level;
+        default:
+          return false;
       }
+    },
+    hasProgress() {
+      switch (this.type) {
+        case "single":
+        case "limited":
+        case "unlimited":
+        case "core":
+          return true;
+        default:
+          return false;
+      }
+    },
+
+    getNode() {
+      return AbyssResearches[this.id];
     },
   },
   methods: {
     handleClick() {
       AbyssResearches[this.id].click();
     },
-    update() {
-      this.timeToNext = this.abyssResearchSpeed.gt(0)
+    sinkAnimationStyle(id) {
+      return {
+        "animation-delay": `${1 - id}s`,
+      };
+    },
+    calcTimeToNext(researchSpeed) {
+      return researchSpeed.gt(0)
         ? TimeSpan.fromSeconds(
-            AbyssResearches[this.id].cost.sub(AbyssResearches[this.id].progress).div(this.abyssResearchSpeed).toNumber()
+            this.getNode.cost.sub(this.getNode.progress).div(researchSpeed).toNumber()
           ).toTimeEstimate()
         : "Forever";
-      this.percentage = AbyssResearches[this.id].percentage;
-      this.unlocked = player.abyssResearches[this.id].unlocked;
-      this.isMaxed = AbyssResearches[this.id].maxed;
-      this.type = AbyssResearches[this.id].type;
-      this.level.copyFrom(AbyssResearches[this.id].level);
-      this.maxLevel.copyFrom(AbyssResearches[this.id].maxLevel);
+    },
+    update() {
+      this.type = this.getNode.type;
+      this.unlocked = this.getNode.unlocked;
+      if (this.type === "sink") return;
+      this.timeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency + 1));
+      this.autoTimeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency));
+      this.percentage = this.getNode.percentage;
+      this.isMaxed = this.getNode.maxed;
+      this.level.copyFrom(this.getNode.level);
+      this.maxLevel.copyFrom(this.getNode.maxLevel);
+
+      this.autoResearchEfficiency = this.getNode.autoResearchEfficiency;
+      this.isAutoResearching = this.getNode.isAutoResearching;
+
+      this.restrictionStates = this.getNode.restrictionStates;
 
       if (!this.isMaxed) {
-        this.restrictionMet = AbyssResearches[this.id].checkRestriction;
-        this.progress.copyFrom(AbyssResearches[this.id].progress);
-        this.abyssResearchSpeed.copyFrom(AbyssResearches[this.id].researchSpeed);
-        this.isResearching = AbyssResearches[this.id].isResearching;
+        this.restrictionMet = this.getNode.checkRestriction;
+        this.progress.copyFrom(this.getNode.progress);
+        this.abyssResearchSpeed.copyFrom(this.getNode.researchSpeed);
+        this.isResearching = this.getNode.isResearching;
       } else {
         this.isResearching = false;
       }
@@ -181,52 +257,58 @@ export default {
 
 <template>
   <div
-    v-if="type === 'single' || type === 'limited' || type === 'unlimited' || type === 'core'"
     class="research-node"
     :class="getNodeClass"
     :style="getNodeStyle"
-    v-tooltip="{ content: getTooltip, classes: ['general-tooltip', 'abyss-research-tooltip'] }"
+    v-tooltip="{
+      content: getTooltip,
+      classes: ['general-tooltip', 'abyss-research-tooltip'],
+      hideOnTargetClick: false,
+    }"
   >
-    <div class="research-node__container" @click="handleClick" :class="getContainerClass">
-      <div class="research-node__inner" :style="getFillStyle" :class="getFillClass"></div>
-      <div class="research-node__level" :style="getTextStyle">{{ levelText }}</div>
-    </div>
-  </div>
-  <div v-else-if="type === 'sink'" class="research-node">
-    <div class="sink" @click="handleClick">
-      <div v-for="i in 10" :id="i"></div>
+    <div class="research-node-container" @click="handleClick" :class="getContainerClass">
+      <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass"></div>
+      <div v-if="levelText" class="research-node-level" :style="getTextStyle">{{ levelText }}</div>
+      <!-- For "Sink" type -->
+      <div v-if="type === 'sink'" class="sink-animation">
+        <div v-for="i in 3" :style="sinkAnimationStyle(i)" class="sink-animation-block"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.sink div {
-  content: "";
+.locked .sink-animation-block {
+  border-color: rgb(100, 100, 100);
+}
+
+.sink-animation-block {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  border: 2px solid hsl(calc(var(--i) * 30), 100%, 50%);
+  border: 2px solid rgb(125, 100, 150);
   transform-origin: center;
-  animation: collapse 2s linear infinite;
-  animation-delay: calc(var(--i) * -0.2s);
+  animation: collapse 3s linear infinite;
   box-sizing: border-box;
+  z-index: 9;
 }
 
 @keyframes collapse {
   0% {
     transform: rotate(0deg) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: rotate(90deg) scale(0.5);
-    opacity: 0.5;
   }
   100% {
     transform: rotate(180deg) scale(0);
-    opacity: 0;
   }
+}
+
+.sink-animation {
+  position: relative;
+  width: inherit;
+  height: inherit;
+  overflow: hidden;
 }
 
 .research-node {
@@ -238,7 +320,7 @@ export default {
   transition-duration: 0.5s;
 }
 
-.research-node__container {
+.research-node-container {
   z-index: 0;
   width: 100%;
   height: 100%;
@@ -247,17 +329,17 @@ export default {
 
   transition-duration: 0.5s;
 
-  .research-node--unlimited & {
+  .unlimited & {
     border-radius: 50%;
   }
-  .research-node--limited & {
+  .limited & {
     transform: rotate(45deg);
   }
-  .research-node--single & {
+  .single & {
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   }
 
-  .research-node--core & {
+  .core & {
     -webkit-mask: radial-gradient(circle at 0% 0%, transparent 70%, black 70%) top left,
       radial-gradient(circle at 100% 0%, transparent 70%, black 70%) top right,
       radial-gradient(circle at 100% 100%, transparent 70%, black 70%) bottom right,
@@ -271,22 +353,29 @@ export default {
     mask-size: 50% 50%;
     mask-repeat: no-repeat;
     --inset: 6px;
+    .research-node-inner {
+      --inset: 8px;
+    }
+  }
+
+  .sink & {
+    background-color: rgb(125, 100, 150);
   }
 }
 
-.research-node__container--locked {
-  background-color: rgb(100, 100, 100);
+.research-node-container.locked {
+  background-color: rgb(100, 100, 100) !important;
 }
 
-.research-node__container--completed {
+.research-node-container.completed {
   background-color: #aeae77;
 }
 
-.research-node__container--active {
+.research-node-container.active {
   background-color: #f39c12;
 }
 
-.research-node__container::before {
+.research-node-container::before {
   z-index: 1;
   content: "";
   position: absolute;
@@ -302,7 +391,7 @@ export default {
   mask-repeat: inherit;
 }
 
-.research-node__inner {
+.research-node-inner {
   z-index: 2;
   position: absolute;
   inset: 2px;
@@ -311,9 +400,21 @@ export default {
   transform-origin: center;
   border-radius: inherit;
   clip-path: inherit;
+  mask: inherit;
+
+  -webkit-mask: inherit;
+  -webkit-mask-size: inherit;
+  -webkit-mask-repeat: inherit;
+  mask: inherit;
+  mask-size: inherit;
+  mask-repeat: inherit;
 }
 
-.research-node__level {
+.research-node.core .completed .research-node-inner {
+  background-color: #aeae77;
+}
+
+.research-node-level {
   position: absolute;
   z-index: 4;
   width: 100%;

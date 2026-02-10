@@ -42,7 +42,7 @@ export const IP = {
       const div = Effects.min(308, Achievement(103));
       return `log(AM)/${formatInt(308)} ➜ log(AM)/${format(div, 2, 1)}`;
     },
-    powValue: () => 308 / Effects.min(308, Achievement(103)),
+    powValue: () => Decimal.div(308 ,Effects.min(308, Achievement(103))),
     isActive: () => Achievement(103).canBeApplied,
     icon: MultiplierTabIcons.DIVISOR("IP"),
   },
@@ -51,6 +51,18 @@ export const IP = {
     multValue: () => InfinityUpgrade.ipMult.effectOrDefault(1),
     isActive: () => player.break && !Pelle.isDoomed,
     icon: MultiplierTabIcons.UPGRADE("infinity"),
+  },
+  SR41: {
+    name: () => `Space Research - Infinity Amplifier`,
+    multValue: () => SpaceResearchRifts.r41.effectValue,
+    isActive: () => SpaceResearchRifts.r41.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(3),
+  },
+  AR: {
+    name: "Abyss Researches (Static)",
+    multValue: () => Effects.product(AbyssResearches.A14),
+    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    icon: MultiplierTabIcons.ABYSS_RESEARCH,
   },
   achievement: {
     name: "Achievements",
@@ -61,7 +73,7 @@ export const IP = {
       Achievement(125),
       Achievement(141).effects.ipGain,
     ),
-    isActive: () => player.break && !Pelle.isDoomed,
+    isActive: () => !PlayerProgress.imaginaryUnlocked() && player.break && !Pelle.isDoomed,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
   timeStudy: {
@@ -97,7 +109,7 @@ export const IP = {
   },
   iap: {
     name: "Shop Tab Purchases",
-    multValue: () => 1,
+    multValue: () => DC.D1,
     isActive: () => false,
     icon: MultiplierTabIcons.IAP,
   },

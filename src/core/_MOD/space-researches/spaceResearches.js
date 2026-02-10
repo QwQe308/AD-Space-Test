@@ -4,12 +4,17 @@ export function updateSpaceResearches(diff) {
   SpaceResearchRifts.all.forEach((r) => r.fill(diff));
 }
 
-export function globalResearchSpeed() {
+export function getBaseResearchSpeed() {
   let spaceFactor = DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1));
   let dbFactor = DC.D2.pow(DimBoost.totalBoosts.pow(0.75));
 
-  let baseResearchSpeed = spaceFactor.mul(dbFactor)
-  if(PlayerProgress.imaginaryUnlocked()) baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9)
+  let baseResearchSpeed = spaceFactor.mul(dbFactor);
+  if (PlayerProgress.imaginaryUnlocked()) baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9);
+  return baseResearchSpeed;
+}
+
+export function globalResearchSpeed() {
+  let baseResearchSpeed = getBaseResearchSpeed();
 
   let researchFactor = SpaceResearchRifts.r21.effectValue[1]; //r21
   let achievementFactor = Achievements.power;
@@ -188,8 +193,8 @@ export const spaceResearches = {
       return `× ${format(value, 2)} Infinity Points`;
     },
     levelUP: (lastLevel, newLevel) => {
-      if(!TimeStudy(181).isBought) Autobuyer.bigCrunch.bumpAmount(newLevel.sub(lastLevel).pow_base(2))
-    }
+      if (!TimeStudy(181).isBought) Autobuyer.bigCrunch.bumpAmount(newLevel.sub(lastLevel).pow_base(2));
+    },
   },
 
   r42: {
@@ -254,7 +259,7 @@ export const spaceResearches = {
       return `+ ${format(value.mul(100), 2)}% Continuum`;
     },
     unlocked: () => isSCTierCompleted(1, 2),
-    maxLevel: () => TimeStudy(111).isBought? false : new Decimal(15),
+    maxLevel: () => (TimeStudy(111).isBought ? false : new Decimal(15)),
   },
 
   r45: {
@@ -278,7 +283,7 @@ export const spaceResearches = {
       return `+ ${format(value, 2, 2)} IPow conversion rate`;
     },
     unlocked: () => PlayerProgress.IDUnlocked(1),
-    maxLevel: () => TimeStudy(111).isBought? false : new Decimal(15),
+    maxLevel: () => (TimeStudy(111).isBought ? false : new Decimal(15)),
   },
 
   //Eternity - Tier 4
@@ -301,8 +306,8 @@ export const spaceResearches = {
       return `× ${format(value, 2)} EP`;
     },
     levelUP: (lastLevel, newLevel) => {
-      Autobuyer.eternity.bumpAmount(newLevel.sub(lastLevel).pow_base(2))
-    }
+      Autobuyer.eternity.bumpAmount(newLevel.sub(lastLevel).pow_base(2));
+    },
   },
 
   r52: {

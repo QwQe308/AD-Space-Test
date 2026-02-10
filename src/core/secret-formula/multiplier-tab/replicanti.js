@@ -20,11 +20,23 @@ export const replicanti = {
   timeStudy: {
     name: "Time Studies",
     multValue: () => {
-      const preReality = Effects.product(TimeStudy(52), TimeStudy(213)).mul(TimeStudy(132).isBought ? 1.5 : 1);
-      return preReality.mul(Perk.studyPassive.isBought && TimeStudy(132).isBought ? 2 : 1);
+      const preReality = Effects.product(TimeStudy(52)).mul(TimeStudy(21).isBought ? 1/3 : 1);
+      return preReality;
     },
     isActive: () => PlayerProgress.eternityUnlocked() && !Pelle.isDoomed,
     icon: MultiplierTabIcons.TIME_STUDY,
+  },
+  SR51: {
+    name: () => `Space Research - Replicated Flux`,
+    multValue: () => SpaceResearchRifts.r51.effectValue,
+    isActive: () => SpaceResearchRifts.r51.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(4),
+  },
+  AR: {
+    name: "Abyss Researches (Static)",
+    multValue: () => Effects.product(AbyssResearches.A19),
+    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    icon: MultiplierTabIcons.ABYSS_RESEARCH,
   },
   glyph: {
     name: "Glyph Effects",
@@ -79,5 +91,11 @@ export const replicanti = {
     multValue: () => 1,
     isActive: () => false,
     icon: MultiplierTabIcons.IAP,
+  },
+  prism: {
+    name: () => `Prism nerf to Replicanti`,
+    multValue: () => getPrismReplicantiNerf().recip(),
+    isActive: () => getPrismReplicantiNerf().neq(1),
+    icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
 };

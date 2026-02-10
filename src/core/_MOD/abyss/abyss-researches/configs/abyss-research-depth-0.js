@@ -79,15 +79,21 @@ let baseConfig = {
       return `Abyss Research Speed is 1% faster per Tickspeed Upgrade (additive, up to ×4, locked to max if infinitied once)
       <br>Current: ×${format(this.effectValue(), 2, 2)}`;
     },
-    restrictionInfo(level) {
-      return `Can afford at least 1 dimension for all unlocked AD`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(4);
-    },
-    checkRestriction(level) {
-      return AntimatterDimensions.all.filter((x) => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8;
-    },
+    restrictions: [
+      {
+        description() {
+          return `Can afford at least 1 dimension for all unlocked AD tiers`;
+        },
+        nerf() {
+          return DC.D4;
+        },
+        requirement() {
+          return (
+            AntimatterDimensions.all.filter((x) => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8
+          );
+        },
+      },
+    ],
     effectValue(level) {
       if (player.infinities.gt(0)) return new Decimal(4);
       return Tickspeed.totalUpgrades.mul(0.01).add(1).min(4);
@@ -116,21 +122,27 @@ let baseConfig = {
     description(level) {
       return `Start with 1e30 AM (pre-space nerf)`;
     },
-    restrictionInfo(level) {
-      return `Tickspeed upgrades' amount is a prime lower than 308. (includes free ones)`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(3);
-    },
-    checkRestriction(level) {
-      if (Tickspeed.totalUpgrades.gte(308)) return false;
-      let primes = [
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107,
-        109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
-        233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307,
-      ];
-      return primes.includes(Math.round(Tickspeed.totalUpgrades.toNumber())); // break_eternity.js may have some precision losses so heres a round
-    },
+
+    restrictions: [
+      {
+        description() {
+          return `Tickspeed upgrades' amount is a prime number lower than 308. (including free ones)`;
+        },
+        nerf() {
+          return DC.D3;
+        },
+        requirement() {
+          if (Tickspeed.totalUpgrades.gte(308)) return false;
+          let primes = [
+            2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103,
+            107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223,
+            227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307,
+          ];
+          // break_eternity.js may have some precision losses so heres a round
+          return primes.includes(Math.round(Tickspeed.totalUpgrades.toNumber()));
+        },
+      },
+    ],
     effectValue(level) {
       return new Decimal(1e30);
     },
@@ -228,17 +240,21 @@ let baseConfig = {
     type: "single",
     cost: new Decimal(500),
     description(level) {
-      return `Triples your Infinities(IS) gain`;
+      return `Triples your Infinities (IS) gain`;
     },
-    restrictionInfo(level) {
-      return `Infinitied at least twice`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(6);
-    },
-    checkRestriction(level) {
-      return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
-    },
+    restrictions: [
+      {
+        description() {
+          return `Infinitied at least twice`;
+        },
+        nerf() {
+          return DC.D6;
+        },
+        requirement() {
+          return player.infinities.gte(2);
+        },
+      },
+    ],
     effectValue(level) {
       return new Decimal(3);
     },
@@ -256,15 +272,19 @@ let baseConfig = {
       player.challenge.normal.completedBits = 8190;
       player.infinityPoints = player.infinityPoints.mul(2);
     },
-    restrictionInfo(level) {
-      return `Infinitied at least twice`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(6);
-    },
-    checkRestriction(level) {
-      return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
-    },
+    restrictions: [
+      {
+        description() {
+          return `Infinitied at least twice`;
+        },
+        nerf() {
+          return DC.D6;
+        },
+        requirement() {
+          return player.infinities.gte(2);
+        },
+      },
+    ],
     tooltipTags: ["Instant Effect", "Restrictions"],
     next: ["A16"],
   },
@@ -275,15 +295,19 @@ let baseConfig = {
     description(level) {
       return `Double your IP gain`;
     },
-    restrictionInfo(level) {
-      return `Infinitied at least twice`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(6);
-    },
-    checkRestriction(level) {
-      return player.infinities.gte(2); // break_eternity.js may have some precision losses so heres a round
-    },
+    restrictions: [
+      {
+        description() {
+          return `Infinitied at least twice`;
+        },
+        nerf() {
+          return DC.D6;
+        },
+        requirement() {
+          return player.infinities.gte(2);
+        },
+      },
+    ],
     effectValue(level) {
       return new Decimal(2);
     },
@@ -312,22 +336,28 @@ let baseConfig = {
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
     },
-    restrictionInfo(level) {
-      return `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (including free ones)`;
-    },
-    restrictionNerf(level) {
-      return new Decimal(3);
-    },
-    checkRestriction(a = DimBoost.totalBoosts, b = player.galaxies) {
-      if(a.eq(0) || b.eq(0)) return false
-      function gcd(a, b) {
-        if (b === 0) {
-          return a;
-        }
-        return gcd(b, a % b);
-      }
-      return gcd(a.round().toNumber(), b.round().toNumber()) === 1;
-    },
+
+    restrictions: [
+      {
+        description() {
+          return `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (including free ones)`;
+        },
+        nerf() {
+          return DC.D3;
+        },
+        requirement() {
+          let a = DimBoost.totalBoosts, b = player.galaxies;
+          if (a.eq(0) || b.eq(0)) return false;
+          function gcd(a, b) {
+            if (b === 0) {
+              return a;
+            }
+            return gcd(b, a % b);
+          }
+          return gcd(a.round().toNumber(), b.round().toNumber()) === 1;
+        },
+      },
+    ],
     next: ["A19"],
   },
   A17: {
@@ -369,8 +399,10 @@ let baseConfig = {
       costIncrease: new Decimal(2),
     },
     description(level) {
-      return `×1.5 Replicanti Speed<br>(×${format(this.effectValue(level))} → ×${format(
-        this.effectValue(level.add(1))
+      return `×1.5 Replicanti Speed<br>(×${format(this.effectValue(level), 2, 2)} → ×${format(
+        this.effectValue(level.add(1)),
+        2,
+        2
       )})`;
     },
     effectValue(level) {
@@ -413,33 +445,58 @@ let baseConfig = {
   C0: {
     position: [0, 7],
     type: "core",
-    cost: new Decimal(5e4),
+    cost: new Decimal(1.5e5),
     description(level) {
       return `Auto Researches Depth 0 Abyss Researches at ${formatPercents(this.effectValue())} rate`;
     },
     effectValue(level) {
-      return new Decimal(0.2);
+      return 0.2;
     },
-    coreRestrictions: [
-      [
-        () => `The greatest common divisor between Galaxies and Dimensional Boosts is 1 (Hint: Shift+Click to buy 1 AG/DB)`,
-        () => baseConfig.A16.checkRestriction(),
-      ],
-      [() => `In Mirror, Active a total of 200 (or more) percentages of RGB`, () => getPendingPrisms() >= 200 && player.light.inMirror],
-      [
-        () => `Only 3 (or less) pre-Inf Space Researches can be level 1 or higher`,
-        () =>
-          SpaceResearchTierDetail[0].filter((x) => SpaceResearchRifts[x].level.gte(1)).length +
-            SpaceResearchTierDetail[1].filter((x) => SpaceResearchRifts[x].level.gte(1)).length +
-            SpaceResearchTierDetail[2].filter((x) => SpaceResearchRifts[x].level.gte(1)).length <=
-          3,
-      ],
-      [() => `Reach Mirror goal`, () => canBreakMirror()],
+    restrictions: [
+      {
+        type: "failable",
+        description() {
+          return `In Mirror in this whole eternity<br>(! You may need to pre-enter Mirror before eternity)`;
+        },
+        completable() {
+          return player.light.inMirror;
+        },
+        resetOnEvent: GAME_EVENT.ETERNITY_RESET_AFTER,
+      },
+      {
+        description() {
+          return `Apply 200% RGB percentages or higher`;
+        },
+        requirement() {
+          return getPendingPrisms() >= 200;
+        },
+      },
+      {
+        description() {
+          return `Be able to Break Mirror`;
+        },
+        requirement() {
+          return canBreakMirror();
+        },
+      },
     ],
+    next: ["S0-1"],
     tooltipTags: ["Core", "Depth"],
+  },
+
+  //row 11 *Sink*
+  "S0-1": {
+    position: [0, 8],
+    type: "sink",
+    description(level) {
+      return `Sink to Depth 1`;
+    },
+    effectValue(level) {},
+    target: "1",
+    tooltipTags: ["Sink", "Depth"],
   },
 };
 
 quickSpawnResearches(baseConfig, "0");
 
-export const AbyssResearchesDepth_0 = baseConfig;
+export const AbyssResearchesDepth0 = baseConfig;

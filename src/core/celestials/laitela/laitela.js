@@ -32,12 +32,18 @@ export const Laitela = {
     return Laitela.maxAllowedDimension === 0;
   },
   get continuumUnlocked() {
-    return ImaginaryUpgrade(15).isBought && !Pelle.isDisabled("continuum") || (isSCTierCompleted(1, 2) && player.break);
+    return (
+      (ImaginaryUpgrade(15).isBought && !Pelle.isDisabled("continuum")) || (isSCTierCompleted(1, 2) && player.break)
+    );
   },
   get continuumActive() {
     return this.continuumUnlocked && !player.auto.disableContinuum && !Pelle.isDisabled("continuum");
   },
   setContinuum(x) {
+    if (PlayerProgress.imaginaryUnlocked()) {
+      GameUI.notify.error("Continuum is permanent");
+      return;
+    }
     player.auto.disableContinuum = !x;
     // If continuum is now not disabled (i.e. is enabled) we update the relevant requirement check.
     if (!player.auto.disableContinuum) {
@@ -45,31 +51,34 @@ export const Laitela = {
     }
   },
   get matterExtraPurchaseFactor() {
-    let extraPurchases = Decimal.pow(Currency.darkMatter.max.add(1).max(1).log10().div(50), 0.4).div(2).add(1)
-    extraPurchases = extraPurchases.plusEffectsOf(SpaceResearchRifts.r44,
-      AbyssResearches.A17
-    )
+    let extraPurchases = Decimal.pow(Currency.darkMatter.max.add(1).max(1).log10().div(50), 0.4).div(2).add(1);
+    extraPurchases = extraPurchases.plusEffectsOf(SpaceResearchRifts.r44, AbyssResearches.A17);
     //multpliers
-    extraPurchases = extraPurchases.times((SingularityMilestone.continuumMult.effectOrDefault(DC.D0)).add(1));
-    return extraPurchases
+    extraPurchases = extraPurchases.times(SingularityMilestone.continuumMult.effectOrDefault(DC.D0).add(1));
+    return extraPurchases;
   },
   get realityReward() {
-    return Decimal.clampMin(Decimal.pow(100, this.difficultyTier)
-      .mul(Decimal.pow(player.celestials.laitela.fastestCompletion.recip().mul(360), 2)), 1);
+    return Decimal.clampMin(
+      Decimal.pow(100, this.difficultyTier).mul(
+        Decimal.pow(player.celestials.laitela.fastestCompletion.recip().mul(360), 2)
+      ),
+      1
+    );
   },
   // Note that entropy goes from 0 to 1, with 1 being completion
   get entropyGainPerSecond() {
     return Decimal.clamp(Decimal.pow(Currency.antimatter.value.add(1).log10().div(1e11), 2), 0, 100).div(200);
   },
   get darkMatterMultGain() {
-    return Decimal.pow(Currency.darkMatter.value.dividedBy(this.annihilationDMRequirement)
-      .plus(1).log10(), 1.5).mul(ImaginaryUpgrade(21).effectOrDefault(1));
+    return Decimal.pow(Currency.darkMatter.value.dividedBy(this.annihilationDMRequirement).plus(1).log10(), 1.5).mul(
+      ImaginaryUpgrade(21).effectOrDefault(1)
+    );
   },
   get darkMatterMult() {
     return this.celestial.darkMatterMult;
   },
   get darkMatterMultRatio() {
-    return (this.celestial.darkMatterMult.add(this.darkMatterMultGain)).div(this.celestial.darkMatterMult);
+    return this.celestial.darkMatterMult.add(this.darkMatterMultGain).div(this.celestial.darkMatterMult);
   },
   get annihilationUnlocked() {
     return ImaginaryUpgrade(19).isBought;
@@ -91,8 +100,7 @@ export const Laitela = {
   // Max purchase interval, then DM, then DE, working highest tier down in each case. No reason for the order.
   maxAllDMDimensions(maxTier) {
     // Note that tier is 1-indexed
-    const unlockedDimensions = DarkMatterDimensions.all
-      .filter(d => d.isUnlocked && d.tier <= maxTier);
+    const unlockedDimensions = DarkMatterDimensions.all.filter((d) => d.isUnlocked && d.tier <= maxTier);
     for (let i = 0; i < maxTier; i++) {
       unlockedDimensions[i].buyManyInterval(Infinity);
     }
@@ -114,7 +122,7 @@ export const Laitela = {
     this.celestial.singularityCapIncreases = DC.D0;
   },
   quotes: Quotes.laitela,
-  symbol: "ᛝ"
+  symbol: "ᛝ",
 };
 
 EventHub.logic.on(GAME_EVENT.TAB_CHANGED, () => {

@@ -94,7 +94,7 @@ export const normalTimeStudies = [
     reqType: TS_REQUIREMENT_TYPE.AT_LEAST_ONE,
     description: () =>
       `Base Replicanti interval limit ${formatInt(50)}ms ➜ ${formatInt(10)}ms 
-      and all Replicanti related IP cost /${formatInt(1e40)}. Remove Prism nerf to Replicanti.`,
+      and all Replicanti related IP cost /${formatInt(1e40)}.${(!PlayerProgress.imaginaryUnlocked()? " Remove Prism nerf to Replicanti." : "")}`,
     effect: 1e40,
   },
   {

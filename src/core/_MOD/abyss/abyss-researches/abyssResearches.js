@@ -1,5 +1,4 @@
-import { DC } from "../../../constants";
-import { AbyssResearchesDepth_0 } from "./configs/abyss-research-depth-0";
+import { AbyssResearchesDepth0 } from "./configs/abyss-research-depth-0";
 
 export const abyssDepths = ["0"];
 
@@ -83,6 +82,11 @@ export function abyssResearchSafetyChecker(config, layer) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
         error = true;
       }
+    } else if (config[i].type === "sink") {
+      if (!config[i].target) {
+        console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No target defined)`);
+        error = true;
+      }
     } else {
       console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (Wrong type)`);
       error = true;
@@ -92,7 +96,7 @@ export function abyssResearchSafetyChecker(config, layer) {
   if (error) debugger;
 }
 
-export const abyssResearches = { ...AbyssResearchesDepth_0 };
+export const abyssResearches = { ...AbyssResearchesDepth0 };
 
 export function globalAbyssResearchSpeed() {
   let abyssResearchSpeed = player.records.thisReality.maxSpace.pow(0.5).div(10);
@@ -101,7 +105,7 @@ export function globalAbyssResearchSpeed() {
 }
 
 export const extraAbyssResearchTooltips = {
-  Tips: `* Some tips will show on Abyss Researches(AR). Once you've completed these researches(reaching lv.1), these tips will disappear. Disappeared ones could be viewed in "how to play" section.`,
+  Tips: `* Some tips will show on Abyss Researches(AR). Once you've completed these researches(reaching lv.1), these tips will disappear. Disappeared ones could be viewed in "How to play" section.`,
 
   Shapes: `* Different types of Abyss Researches are shown in different shapes. Circle: unlimited, Diamond: limited, Hexagon: Single.`,
 
@@ -109,7 +113,8 @@ export const extraAbyssResearchTooltips = {
 
   Restrictions: `* If restrictions are not met, your ARS will receive a penalty.
   Penalty is shown below ARS, <span style="color:lime">green</span> if reached restriction, <span style="color:red">red</span> if not.
-  You must *keep* restriction met to avoid ARS losses.`,
+  You must *keep* restriction met to avoid ARS losses.
+  If not mentioned, the restriction only need to be completed "now" instead of in entire "eternity" or other periods.`,
 
   "Instant Effect": `* Some Abyss Researches have Instant Effects on them. Be wisely, these effects only apply on current values once,
   and do not provide permanent multpliers.`,
@@ -122,5 +127,5 @@ export const extraAbyssResearchTooltips = {
   and also quick switch depths here.`,
 
   Sink: `* Sink nodes allows you to go deeper into the abyss. Once the node is used, the new depth will be permanently shown.
-  However, you may need to research nearby researches to unlock the node.`,
+  However, if the node is locked, you will unable to research the nearby nodes linked to it.`,
 };

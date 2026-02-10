@@ -6,33 +6,36 @@ import AbyssResearchPageSelector from "./AbyssResearchPageSelector.vue";
 
 export default {
   name: "AbyssResearchTab",
+
   data() {
     return {
-      depth: "0",
+      depth: player.abyssResearchCanvas.currentAbyssResearchDepth,
       shownNodes: [],
       activeNodes: new Set(),
       connections: [],
 
-      zoomLevel: 1,
-      offsetX: 750,
-      offsetY: 333,
+      zoomLevel: player.abyssResearchCanvas.zoomLevel,
+      offset: new Vector(
+        player.abyssResearchCanvas.offsetX,
+        player.abyssResearchCanvas.offsetY
+      ),
 
       isDragging: false,
-      dragStartX: 0,
-      dragStartY: 0,
-      startOffsetX: 0,
-      startOffsetY: 0,
+      dragStart: new Vector(0, 0),
+      startOffset: new Vector(0, 0),
     };
   },
+
   components: {
     AbyssResearchConnection,
     AbyssResearchNode,
     AbyssResearchPageSelector,
   },
+
   computed: {
     getCurrentNodes() {
       // only give keys
-      return Object.keys(AbyssResearchesSortByDepth[this.depth]);
+      return Object.keys(AbyssResearchHelperTools.sortByDepth[this.depth]);
     },
     getConnections() {
       // [[x1,y1],[x2,y2],isResearching]
@@ -41,9 +44,19 @@ export default {
         for (let id2 of AbyssResearches[id].next) {
           if (this.shownNodes.includes(id2)) {
             connections.push([
-              [AbyssResearches[id].x, AbyssResearches[id].y],
-              [AbyssResearches[id2].x, AbyssResearches[id2].y],
-              AbyssResearches[id2].id,
+              [AbyssResearches[id].x, AbyssResearches[id].y, AbyssResearches[id].id],
+              [AbyssResearches[id2].x, AbyssResearches[id2].y, AbyssResearches[id2].id],
+              false
+            ]);
+          }
+        }
+
+        for (let id2 of AbyssResearches[id].previous) {
+          if (this.shownNodes.includes(id2)) {
+            connections.push([
+              [AbyssResearches[id].x, AbyssResearches[id].y, AbyssResearches[id].id],
+              [AbyssResearches[id2].x, AbyssResearches[id2].y, AbyssResearches[id2].id],
+              true
             ]);
           }
         }
@@ -51,38 +64,46 @@ export default {
       return connections;
     },
   },
+
+  watch: {
+    offset(newVal) {
+      player.abyssResearchCanvas.offsetX = newVal.x;
+      player.abyssResearchCanvas.offsetY = newVal.y;
+      this.updateCanvasTransform();
+    },
+
+    zoomLevel(newVal) {
+      player.abyssResearchCanvas.zoomLevel = newVal;
+      this.updateCanvasTransform();
+    },
+
+    depth(newVal) {
+      player.abyssResearchCanvas.currentAbyssResearchDepth = newVal;
+    },
+  },
+
   methods: {
     update() {
-      this.offsetX = player.abyssResearchCanvas.offsetX;
-      this.offsetY = player.abyssResearchCanvas.offsetY;
-      this.zoomLevel = player.abyssResearchCanvas.zoomLevel;
-      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
       this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
     },
 
     updateCanvasTransform() {
-      this.offsetX = player.abyssResearchCanvas.offsetX;
-      this.offsetY = player.abyssResearchCanvas.offsetY;
-      this.zoomLevel = player.abyssResearchCanvas.zoomLevel;
       if (this.$refs.canvas) {
-        this.$refs.canvas.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.zoomLevel})`;
+        this.$refs.canvas.style.transform = `${this.offset.asPxTranslate()} scale(${this.zoomLevel})`;
       }
     },
 
     startDrag(event) {
       this.isDragging = true;
-      this.dragStartX = event.clientX;
-      this.dragStartY = event.clientY;
-      this.startOffsetX = this.offsetX;
-      this.startOffsetY = this.offsetY;
+      this.dragStart = new Vector(event.clientX, event.clientY);
+      this.startOffset = this.offset.copy;
     },
     drag(event) {
       //this.updateTooltipPosition(event);
       if (this.isDragging) {
-        player.abyssResearchCanvas.offsetX = this.startOffsetX + (event.clientX - this.dragStartX);
-        player.abyssResearchCanvas.offsetY = this.startOffsetY + (event.clientY - this.dragStartY);
-        this.updateCanvasTransform();
+        let cursorPosition = new Vector(event.clientX, event.clientY);
+        this.offset = this.startOffset.plus(cursorPosition).minus(this.dragStart);
       }
     },
     endDrag() {
@@ -91,41 +112,29 @@ export default {
 
     handleZoom(event) {
       const delta = event.deltaY * -0.001;
-      const newZoom = Math.min(Math.max(0.5, this.zoomLevel + delta), 2);
+      const newZoom = Math.min(Math.max(0.33, this.zoomLevel + delta), 3);
 
       if (this.$refs.canvas) {
         const rect = this.$refs.canvasContainer.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+        const position = new Vector(event.clientX - rect.left, event.clientY - rect.top);
 
         const zoomFactor = newZoom / this.zoomLevel;
 
-        player.abyssResearchCanvas.offsetX -= (x - this.offsetX) * (zoomFactor - 1);
-        player.abyssResearchCanvas.offsetY -= (y - this.offsetY) * (zoomFactor - 1);
-
-        player.abyssResearchCanvas.zoomLevel = newZoom;
+        this.offset = this.offset.minus(position.minus(this.offset).times(zoomFactor - 1));
         this.zoomLevel = newZoom;
-        this.updateCanvasTransform();
       }
     },
 
     handleTabChange(newVal) {
-      player.abyssResearchCanvas.currentAbyssResearchDepth = newVal;
       this.depth = newVal;
     },
 
     relocate() {
-      player.abyssResearchCanvas.offsetX = 750;
-      player.abyssResearchCanvas.offsetY = 333;
-      player.abyssResearchCanvas.zoomLevel = 1;
-      this.updateCanvasTransform();
+      this.offset = new Vector(750, 333);
+      this.zoomLevel = 1;
     },
   },
-  watch: {
-    shownNodes() {
-      this.connections = this.getConnections;
-    },
-  },
+
   mounted() {
     this.updateCanvasTransform();
   },
@@ -149,41 +158,42 @@ export default {
         <svg class="connections-layer" width="100%" height="100%">
           <defs>
             <linearGradient id="linearGradient-rightwards" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-leftwards" x1="100%" y1="0%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-upwards" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-downwards" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
-            
+
             <linearGradient id="linearGradient-right-upwards" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-left-upwards" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-right-downwards" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
             </linearGradient>
             <linearGradient id="linearGradient-left-downwards" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color: rgba(94, 214, 255, 0); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(94, 214, 255, 1); stop-opacity: 1" />
+              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
+              <stop offset="100%" style="stop-color: rgb(94, 214, 255, 1); stop-opacity: 1" />
             </linearGradient>
           </defs>
+
           <AbyssResearchConnection
-            v-for="(connection, index) in connections"
+            v-for="(connection, index) in getConnections"
             :key="'conn-' + index"
             :data="connection"
             :id="'conn-' + index"

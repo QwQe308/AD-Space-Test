@@ -125,7 +125,7 @@ export function getReplicantiInterval(overCapOverride, intervalIn) {
     interval = interval.times(Decimal.pow(ReplicantiGrowth.scaleFactor, increases));
   }
 
-  interval = interval.divide(totalReplicantiSpeedMult(overCap));
+  interval = interval.divide(totalReplicantiSpeedMult(overCap)).div(4);
 
   if (V.isRunning) {
     // This is a boost if interval < 1, but that only happens in EC12
@@ -140,7 +140,7 @@ export function getReplicantiInterval(overCapOverride, intervalIn) {
 // and celestial nerfs) interact very weirdly and the game balance relies on this behavior, and we also use this same
 // value in the multiplier tab too
 export function totalReplicantiSpeedMult(overCap) {
-  let totalMult = DC.D4;
+  let totalMult = DC.D1;
 
   // These are the only effects active in Pelle - the function shortcuts everything else if we're in Pelle
   totalMult = totalMult.times(PelleRifts.decay.effectValue);

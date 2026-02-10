@@ -21,10 +21,9 @@ export const galaxies = {
     displayOverride: () => {
       const num = Replicanti.galaxies.total;
       let rg = Replicanti.galaxies.bought;
-      rg = rg.mul(Effects.sum(TimeStudy(132), TimeStudy(133)).add(1));
       rg = rg.add(Replicanti.galaxies.extra);
-      rg = Decimal.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value).mul(
-        Effects.sum(EternityChallenge(8).reward)
+      rg = rg.add(Decimal.min(Replicanti.galaxies.bought, ReplicantiUpgrade.galaxies.value).mul(
+        Effects.sum(EternityChallenge(8).reward))
       );
       const mult = rg.div(Decimal.clampMin(num, 1)).mul(MultiplierTabHelper.globalGalaxyMult());
       return `${formatInt(num)}, ${formatX(mult, 2, 2)} strength`;

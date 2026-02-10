@@ -6,7 +6,7 @@ import { AUTOMATOR_MODE, AUTOMATOR_TYPE } from "./automator/automator-backend";
 import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 
-import { abyssResearches, extraAbyssResearchTooltips } from "./_MOD/abyss/abyss-researches/abyssResearches";
+import { abyssResearches } from "./_MOD/abyss/abyss-researches/abyssResearches";
 
 function getGlyphTypes() {
   const v = { ...GlyphInfo };
@@ -24,6 +24,7 @@ function createAbyssResearchesData(){
       progress: DC.D0,
       unlocked: false,
       shown: false,
+      restrictionData: [],
     }
     let scalingConfig = abyssResearches[i].scaling
     if(scalingConfig && scalingConfig.type === "linear"){
@@ -42,7 +43,7 @@ window.player = {
   abyssResearchCanvas:{
     currentAbyssResearchDepth: "0",
     offsetX: 750,
-    offsetY: 300,
+    offsetY: 333,
     zoomLevel: 1,
   },
   abyssResearchDepthsUnlocked: new Set("0"),

@@ -65,7 +65,7 @@ export default {
 <template>
   <div class="l-pelle-panel-container">
     <div class="c-pelle-panel-title">
-      <i :class="collapseIcon" class="c-collapse-icon-clickable" @click="toggleCollapse" />
+      <!-- <i :class="collapseIcon" class="c-collapse-icon-clickable" @click="toggleCollapse" /> -->
       Space Researches
     </div>
     <div v-if="!isCollapsed" class="l-pelle-content-container">

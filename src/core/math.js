@@ -1288,6 +1288,10 @@ window.Vector = class Vector {
     return `translate(${this.x}, ${this.y})`;
   }
 
+  asPxTranslate() {
+    return `translate(${this.x}px, ${this.y}px)`;
+  }
+
   asRotate() {
     return `rotate(${(180 / Math.PI) * Math.atan2(this.y, this.x)})`;
   }

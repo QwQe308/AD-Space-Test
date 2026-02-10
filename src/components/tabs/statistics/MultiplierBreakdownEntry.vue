@@ -148,12 +148,12 @@ export default {
         const multFrac = log10Mult.eq(0)
           ? DC.D0
           : Decimal.log10(entry.data.mult).div(log10Mult);
-        const powFrac = totalPosPow.eq(1) ? DC.D0 : Decimal.log(entry.data.pow).div(Decimal.log(totalPosPow));
+        const powFrac = totalPosPow.eq(1) ? DC.D0 : Decimal.log(entry.data.pow, Math.E).div(Decimal.log(totalPosPow, Math.E));
 
         // Handle nerf powers differently from everything else in order to render them with the correct bar percentage
         const perc = Decimal.gte(entry.data.pow, 1)
           ? multFrac.div(totalPosPow).add(powFrac.mul(Decimal.sub(1, totalPosPow.reciprocal())))
-          : Decimal.log(entry.data.pow).div(Decimal.log(totalNegPow)).mul(totalNegPow.sub(1));
+          : Decimal.log(entry.data.pow, Math.E).div(Decimal.log(totalNegPow, Math.E)).mul(totalNegPow.sub(1));
 
         // This is clamped to a minimum of something that's still nonzero in order to show it at <0.1% instead of 0%
         percentList.push(
@@ -265,7 +265,7 @@ export default {
           // For replacing powers with equivalent multipliers, we calculate what the total additional multiplier
           // from ALL power effects taken together would be, and then we split up that additional multiplier
           // proportionally to this individual power's contribution to all positive powers
-          const powFrac = Decimal.log(entry.data.pow).div(Decimal.log(this.totalPositivePower));
+          const powFrac = Decimal.log(entry.data.pow, Math.E).div(Decimal.log(this.totalPositivePower, Math.E));
           const equivMult = this.totalMultiplier.pow((this.totalPositivePower.sub(1)).mul(powFrac));
           values.push(formatFn(entry.data.mult.times(equivMult)));
         } else {

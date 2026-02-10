@@ -23,6 +23,18 @@ export const infinities = {
     isActive: () => Achievement(87).isUnlocked,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
+  SR43: {
+    name: "Space Research - Infinite Intensifier",
+    multValue: () => SpaceResearchRifts.r43.effectValue,
+    isActive: () => SpaceResearchRifts.r43.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH("3"),
+  },
+  AR: {
+    name: "Abyss Researches (Static)",
+    multValue: () => Effects.product(AbyssResearches.A12, AbyssResearches.A18),
+    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    icon: MultiplierTabIcons.ABYSS_RESEARCH,
+  },
   amplifierInf: {
     name: "Reality Upgrade - Boundless Amplifier",
     multValue: () => DC.D1.timesEffectsOf(RealityUpgrade(5)),
