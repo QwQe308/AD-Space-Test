@@ -7,12 +7,20 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      depthUnlockStates: {},
+    };
+  },
   computed: {
-    depthsList() {
-      return abyssDepths;
+    unlockedDepthsList() {
+      return abyssDepths.filter((x) => this.depthUnlockStates[x[0]]).map((x) => x[0]);
     },
   },
   methods: {
+    update() {
+      this.depthUnlockStates = abyssDepths.map((x) => x[1]());
+    },
     changeTab(tabId) {
       if (player.abyssResearchCanvas.currentAbyssResearchDepth === tabId) return;
       this.$emit("tab-change", tabId);
@@ -27,7 +35,7 @@ export default {
 <template>
   <div class="research-tabs">
     <div
-      v-for="depthID in depthsList"
+      v-for="depthID in unlockedDepthsList"
       :key="depthID"
       class="research-tabs__item"
       :class="{ 'research-tabs__item--active': depth === depthID }"
@@ -52,10 +60,10 @@ export default {
   font-weight: 500;
   transition: all 0.3s ease;
   opacity: 0.7;
-  right: 0px
+  right: 0px;
 }
-.relocate-lable{
-  font-size: 1.5rem
+.relocate-lable {
+  font-size: 1.5rem;
 }
 .relocate-button:hover {
   background: rgba(52, 152, 219, 0.2);
@@ -95,7 +103,7 @@ export default {
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(to right, #3498db, #2ecc71);
+  background-color: #3498db;
 }
 
 @media (max-width: 768px) {

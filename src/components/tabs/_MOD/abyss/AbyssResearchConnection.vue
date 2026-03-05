@@ -73,9 +73,12 @@ export default {
     update() {
       this.isResearching = AbyssResearches[this.data[1][2]].isResearching;
       this.isActive =
-        (this.isResearching || AbyssResearches[this.data[0][2]].isResearching) &&
-        AbyssResearches[this.data[0][2]].unlocked &&
-        AbyssResearches[this.data[1][2]].unlocked;
+        (this.isResearching &&
+          AbyssResearches[this.data[0][2]].completed &&
+          AbyssResearches[this.data[1][2]].unlocked) ||
+        (AbyssResearches[this.data[0][2]].isResearching &&
+          AbyssResearches[this.data[1][2]].completed &&
+          AbyssResearches[this.data[0][2]].unlocked);
 
       if (!this.isResearching || !this.isActive) {
         this.animationPercentages = [-60, 0];

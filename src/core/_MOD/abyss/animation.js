@@ -191,7 +191,9 @@ export async function abyssAnimation() {
   SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].reset());
   eternity(true, true);
   player.eternities = new Decimal(100);
-  player.abyssResearches.A1.unlocked = true;
+  AbyssResearch.A1.unlock()
+  AbyssResearch.A2.show()
+  AbyssResearch.A3.show()
   player.abyssResearches.A1.shown = true;
   player.infinityUpgrades = new Set();
   player.replicanti.unl = false;

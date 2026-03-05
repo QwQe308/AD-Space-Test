@@ -15,7 +15,7 @@ class Influence extends GameMechanicState {
   }
 
   get info() {
-    return this.config.info
+    return this.config.info()
   }
 
   get influenceStat(){

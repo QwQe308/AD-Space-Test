@@ -27,12 +27,14 @@ class SecretAchievementState extends GameMechanicState {
   }
 
   tryUnlock(args) {
+    if (PlayerProgress.imaginaryUnlocked()) return;
     if (this.isUnlocked) return;
     if (!this.config.checkRequirement(args)) return;
     this.unlock();
   }
 
   unlock() {
+    if (PlayerProgress.imaginaryUnlocked()) return;
     if (this.isUnlocked) return;
     player.secretAchievementBits[this.row - 1] |= this._bitmask;
     GameUI.notify.success(`Secret Achievement: ${this.name}`);

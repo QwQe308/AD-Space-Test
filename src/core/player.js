@@ -6,7 +6,10 @@ import { AUTOMATOR_MODE, AUTOMATOR_TYPE } from "./automator/automator-backend";
 import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 
-import { abyssResearches } from "./_MOD/abyss/abyss-researches/abyssResearches";
+// Config data importing
+import { abyssResearches } from "./_MOD/abyss/abyss-researches/configs/abyss-research-index";
+import { RestrictionDefaultData } from "./_MOD/restrictionHandler";
+import { spaceResearches } from "./_MOD/space-researches/spaceResearches";
 
 function getGlyphTypes() {
   const v = { ...GlyphInfo };
@@ -16,19 +19,41 @@ function getGlyphTypes() {
   return v;
 }
 
-function createAbyssResearchesData(){
-  let data = {}
-  for(let i in abyssResearches){
+function createAbyssResearchesData() {
+  let data = {};
+  for (let i in abyssResearches) {
     data[i] = {
       level: DC.D0,
       progress: DC.D0,
       unlocked: false,
       shown: false,
-      restrictionData: [],
+    };
+
+    let scalingConfig = abyssResearches[i].scaling;
+    if (scalingConfig && scalingConfig.type === "linear") {
+      data[i].cost = scalingConfig.cost;
     }
-    let scalingConfig = abyssResearches[i].scaling
-    if(scalingConfig && scalingConfig.type === "linear"){
-      data[i].cost = scalingConfig.cost
+
+    if(abyssResearches[i].restrictions){
+      data[i].restrictionData = abyssResearches[i].restrictions.map((x) =>
+        x.type === "failable"
+          ? x.defaultUncompletable
+            ? RestrictionDefaultData.uncompletableFailableRestriction
+            : RestrictionDefaultData.failableRestriction
+          : RestrictionDefaultData.defaultRestriction
+      )
+    }
+  }
+  return data;
+}
+
+function createSpaceResearchesData(){
+  let data = {}
+  for(let i in spaceResearches){
+    data[i] =  {
+      progress: DC.D0,
+      pendingProgress: DC.D0,
+      active: false,
     }
   }
   return data
@@ -39,8 +64,14 @@ function createAbyssResearchesData(){
 window.player = {
   version: 103,
   //MOD
+  //empowers
+  empowers: {
+    past:{
+      frozenCurrency: null,
+    },
+  },
   //abyss
-  abyssResearchCanvas:{
+  abyssResearchCanvas: {
     currentAbyssResearchDepth: "0",
     offsetX: 750,
     offsetY: 333,
@@ -52,7 +83,7 @@ window.player = {
   abyssResearchTooltipsShown: new Set(),
   //imaginary influence
   imaginaryInfluence: [],
-  pendingMessage:[],
+  pendingMessage: [],
   //mirror
   light: {
     inMirror: false,
@@ -69,89 +100,7 @@ window.player = {
   //sc
   spaceChalls: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
   //space research
-  spaceResearches: {
-    r11: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r12: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r13: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r21: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r22: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r31: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r32: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r41: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r42: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r43: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r44: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r45: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-
-    r51: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r52: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r53: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-    r54: {
-      progress: DC.D0,
-      pendingProgress: DC.D0,
-      active: false,
-    },
-  },
+  spaceResearches: createSpaceResearchesData(),
 
   //original
   antimatter: DC.E1,
@@ -159,20 +108,20 @@ window.player = {
     antimatter: Array.range(0, 8).map(() => ({
       bought: DC.D0,
       costBumps: DC.D0,
-      amount: DC.D0
+      amount: DC.D0,
     })),
-    infinity: Array.range(0, 8).map(tier => ({
+    infinity: Array.range(0, 8).map((tier) => ({
       isUnlocked: false,
       bought: DC.D0,
       amount: DC.D0,
       cost: [DC.E7, DC.E9, DC.E12, DC.E20, DC.E140, DC.E200, DC.E250, DC.E280][tier],
-      baseAmount: DC.D0
+      baseAmount: DC.D0,
     })),
-    time: Array.range(0, 8).map(tier => ({
+    time: Array.range(0, 8).map((tier) => ({
       cost: [DC.D1, DC.D5, DC.E2, DC.E3, DC.E2350, DC.E2650, DC.E3000, DC.E3350][tier],
       amount: DC.D0,
-      bought: DC.D0
-    }))
+      bought: DC.D0,
+    })),
   },
   buyUntil10: true,
   sacrificed: DC.D0,
@@ -230,7 +179,7 @@ window.player = {
       glyph: DC.D0,
       time: 0,
       shard: DC.D0,
-      isActive: false
+      isActive: false,
     },
     eternity: {
       mode: 0,
@@ -238,7 +187,7 @@ window.player = {
       increaseWithMult: true,
       time: 1,
       xHighest: DC.D1,
-      isActive: false
+      isActive: false,
     },
     bigCrunch: {
       cost: 1,
@@ -249,7 +198,7 @@ window.player = {
       time: 1,
       xHighest: DC.D1,
       isActive: true,
-      lastTick: 0
+      lastTick: 0,
     },
     galaxy: {
       cost: 1,
@@ -259,7 +208,7 @@ window.player = {
       buyMax: false,
       buyMaxInterval: 0,
       isActive: true,
-      lastTick: 0
+      lastTick: 0,
     },
     dimBoost: {
       cost: 1,
@@ -270,7 +219,7 @@ window.player = {
       galaxies: new Decimal(10),
       buyMaxInterval: 0,
       isActive: true,
-      lastTick: 0
+      lastTick: 0,
     },
     tickspeed: {
       isUnlocked: false,
@@ -279,14 +228,14 @@ window.player = {
       mode: AUTOBUYER_MODE.BUY_SINGLE,
       isActive: true,
       lastTick: 0,
-      isBought: false
+      isBought: false,
     },
     sacrifice: {
       multiplier: DC.D2,
-      isActive: true
+      isActive: true,
     },
     antimatterDims: {
-      all: Array.range(0, 8).map(tier => ({
+      all: Array.range(0, 8).map((tier) => ({
         isUnlocked: false,
         cost: 1,
         interval: [500, 600, 700, 800, 900, 1000, 1100, 1200][tier],
@@ -294,7 +243,7 @@ window.player = {
         mode: AUTOBUYER_MODE.BUY_10,
         isActive: true,
         lastTick: 0,
-        isBought: false
+        isBought: false,
       })),
       isActive: true,
     },
@@ -363,8 +312,8 @@ window.player = {
       multiplier: new Decimal(1.05),
     },
     singularity: { isActive: false },
-    ipMultBuyer: { isActive: false, },
-    epMultBuyer: { isActive: false, },
+    ipMultBuyer: { isActive: false },
+    epMultBuyer: { isActive: false },
   },
   infinityPoints: DC.D0,
   infinities: DC.D0,
@@ -378,7 +327,7 @@ window.player = {
       uselessNewsClicks: 0,
       paperclips: 0,
       newsQueuePosition: 1000,
-      eiffelTowerChapter: 0
+      eiffelTowerChapter: 0,
     },
     totalSeen: 0,
   },
@@ -401,7 +350,7 @@ window.player = {
   shownRuns: {
     Reality: true,
     Eternity: true,
-    Infinity: true
+    Infinity: true,
   },
   requirementChecks: {
     infinity: {
@@ -430,8 +379,8 @@ window.player = {
     permanent: {
       emojiGalaxies: DC.D0,
       singleTickspeed: 0,
-      perkTreeDragging: 0
-    }
+      perkTreeDragging: 0,
+    },
   },
   records: {
     gameCreatedTime: Date.now(),
@@ -443,12 +392,18 @@ window.player = {
     fullGameCompletions: 0,
     previousRunRealTime: DC.D0,
     totalAntimatter: DC.E1,
-    recentInfinities: Array.range(0, 10).map(() =>
-      [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, ""]),
-    recentEternities: Array.range(0, 10).map(() =>
-      [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0]),
-    recentRealities: Array.range(0, 10).map(() =>
-      [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0, DC.D0]),
+    recentInfinities: Array.range(0, 10).map(() => [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, ""]),
+    recentEternities: Array.range(0, 10).map(() => [Number.MAX_VALUE, DC.BEMAX, DC.BEMAX, DC.D1, DC.D1, "", DC.D0]),
+    recentRealities: Array.range(0, 10).map(() => [
+      Number.MAX_VALUE,
+      DC.BEMAX,
+      DC.BEMAX,
+      DC.D1,
+      DC.D1,
+      "",
+      DC.D0,
+      DC.D0,
+    ]),
     thisInfinity: {
       time: DC.D0,
       realTime: DC.D0,
@@ -530,7 +485,7 @@ window.player = {
     achievementTimes: {},
     seedSelection: SPEEDRUN_SEED_STATE.FIXED,
     initialSeed: 0,
-    previousRuns: {}
+    previousRuns: {},
   },
   IPMultPurchases: DC.D0,
   infinityPower: DC.D1,
@@ -607,7 +562,7 @@ window.player = {
         replication: DC.D0,
         dilation: DC.D0,
         effarig: DC.D0,
-        reality: DC.D0
+        reality: DC.D0,
       },
       undo: [],
       sets: new Array(7).fill({
@@ -620,14 +575,20 @@ window.player = {
         trash: AUTO_GLYPH_REJECT.SACRIFICE,
         simple: 0,
         types: Object.keys(getGlyphTypes())
-          .filter(t => GlyphInfo.generatedGlyphTypes.includes(t))
-          .mapToObject(t => t, t => ({
-            rarity: new Decimal(),
-            score: 0,
-            effectCount: 0,
-            specifiedMask: [],
-            effectScores: [...Array(GlyphInfo[t].effectIDs.length).keys()].mapToObject(e => GlyphInfo[t].effectIDs[e], () => 0),
-          })),
+          .filter((t) => GlyphInfo.generatedGlyphTypes.includes(t))
+          .mapToObject(
+            (t) => t,
+            (t) => ({
+              rarity: new Decimal(),
+              score: 0,
+              effectCount: 0,
+              specifiedMask: [],
+              effectScores: [...Array(GlyphInfo[t].effectIDs.length).keys()].mapToObject(
+                (e) => GlyphInfo[t].effectIDs[e],
+                () => 0
+              ),
+            })
+          ),
       },
       createdRealityGlyph: false,
       cosmetics: {
@@ -636,14 +597,14 @@ window.player = {
         unlockedFromNG: [],
         symbolMap: {},
         colorMap: {},
-      }
+      },
     },
     initialSeed: Math.floor(Date.now() * Math.random() + 1),
     // The seed value should get set from initialSeed upon unlocking reality, but we set it to 1 as a fallback in
     // case somehow it doesn't get set properly. Do not change this to 0, as a seed of 0 causes the game to hang
     seed: 1,
     secondGaussian: 1e6,
-    musicSeed: Math.floor(Date.now() * Math.random() + 0xBCDDECCB),
+    musicSeed: Math.floor(Date.now() * Math.random() + 0xbcddeccb),
     musicSecondGaussian: 1e6,
     rebuyables: {
       1: new Decimal(),
@@ -698,8 +659,7 @@ window.player = {
         followExecution: true,
         stack: [],
       },
-      scripts: {
-      },
+      scripts: {},
       constants: {},
       constantSortOrder: [],
       execTimer: 0,
@@ -710,7 +670,7 @@ window.player = {
     achTimer: new Decimal(),
     hasCheckedFilter: false,
   },
-  blackHole: Array.range(0, 2).map(id => ({
+  blackHole: Array.range(0, 2).map((id) => ({
     id,
     intervalUpgrades: DC.D0,
     powerUpgrades: DC.D0,
@@ -734,7 +694,7 @@ window.player = {
       bestAMSet: [],
       perkShop: Array.repeat(DC.D0, 6),
       lastRepeatedMachines: DC.D0,
-      lastRepeatediM: DC.D0
+      lastRepeatediM: DC.D0,
     },
     effarig: {
       relicShards: DC.D0,
@@ -745,7 +705,7 @@ window.player = {
         ep: 25,
         repl: 25,
         dt: 25,
-        eternities: 25
+        eternities: 25,
       },
       autoAdjustGlyphWeights: false,
     },
@@ -767,7 +727,7 @@ window.player = {
       hintBits: 0,
       hintUnlockProgress: 0,
       glyphHintsGiven: 0,
-      zeroHintTime: 0
+      zeroHintTime: 0,
     },
     v: {
       unlockBits: 0,
@@ -788,42 +748,41 @@ window.player = {
           memories: DC.D0,
           memoryChunks: DC.D0,
           memoryUpgrades: 0,
-          chunkUpgrades: 0
+          chunkUpgrades: 0,
         },
         effarig: {
           level: 1,
           memories: DC.D0,
           memoryChunks: DC.D0,
           memoryUpgrades: 0,
-          chunkUpgrades: 0
+          chunkUpgrades: 0,
         },
         enslaved: {
           level: 1,
           memories: DC.D0,
           memoryChunks: DC.D0,
           memoryUpgrades: 0,
-          chunkUpgrades: 0
+          chunkUpgrades: 0,
         },
         v: {
           level: 1,
           memories: DC.D0,
           memoryChunks: DC.D0,
           memoryUpgrades: 0,
-          chunkUpgrades: 0
-        }
+          chunkUpgrades: 0,
+        },
       },
-      alchemy: Array.repeat(0, 21)
-        .map(() => ({
-          amount: DC.D0,
-          reaction: false
-        })),
+      alchemy: Array.repeat(0, 21).map(() => ({
+        amount: DC.D0,
+        reaction: false,
+      })),
       highestRefinementValue: {
         power: DC.D0,
         infinity: DC.D0,
         time: DC.D0,
         replication: DC.D0,
         dilation: DC.D0,
-        effarig: DC.D0
+        effarig: DC.D0,
       },
       quoteBits: 0,
       momentumTime: DC.D0,
@@ -832,22 +791,21 @@ window.player = {
       charged: new Set(),
       disCharge: false,
       peakGamespeed: DC.D1,
-      petWithRemembrance: ""
+      petWithRemembrance: "",
     },
     laitela: {
       darkMatter: DC.D0,
       maxDarkMatter: DC.D0,
       run: false,
       quoteBits: 0,
-      dimensions: Array.range(0, 4).map(() =>
-        ({
-          amount: DC.D0,
-          intervalUpgrades: DC.D0,
-          powerDMUpgrades: DC.D0,
-          powerDEUpgrades: DC.D0,
-          realDiff: DC.D0,
-          ascensionCount: DC.D0
-        })),
+      dimensions: Array.range(0, 4).map(() => ({
+        amount: DC.D0,
+        intervalUpgrades: DC.D0,
+        powerDMUpgrades: DC.D0,
+        powerDEUpgrades: DC.D0,
+        realDiff: DC.D0,
+        ascensionCount: DC.D0,
+      })),
       entropy: DC.D0,
       thisCompletion: new Decimal(3600),
       fastestCompletion: new Decimal(3600),
@@ -892,29 +850,29 @@ window.player = {
         vacuum: {
           fill: DC.D0,
           active: false,
-          reducedTo: 1
+          reducedTo: 1,
         },
         decay: {
           fill: DC.D0,
           active: false,
           percentageSpent: 0,
-          reducedTo: 1
+          reducedTo: 1,
         },
         chaos: {
           fill: 0,
           active: false,
-          reducedTo: 1
+          reducedTo: 1,
         },
         recursion: {
           fill: DC.D0,
           active: false,
-          reducedTo: 1
+          reducedTo: 1,
         },
         paradox: {
           fill: DC.D0,
           active: false,
-          reducedTo: 1
-        }
+          reducedTo: 1,
+        },
       },
       progressBits: 0,
       galaxyGenerator: {
@@ -922,16 +880,16 @@ window.player = {
         spentGalaxies: DC.D0,
         generatedGalaxies: DC.D0,
         phase: 0,
-        sacrificeActive: false
+        sacrificeActive: false,
       },
       quoteBits: 0,
       collapsed: {
         upgrades: false,
         rifts: false,
-        galaxies: false
+        galaxies: false,
       },
       showBought: false,
-    }
+    },
   },
   isGameEnd: false,
   tabNotifications: new Set(),
@@ -939,8 +897,8 @@ window.player = {
   tutorialState: 0,
   tutorialActive: true,
   options: {
-    testServer: false,//***
-    breakPlaceHolder: false,//***
+    testServer: false, //***
+    breakPlaceHolder: false, //***
     news: {
       enabled: true,
       repeatBuffer: 40,
@@ -952,7 +910,7 @@ window.player = {
     lnotation: "Stacked Scientific",
     notationDigits: {
       comma: 5,
-      notation: 9
+      notation: 9,
     },
     sidebarResourceID: 0,
     retryChallenge: false,
@@ -1018,7 +976,7 @@ window.player = {
       reality: true,
       background: true,
       blobSnowflakes: 16,
-      blobHole: false
+      blobHole: false,
     },
     confirmations: {
       armageddon: true,
@@ -1041,7 +999,7 @@ window.player = {
       antimatterGalaxy: true,
       dimensionBoost: true,
       switchAutomatorMode: true,
-      respecIAP: true
+      respecIAP: true,
     },
     awayProgress: {
       antimatter: true,
@@ -1067,7 +1025,7 @@ window.player = {
       singularities: true,
       celestialMemories: true,
       blackHole: true,
-      realityShards: true
+      realityShards: true,
     },
     hiddenTabBits: 0,
     hiddenSubtabBits: Array.repeat(0, 11),
@@ -1089,7 +1047,7 @@ window.player = {
     enabled: false,
     checkoutSession: {
       id: false,
-    }
+    },
   },
 };
 
@@ -1145,7 +1103,7 @@ export const Player = {
 
   get tickSpeedMultDecrease() {
     return GameCache.tickSpeedMultDecrease.value;
-  },//test
+  }, //test
 
   get dimensionMultDecrease() {
     return GameCache.dimensionMultDecrease.value;
@@ -1162,13 +1120,16 @@ export const Player = {
   },
 
   get eternityGoal() {
-    return EternityChallenge.isRunning
-      ? EternityChallenge.current.currentGoal
-      : requiredIPForEP(1);
+    return EternityChallenge.isRunning ? EternityChallenge.current.currentGoal : requiredIPForEP(1);
   },
 
   get automatorUnlocked() {
-    return AutomatorPoints.totalPoints >= AutomatorPoints.pointsForAutomator || player.reality.automator.forceUnlock || isSCRunningOnTier(6, 1) || isSCTierCompleted(6, 1);
+    return (
+      AutomatorPoints.totalPoints >= AutomatorPoints.pointsForAutomator ||
+      player.reality.automator.forceUnlock ||
+      isSCRunningOnTier(6, 1) ||
+      isSCTierCompleted(6, 1)
+    );
   },
 
   resetRequirements(key) {
@@ -1212,7 +1173,7 @@ export const Player = {
       default:
         throw Error("Unrecognized prestige layer for requirement reset");
     }
-  }
+  },
 };
 
 export function guardFromNaNValues(obj) {
@@ -1248,7 +1209,7 @@ export function guardFromNaNValues(obj) {
             throw new Error("NaN player property assignment");
           }
           value = newValue;
-        }
+        },
       });
     }
 
@@ -1269,7 +1230,7 @@ export function guardFromNaNValues(obj) {
             throw new Error("NaN player property assignment");
           }
           value = newValue;
-        }
+        },
       });
     }
   }

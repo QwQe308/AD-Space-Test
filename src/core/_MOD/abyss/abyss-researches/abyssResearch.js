@@ -1,12 +1,13 @@
 import { DC } from "../../../constants";
 import { GameMechanicState } from "../../../utils";
-import { abyssDepths, globalAbyssResearchSpeed } from "./abyssResearches";
+import { abyssDepths, globalAbyssResearchSpeed } from "./abyssResearchSpawner";
 import { AbyssFailableRestriction, AbyssRestriction } from "./abyssRestrictionsHandler";
 
 //currently only allows linear
 class AbyssResearchClass extends GameMechanicState {
   constructor(config) {
     super(config);
+
     this.depth = config.depth;
     this.type = config.type;
     this.x = config.position[0] * 150 + 5000;
@@ -18,9 +19,21 @@ class AbyssResearchClass extends GameMechanicState {
     this.target = config.target;
     if (!config.cost && !config.costs && this.type !== "sink") this.scalingType = config.scaling.type;
 
-    this.restrictions = config.restrictions.map((x, index) =>
-      x.type === "failable" ? new AbyssFailableRestriction(x, this.id, index) : new AbyssRestriction(x, this.id, index)
-    );
+    if (config.restrictions) {
+      try {
+        this.config.restrictions = config.restrictions.map((x, index) =>
+          x.type === "failable"
+            ? new AbyssFailableRestriction(x, this.id, index)
+            : new AbyssRestriction(x, this.id, index)
+        );
+      } catch (err) {
+        console.error(`*Error found in assigning restriction to Abyss Research ${this.id} |`, err);
+      }
+    }
+  }
+
+  get ignoredOnUnlocking() {
+    return (this.type === "core" && this.completed) || this.type === "sink";
   }
 
   get data() {
@@ -35,9 +48,9 @@ class AbyssResearchClass extends GameMechanicState {
     return this.data.level;
   }
 
-  set level(data) {
-    if (this.config.onLevelUp && this.level.lt(data)) this.config.onLevelUp(this.level, data);
-    this.data.level = data;
+  set level(newLevel) {
+    if (this.config.onLevelUp && this.level.lt(newLevel)) this.config.onLevelUp(this.level, newLevel);
+    this.data.level = newLevel;
   }
 
   get maxLevel() {
@@ -90,10 +103,15 @@ class AbyssResearchClass extends GameMechanicState {
     return player.activeAbyssResearches.size < this.maxConcurrent && this.unlocked && this.level.lt(this.maxLevel);
   }
 
+  get permanent() {
+    return this.config.permanent
+  }
+
   get maxConcurrent() {
     //maxiumn concurrent researches
     let maxConcurrent = 1;
     if (AbyssResearches.A6.isEffectActive) maxConcurrent++;
+    if (AbyssResearches.A6B.isEffectActive) maxConcurrent++;
     return maxConcurrent;
   }
 
@@ -102,11 +120,11 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get researchSpeed() {
-    return globalAbyssResearchSpeed().div(this.restrictionNerf);
+    return globalAbyssResearchSpeed().div(this.totalRestrictionNerf);
   }
 
   get linkedAbyssResearchCore() {
-    return AbyssResearchHelper.cores[this.depth];
+    return AbyssResearchHelperTools.automationCores[this.depth];
   }
 
   get isAutoResearching() {
@@ -134,8 +152,9 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get totalRestrictionNerf() {
+    if (!this.hasRestriction) return DC.D1;
     return this.restrictions
-      .map((x) => (x.completed ? DC.D1 : x.restrictionNerf))
+      .map((x) => (x.completed ? DC.D1 : x.nerf))
       .reduce((a, b) => Decimal.mul(a, b), DC.D1);
   }
 
@@ -177,10 +196,10 @@ class AbyssResearchClass extends GameMechanicState {
           }
           break;
         }
-        this.handleScalingLevelCalculations();
+        if (!this.handleScalingLevelCalculations()) return;
         break;
       case "unlimited":
-        this.handleScalingLevelCalculations();
+        if (!this.handleScalingLevelCalculations()) return;
         break;
     }
     if (this.level.gte(this.maxLevel)) this.stop();
@@ -190,13 +209,14 @@ class AbyssResearchClass extends GameMechanicState {
   handleScalingLevelCalculations() {
     switch (this.scalingType) {
       case "linear":
-        if (this.scaling.purchases.lt(1)) return;
-        this.level = this.level.add(this.scaling.purchases);
+        if (this.scaling.purchases.lt(1)) return false;
+        this.level = this.level.add(this.scaling.purchases).min(this.maxLevel);
         this.cost = this.scaling.nextCost;
         player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); //to avoid unwanted update
 
         break;
     }
+    return true;
   }
 
   updateCompletion() {
@@ -204,39 +224,46 @@ class AbyssResearchClass extends GameMechanicState {
       player.abyssResearchTooltipsShown.add(tag);
     }
 
-    // This shows nearby nodes, 3 layers away at maxiumn, and unlocks nodes next to it.
-    let callback = (layer) => {
-      for (let node of [...this.next, ...this.prev]) {
+    // This shows nearby nodes, 2 layers away at maxiumn, and unlocks nodes next to it.
+    let recorder = [];
+    let callback = (start, layer) => {
+      for (let node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+        if (recorder.includes(node)) continue;
+        recorder.push(node);
         if (layer === 1) AbyssResearches[node].unlock();
-        else AbyssResearches[node].shown = true;
-        if (layer < 3) callback(layer + 1);
+        else AbyssResearches[node].show();
+        if (layer < 2) callback(node, layer + (AbyssResearches[node].ignoredOnUnlocking ? 0 : 1));
       }
     };
 
-    callback(1);
+    callback(this.id, 1);
   }
 
   unlock() {
     player.abyssResearches[this.id].unlocked = true;
     player.abyssResearches[this.id].shown = true;
-    if ((this.type === "core" && this.level.gte(1)) || this.type === "sink") {
-      for (let next of this.next) AbyssResearches[next].unlock();
-    }
+  }
+
+  show() {
+    player.abyssResearches[this.id].shown = true;
   }
 
   updateCompletionWithCondition() {
     if (this.level.gte(1)) return this.updateCompletion();
     if (!player.abyssResearches[this.id].unlocked) return;
 
-    // This shows nearby nodes, 2 layers away at maxiumn.
-    let callback = (layer) => {
-      for (let node of [...this.next, ...this.prev]) {
-        AbyssResearches[node].shown = true;
-        if (layer < 2) callback(layer + 1);
+    // This shows nearby nodes, 1 layers away at maxiumn.
+    let recorder = [];
+    let callback = (start, layer) => {
+      for (let node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+        if (recorder.includes(node)) continue;
+        recorder.push(node);
+        AbyssResearches[node].show();
+        if (layer < 1) callback(node, layer + (AbyssResearches[node].ignoredOnUnlocking ? 0 : 1));
       }
     };
 
-    callback(1);
+    callback(this.id, 1);
   }
 
   start() {
@@ -288,15 +315,15 @@ class AbyssResearchHelper {
     return this.data.sortByDepth;
   }
 
-  get cores() {
-    return this.data.cores;
+  get automationCores() {
+    return this.data.automationCores;
   }
 
   initializeHelperData() {
     // Sort by depth
     let abyssResearchesSortByDepth = {};
     for (let i of abyssDepths) {
-      abyssResearchesSortByDepth[i] = {};
+      abyssResearchesSortByDepth[i[0]] = {};
     }
     for (let i in AbyssResearches) {
       if (i === "all") continue;
@@ -304,14 +331,14 @@ class AbyssResearchHelper {
     }
     this.data.sortByDepth = abyssResearchesSortByDepth;
 
-    // Abyss Research Cores
+    // Abyss Research Cores related to automation
     let abyssResearchCores = {};
     for (let index in AbyssResearches) {
       let research = AbyssResearches[index];
-      if (research.type !== "core") continue;
+      if (research.type !== "core" && !research.automation) continue;
       abyssResearchCores[research.depth] = research;
     }
-    this.data.cores = abyssResearchCores;
+    this.data.automationCores = abyssResearchCores;
   }
 
   update(diff) {
@@ -325,10 +352,11 @@ class AbyssResearchHelper {
 
     for (let index in this.cores) {
       const Core = this.cores[index];
-      if (!Core.completed) continue;
+      if (!Core || !Core.completed) continue;
       const Depth = Core.depth;
       const Efficiency = Core.effectValue;
       for (let research in this.sortByDepth[Depth]) {
+        if (AbyssResearches[research].maxed) continue;
         AbyssResearches[research].addProgress(
           AbyssResearches[research].researchSpeed.mul(Efficiency).mul(diff).div(1000)
         );

@@ -1,12 +1,13 @@
-import { quickSpawnResearches } from "../abyssResearches";
+import { NODE_TYPE, quickSpawnResearches } from "../abyssResearchSpawner";
 import { DC } from "../../../../constants";
-import { Currency } from "../../../../currency";
+
+// Yes, layer 0 serves as a toturial.
 
 let baseConfig = {
   //row 0
   A1: {
     position: [0, -2],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(10),
@@ -14,19 +15,19 @@ let baseConfig = {
     },
     description(level) {
       return `Antimatter x2 per level<br>
-      (×${format(this.effectValue(level))} → ×${format(this.effectValue(level.add(1)))})`;
+      (×${format(this.effectValue(level), 2)} → ×${format(this.effectValue(level.add(1)))})`;
     },
     effectValue(level) {
       return level.pow_base(2);
     },
-    tooltipTags: ["Tips", "Shapes"],
+    tooltipTags: ["Tips"],
     next: ["A2", "A3"],
   },
 
   //row 1
   A2: {
     position: [-1, -1],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(20),
     description(level) {
       return `+ 6 free Tickspeed Upgrades`;
@@ -34,11 +35,12 @@ let baseConfig = {
     effectValue(level) {
       return new Decimal(6);
     },
+    tooltipTags: ["Shapes"],
     next: ["A4", "A5", "A6"],
   },
   A3: {
     position: [1, -1],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(20),
     description(level) {
       return `×3 Research Speed (RS)`;
@@ -46,14 +48,14 @@ let baseConfig = {
     effectValue(level) {
       return new Decimal(3);
     },
-    tooltipTags: ["ARS"],
+    tooltipTags: ["ARS", "Shapes"],
     next: ["A6", "A7", "A8"],
   },
 
   //row 2
   A4: {
     position: [-2, 0],
-    type: "limited",
+    type: NODE_TYPE.LIMITED,
     maxLevel: new Decimal(3),
     scaling: {
       type: "linear",
@@ -62,8 +64,9 @@ let baseConfig = {
     },
     description(level) {
       if (this.maxLevel.eq(level)) return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))})`;
-      return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level))} → /${format(
-        this.effectValue(level.add(1))
+      return `/10 Antimatter Dimensions' cost<br>(/${format(this.effectValue(level), 2)} → /${format(
+        this.effectValue(level.add(1)),
+        2
       )})`;
     },
     effectValue(level) {
@@ -73,7 +76,7 @@ let baseConfig = {
   },
   A5: {
     position: [-1, 0],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(50),
     description(level) {
       return `Abyss Research Speed is 1% faster per Tickspeed Upgrade (additive, up to ×4, locked to max if infinitied once)
@@ -95,7 +98,8 @@ let baseConfig = {
       },
     ],
     effectValue(level) {
-      if (player.infinities.gt(0)) return new Decimal(4);
+      if (player.infinities.gt(0) || player.eternities.gt(100) || (player.realities.gt(0) && player.eternities.gt(0)))
+        return new Decimal(4);
       return Tickspeed.totalUpgrades.mul(0.01).add(1).min(4);
     },
     tooltipTags: ["Restrictions"],
@@ -104,7 +108,7 @@ let baseConfig = {
 
   A6: {
     position: [0, 0],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(75),
     description(level) {
       return `+ 1 max concurrent Abyss Researches`;
@@ -117,7 +121,7 @@ let baseConfig = {
 
   A7: {
     position: [1, 0],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(50),
     description(level) {
       return `Start with 1e30 AM (pre-space nerf)`;
@@ -154,7 +158,7 @@ let baseConfig = {
   },
   A8: {
     position: [2, 0],
-    type: "limited",
+    type: NODE_TYPE.LIMITED,
     maxLevel: new Decimal(3),
     scaling: {
       type: "linear",
@@ -176,7 +180,7 @@ let baseConfig = {
   //row 4
   A9: {
     position: [-1, 1],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(100),
@@ -196,7 +200,7 @@ let baseConfig = {
   },
   A10: {
     position: [1, 1],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(100),
@@ -217,7 +221,7 @@ let baseConfig = {
   //row 5
   A11: {
     position: [0, 2],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(100),
@@ -237,7 +241,7 @@ let baseConfig = {
   //row 6
   A12: {
     position: [-1, 3],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(500),
     description(level) {
       return `Triples your Infinities (IS) gain`;
@@ -263,7 +267,7 @@ let baseConfig = {
   },
   A13: {
     position: [0, 3],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(750),
     description(level) {
       return `Instant: [Complete all NC and multply IP by 2]`;
@@ -290,7 +294,7 @@ let baseConfig = {
   },
   A14: {
     position: [1, 3],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(500),
     description(level) {
       return `Double your IP gain`;
@@ -318,7 +322,7 @@ let baseConfig = {
   //row 7
   A15: {
     position: [-1, 4],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(5000),
     description(level) {
       return `Instant: [Multplies Infinities by 5]`;
@@ -331,7 +335,7 @@ let baseConfig = {
   },
   A16: {
     position: [0, 4],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(5000),
     description(level) {
       return `Galaxies won't reset Dimensional Boosts`;
@@ -346,7 +350,8 @@ let baseConfig = {
           return DC.D3;
         },
         requirement() {
-          let a = DimBoost.totalBoosts, b = player.galaxies;
+          let a = DimBoost.totalBoosts,
+            b = player.galaxies;
           if (a.eq(0) || b.eq(0)) return false;
           function gcd(a, b) {
             if (b === 0) {
@@ -362,7 +367,7 @@ let baseConfig = {
   },
   A17: {
     position: [1, 4],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(5000),
     description(level) {
       return `Continuum + 1%`;
@@ -376,7 +381,7 @@ let baseConfig = {
   //row 8
   A18: {
     position: [-1, 5],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(7500),
@@ -392,7 +397,7 @@ let baseConfig = {
   },
   A19: {
     position: [0, 5],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(15000),
@@ -412,7 +417,7 @@ let baseConfig = {
   },
   A20: {
     position: [1, 5],
-    type: "unlimited",
+    type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(7500),
@@ -432,11 +437,10 @@ let baseConfig = {
   //row 9
   A21: {
     position: [0, 6],
-    type: "single",
+    type: NODE_TYPE.SINGLE,
     cost: new Decimal(1e4),
-    permanent: true,
     description(level) {
-      return `Infinities will only reset half your Replicanti Galaxies, and keeps your Replicanti.`;
+      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.`;
     },
     next: ["C0"],
   },
@@ -444,19 +448,34 @@ let baseConfig = {
   //row 10 *Core*
   C0: {
     position: [0, 7],
-    type: "core",
-    cost: new Decimal(1.5e5),
+    type: NODE_TYPE.CORE,
+    cost: new Decimal(4e5),
     description(level) {
-      return `Auto Researches Depth 0 Abyss Researches at ${formatPercents(this.effectValue())} rate`;
+      return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },
     effectValue(level) {
-      return 0.2;
+      return 0;
+    },
+    onLevelUp() {
+      player.abyssResearchCanvas.currentAbyssResearchDepth = "1";
+      for (let i of ["A21B", "A7B", "A6B", "A16B"]) {
+        AbyssResearches[i].progress = new Decimal(1e5);
+        AbyssResearches[i].unlock();
+      }
+      AbyssResearches.B0.unlock();
+      AbyssResearchHelperTools.updateStatus();
+      for (let i = 1; i <= 21; i++) {
+        player.activeAbyssResearches = new Set();
+        player.abyssResearches["A" + i].unlocked = false;
+        player.abyssResearches["A" + i].shown = false;
+        AbyssResearches["A" + i].reset();
+      }
     },
     restrictions: [
       {
         type: "failable",
         description() {
-          return `In Mirror in this whole eternity<br>(! You may need to pre-enter Mirror before eternity)`;
+          return `In Mirror in whole this eternity<br>(! You may want to enter Mirror before reset)`;
         },
         completable() {
           return player.light.inMirror;
@@ -465,10 +484,10 @@ let baseConfig = {
       },
       {
         description() {
-          return `Apply 200% RGB percentages or higher`;
+          return `Apply 300% RGB percentages or higher`;
         },
         requirement() {
-          return getPendingPrisms() >= 200;
+          return getPendingPrisms() >= 300;
         },
       },
       {
@@ -479,21 +498,17 @@ let baseConfig = {
           return canBreakMirror();
         },
       },
+      {
+        description() {
+          return `Reach 30 Time Theorms`;
+        },
+        requirement() {
+          return player.timestudy.maxTheorem.gte(30);
+        },
+      },
     ],
-    next: ["S0-1"],
-    tooltipTags: ["Core", "Depth"],
-  },
-
-  //row 11 *Sink*
-  "S0-1": {
-    position: [0, 8],
-    type: "sink",
-    description(level) {
-      return `Sink to Depth 1`;
-    },
-    effectValue(level) {},
-    target: "1",
-    tooltipTags: ["Sink", "Depth"],
+    next: [],
+    tooltipTags: ["Core", "Depth", "Restrictions Reminder"],
   },
 };
 

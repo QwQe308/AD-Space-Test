@@ -1,10 +1,13 @@
-import { AbyssResearchesDepth0 } from "./configs/abyss-research-depth-0";
+import { DEV } from "../../../../env";
 
-export const abyssDepths = ["0"];
+export const abyssDepths = [
+  ["0", () => !AbyssResearches["C0"].completed],
+  ["1", () => AbyssResearches["C0"].completed],
+];
 
 export function quickSpawnResearches(config, layer) {
   //safety checker
-  abyssResearchSafetyChecker(config, layer);
+  if (DEV) abyssResearchSafetyChecker(config, layer);
 
   for (let i in config) {
     config[i].id = i;
@@ -38,21 +41,7 @@ export function abyssResearchSafetyChecker(config, layer) {
       error = true;
     }
     positions.push(config[i].position);
-    //restriction checker
-    let restrictionChecker = 0;
-    for (let item of ["restrictionInfo", "restrictionNerf", "checkRestriction"]) {
-      if (config[i][item]) {
-        restrictionChecker++;
-      }
-    }
-    if (restrictionChecker > 0 && restrictionChecker < 3) {
-      for (let item of ["restrictionInfo", "restrictionNerf", "checkRestriction"]) {
-        if (!config[i][item]) {
-          console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No ${item} defined)`);
-          error = true;
-        }
-      }
-    }
+    //restriction checker (disabled as currently restriction class will check it automatically)
     //type checker
     if (config[i].type === "single") {
       if (!config[i].cost) {
@@ -73,12 +62,8 @@ export function abyssResearchSafetyChecker(config, layer) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No scaling defined)`);
         error = true;
       }
-    } else if (config[i].type === "core"){
-      if(!config[i].coreRestrictions){
-        console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No coreRestrictions defined)`);
-        error = true;
-      }
-      if(!config[i].cost){
+    } else if (config[i].type === "core") {
+      if (!config[i].cost) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
         error = true;
       }
@@ -96,8 +81,6 @@ export function abyssResearchSafetyChecker(config, layer) {
   if (error) debugger;
 }
 
-export const abyssResearches = { ...AbyssResearchesDepth0 };
-
 export function globalAbyssResearchSpeed() {
   let abyssResearchSpeed = player.records.thisReality.maxSpace.pow(0.5).div(10);
   abyssResearchSpeed = abyssResearchSpeed.timesEffectsOf(AbyssResearches.A5, AbyssResearches.A9);
@@ -111,21 +94,39 @@ export const extraAbyssResearchTooltips = {
 
   ARS: `* Note that Abyss Research uses an independent value called Abyss Research Speed (ARS), differed from Research Speed (RS).`,
 
-  Restrictions: `* If restrictions are not met, your ARS will receive a penalty.
-  Penalty is shown below ARS, <span style="color:lime">green</span> if reached restriction, <span style="color:red">red</span> if not.
-  You must *keep* restriction met to avoid ARS losses.
-  If not mentioned, the restriction only need to be completed "now" instead of in entire "eternity" or other periods.`,
+  Restrictions: `* If restrictions are not met, your ARS will face a penalty.<br><br>
+  Penalty is shown after each restriction,
+  <span style="color:lime">green</span> if reached restriction,
+  <span style="color:red">red</span> if not.<br><br>
+  You may want to *keep* restriction met to avoid ARS losses.<br><br>
+  If not mentioned, restrictions only need to be completed "now" instead of in entire "eternity" or other certain periods.`,
+
+  "Restrictions Reminder": `* Here's the reminder:<br>
+  If not mentioned, restrictions only need to be completed "now" instead of in entire "eternity" or other certain periods.<br>
+  This is the last reminder.`,
 
   "Instant Effect": `* Some Abyss Researches have Instant Effects on them. Be wisely, these effects only apply on current values once,
   and do not provide permanent multpliers.`,
 
   Core: `* Core Nodes requires you to complete various strict requirements at the same time. Once you accomplished them,
-  you can simply research it and instantly claim *Permanent* boosts; Either, you can get the node by researching for a long time.
-  These will never be reseted.`,
+  you can simply research it and complete instantly; Either, you can complete it by researching for a long time.
+  Cores will never be reseted.`,
 
   Depth: `* Depths are similar to "pages" Abyss Researches are at. You could find unlocked depths in the left-upper corner,
   and also quick switch depths here.`,
 
-  Sink: `* Sink nodes allows you to go deeper into the abyss. Once the node is used, the new depth will be permanently shown.
-  However, if the node is locked, you will unable to research the nearby nodes linked to it.`,
+  Link: `* Link nodes can serve as a "portal", connecting to another node, and do researches in the other side.
+  If it connects to a new depth, it will be permanently shown in the left upper corner, and allows you to quick switch by clicking.`,
 };
+
+export const NODE_TYPE = {
+  SINGLE: "single",
+  LIMITED: "limited",
+  UNLIMITED: "unlimited",
+  CORE: "core",
+  LINK: "link",
+}
+
+export const SCALING_TYPE = {
+  LINEAR: "linear",
+}

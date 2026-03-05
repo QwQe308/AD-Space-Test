@@ -43,7 +43,7 @@ export default {
 <template>
   <div class="mirror-tab">
     <div style="color:#aaaaaa">
-      Reach target AM in Mirror to gain Prism based on your total color percentage. Effects will be reversed in
+      Reach target AM in Mirror to gain Prism based on your total color percentage. Prism effects will be reversed in
       mirror.<br />
       Target AM is based on your highest color percentage.
     </div>

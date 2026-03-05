@@ -1,5 +1,6 @@
 <script>
 //This is a rewritten version of that code. Thats too junky.
+import { AbyssResearchHelperTools } from "../../../../core/globals";
 import AbyssResearchConnection from "./AbyssResearchConnection.vue";
 import AbyssResearchNode from "./AbyssResearchNode.vue";
 import AbyssResearchPageSelector from "./AbyssResearchPageSelector.vue";
@@ -86,6 +87,7 @@ export default {
     update() {
       this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
+      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth
     },
 
     updateCanvasTransform() {
@@ -218,7 +220,7 @@ export default {
   position: absolute;
   top: -5000px;
   left: -5000px;
-  width: 10000px; /* 确保画布足够大 */
+  width: 10000px;
   height: 10000px;
   cursor: grab;
 }
@@ -232,6 +234,6 @@ export default {
   position: relative;
   overflow: hidden;
   min-height: 300px;
-  overflow: hidden; /* 改为 auto 允许滚动 */
+  overflow: hidden;
 }
 </style>

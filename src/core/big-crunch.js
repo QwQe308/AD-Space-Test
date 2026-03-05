@@ -150,7 +150,7 @@ export function bigCrunchResetValues(enteringAntimatterChallenge) {
     remainingGalaxies = remainingGalaxies.add(Decimal.min(currentReplicantiGalaxies, 1));
   }
 
-  if(AbyssResearches.A21.completed){
+  if(AbyssResearches.A21B.completed || AbyssResearches.A21.completed){
     Replicanti.amount = currentReplicanti;
     remainingGalaxies = remainingGalaxies.add(Decimal.ceil(currentReplicantiGalaxies.div(2)));
   }

@@ -1,6 +1,6 @@
 <script>
 export default {
-  name: "influence",
+  name: "Influence",
   props: {
     id: {
       type: String,
@@ -40,11 +40,11 @@ export default {
   height: 30px;
   width: 85%;
   margin: auto;
-  color: var(--color-imaginary);
   display: flex;
   margin-bottom: 10px;
 }
 .name{
+  color: var(--color-imaginary);
   text-align: left;
   margin-left: 30px;
   font-size: 20px;

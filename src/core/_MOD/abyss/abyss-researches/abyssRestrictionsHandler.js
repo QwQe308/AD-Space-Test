@@ -1,35 +1,40 @@
+import { DC } from "../../../constants.js";
 import { FailableRestriction, Restriction } from "../../restrictionHandler.js";
 
 export class AbyssRestriction extends Restriction{
   constructor(config, nodeId, index){
-    super(config);
+    config.nodeId = nodeId
+    config.index = index
 
-    this.nodeId = nodeId
-    this.index = index
+    if(!config.nerf) config.nerf = () => DC.D1
+
+    super(config);
   }
 
   get data(){
-    return player.abyssResearches[this.nodeId].restrictionData[this.index]
+    return player.abyssResearches[this.config.nodeId].restrictionData[this.config.index]
   }
 
-  get restrictionNerf(){
-    return this.config.restrictionNerf()
+  get nerf(){
+    return this.config.nerf()
   }
 }
 
 export class AbyssFailableRestriction extends FailableRestriction{
   constructor(config, nodeId, index){
-    super(config);
+    config.nodeId = nodeId
+    config.index = index
 
-    this.nodeId = nodeId
-    this.index = index
+    if(!config.nerf) config.nerf = () => DC.D1
+
+    super(config);
   }
 
   get data(){
-    return player.abyssResearches[this.nodeId].restrictionData[this.index]
+    return player.abyssResearches[this.config.nodeId].restrictionData[this.config.index]
   }
 
-  get restrictionNerf(){
-    return this.config.restrictionNerf()
+  get nerf(){
+    return this.config.nerf()
   }
 }

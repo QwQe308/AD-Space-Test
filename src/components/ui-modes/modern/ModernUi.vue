@@ -65,7 +65,7 @@ export default {
             break;
         }
         let researchSpeed = AbyssResearches[id].researchSpeed;
-        let timeToNext = researchSpeed
+        let timeToNext = researchSpeed.gt(0)
           ? TimeSpan.fromSeconds(
               AbyssResearches[id].cost.sub(AbyssResearches[id].progress).div(researchSpeed).toNumber()
             ).toSimplifiedTimeEstimate()

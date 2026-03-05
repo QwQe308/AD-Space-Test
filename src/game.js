@@ -154,7 +154,8 @@ function totalEPMult() {
     TimeStudy(123),
     RealityUpgrade(12),
     GlyphEffect.epMult,
-    SpaceResearchRifts.r51
+    SpaceResearchRifts.r51,
+    AbyssResearches.B0
   );
   return epMult;
 }

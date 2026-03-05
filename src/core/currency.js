@@ -1,3 +1,4 @@
+import { PastEmpower } from "./_MOD/empowers/pastEmpower";
 import { DC } from "./constants";
 
 
@@ -121,19 +122,19 @@ export class Currency {
   get operations() { throw new NotImplementedError(); }
 
   add(amount) {
-    this.value = this.operations.add(this.value, amount);
+    if(!this.frozen) this.value = this.operations.add(this.value, amount);
   }
 
   subtract(amount) {
-    this.value = this.operations.max(this.operations.subtract(this.value, amount), 0);
+    if(!this.frozen) this.value = this.operations.max(this.operations.subtract(this.value, amount), 0);
   }
 
   multiply(amount) {
-    this.value = this.operations.multiply(this.value, amount);
+    if(!this.frozen) this.value = this.operations.multiply(this.value, amount);
   }
 
   divide(amount) {
-    this.value = this.operations.divide(this.value, amount);
+    if(!this.frozen) this.value = this.operations.divide(this.value, amount);
   }
 
   eq(amount) {
@@ -163,18 +164,20 @@ export class Currency {
   }
 
   bumpTo(value) {
-    this.value = this.operations.max(this.value, value);
+    if(!this.frozen) this.value = this.operations.max(this.value, value);
   }
 
   dropTo(value) {
-    this.value = this.operations.min(this.value, value);
+    if(!this.frozen) this.value = this.operations.min(this.value, value);
   }
 
   get startingValue() { throw new NotImplementedError(); }
 
   reset() {
-    this.value = this.startingValue;
+    if(!this.frozen) this.value = this.startingValue;
   }
+
+  get frozen() {return false}
 }
 
 /**
@@ -209,6 +212,9 @@ Currency.antimatter = new class extends DecimalCurrency {
       TabNotification.newAutobuyer.clearTrigger();
       TabNotification.newAutobuyer.tryTrigger();
     }
+
+    if(this.frozen) return
+
     player.antimatter = value;
     player.records.thisInfinity.maxAM = player.records.thisInfinity.maxAM.max(value);
     player.records.thisEternity.maxAM = player.records.thisEternity.maxAM.max(value);
@@ -220,6 +226,8 @@ Currency.antimatter = new class extends DecimalCurrency {
   }
 
   add(amount) {
+    if(this.frozen) return
+
     super.add(amount);
     if (amount.gt(0)) {
       player.records.totalAntimatter = player.records.totalAntimatter.add(amount);
@@ -228,6 +236,7 @@ Currency.antimatter = new class extends DecimalCurrency {
   }
 
   get productionPerSecond() {
+    if(this.frozen) return new Decimal()
     return new Decimal(player.amProc);
   }
 
@@ -241,36 +250,69 @@ Currency.antimatter = new class extends DecimalCurrency {
       Achievement(54),
       Achievement(55),
       Achievement(78),
-      AbyssResearches.A7
+      AbyssResearches.A7,
+      AbyssResearches.A7B
     );
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "antimatter"
   }
 }();
 
 Currency.matter = new class extends DecimalCurrency {
   get value() { return player.matter; }
   set value(value) {
+    if(this.frozen) return
     player.matter = Decimal.min(value, DC.BEMAX);
+  }
+  
+  get frozen() {
+    return PastEmpower.freezing === "matter"
   }
 }();
 
 Currency.infinities = new class extends DecimalCurrency {
   get value() { return player.infinities; }
-  set value(value) { player.infinities = value; }
+  set value(value) { 
+    if(this.frozen) return
+    player.infinities = value; 
+  }
+  
+  get frozen() {
+    return PastEmpower.freezing === "infinities"
+  }
 }();
 
 Currency.infinitiesBanked = new class extends DecimalCurrency {
   get value() { return player.infinitiesBanked; }
-  set value(value) { player.infinitiesBanked = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.infinitiesBanked = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "infinities"
+  }
 }();
 
 Currency.infinitiesTotal = new class extends DecimalCurrency {
   get value() { return player.infinities.plus(player.infinitiesBanked); }
-  set value(value) { player.infinities = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.infinities = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "infinities"
+  }
 }();
 
 Currency.infinityPoints = new class extends DecimalCurrency {
   get value() { return player.infinityPoints; }
   set value(value) {
+    if(this.frozen) return
+
     player.infinityPoints = value;
     player.records.thisEternity.maxIP = player.records.thisEternity.maxIP.max(value);
     player.records.thisReality.maxIP = player.records.thisReality.maxIP.max(value);
@@ -295,16 +337,30 @@ Currency.infinityPoints = new class extends DecimalCurrency {
     super.reset();
     player.records.thisEternity.maxIP = this.startingValue;
   }
+
+  get frozen() {
+    return PastEmpower.freezing === "infinityPoints"
+  }
 }();
 
 Currency.infinityPower = new class extends DecimalCurrency {
   get value() { return player.infinityPower; }
-  set value(value) { player.infinityPower = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.infinityPower = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "infinityPower"
+  }
 }();
 
 Currency.eternities = new class extends DecimalCurrency {
   get value() { return player.eternities; }
-  set value(value) { player.eternities = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.eternities = value;
+  }
 
   get startingValue() {
     if (Pelle.isDoomed) return new Decimal(0);
@@ -313,11 +369,17 @@ Currency.eternities = new class extends DecimalCurrency {
       RealityUpgrade(10)
     );
   }
+
+  get frozen() {
+    return PastEmpower.freezing === "eternities"
+  }
 }();
 
 Currency.eternityPoints = new class extends DecimalCurrency {
   get value() { return player.eternityPoints; }
   set value(value) {
+    if(this.frozen) return
+
     player.eternityPoints = value;
     player.records.thisReality.maxEP = player.records.thisReality.maxEP.max(value);
     if (player.records.bestReality.bestEP.lt(value)) {
@@ -345,11 +407,22 @@ Currency.eternityPoints = new class extends DecimalCurrency {
     super.reset();
     player.records.thisReality.maxEP = this.startingValue;
   }
+
+  get frozen() {
+    return PastEmpower.freezing === "eternityPoints"
+  }
 }();
 
 Currency.timeShards = new class extends DecimalCurrency {
   get value() { return player.timeShards; }
-  set value(value) { player.timeShards = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.timeShards = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "timeShards"
+  }
 }();
 
 Currency.timeTheorems = new class extends DecimalCurrency {
@@ -379,14 +452,26 @@ Currency.timeTheorems = new class extends DecimalCurrency {
 
 Currency.tachyonParticles = new class extends DecimalCurrency {
   get value() { return player.dilation.tachyonParticles; }
-  set value(value) { player.dilation.tachyonParticles = value; }
+  set value(value) {
+    if(this.frozen) return
+    player.dilation.tachyonParticles = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "tachyonParticles"
+  }
 }();
 
 Currency.dilatedTime = new class extends DecimalCurrency {
   get value() { return player.dilation.dilatedTime; }
   set value(value) {
+    if(this.frozen) return
     player.dilation.dilatedTime = value;
     player.records.thisReality.maxDT = player.records.thisReality.maxDT.max(value);
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "dilatedTime"
   }
 }();
 

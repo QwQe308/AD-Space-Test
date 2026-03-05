@@ -22,6 +22,7 @@ export default {
       level: new Decimal(0),
       maxLevel: new Decimal(0),
       type: "",
+      permanent: AbyssResearches[this.id].permanent,
     };
   },
   computed: {
@@ -83,10 +84,14 @@ export default {
         }
       }
 
-      if (!this.isMaxed && !AbyssResearches[this.id].hasRestriction) {
-        tooltipContent += `<br><span style="color:${
-          this.restrictionsAllCompleted ? "red" : "lime"
-        }">Efficiency /${format(AbyssResearches[this.id].restrictionNerf)}</span>`;
+      if (
+        !this.isMaxed &&
+        AbyssResearches[this.id].hasRestriction &&
+        AbyssResearches[this.id].totalRestrictionNerf.neq(1)
+      ) {
+        tooltipContent += `<br><span style="color:red">Efficiency /${format(
+          AbyssResearches[this.id].totalRestrictionNerf
+        )}</span>`;
       }
 
       return tooltipContent;
@@ -99,10 +104,12 @@ export default {
       tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br></span>`;
       let restrictions = this.getNode.restrictions;
       for (let index = 0; index < restrictions.length; index++) {
-        tooltipContent += `<br><span style="color:${this.restrictionStates ? "lime" : "red"}">${restrictions[
-          i
-        ].description(this.level)}</span>`;
-        if (i < restrictions.length - 1) tooltipContent += "<br>";
+        tooltipContent += `<br><span style="color:${this.restrictionStates[index] ? "lime" : "red"}">${restrictions[
+          index
+        ].description(this.level)}`;
+        if (restrictions[index].nerf.neq(1)) tooltipContent += ` [/${restrictions[index].nerf}]`;
+        tooltipContent += `</span>`;
+        if (index < restrictions.length - 1) tooltipContent += "<br>";
       }
 
       return tooltipContent;
@@ -240,7 +247,9 @@ export default {
       this.autoResearchEfficiency = this.getNode.autoResearchEfficiency;
       this.isAutoResearching = this.getNode.isAutoResearching;
 
-      this.restrictionStates = this.getNode.restrictionStates;
+      if (this.getNode.hasRestriction) {
+        this.restrictionStates = this.getNode.restrictionStates;
+      }
 
       if (!this.isMaxed) {
         this.restrictionMet = this.getNode.checkRestriction;
@@ -266,6 +275,7 @@ export default {
       hideOnTargetClick: false,
     }"
   >
+  <div v-if="permanent" class="permanent-mark">*</div>
     <div class="research-node-container" @click="handleClick" :class="getContainerClass">
       <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass"></div>
       <div v-if="levelText" class="research-node-level" :style="getTextStyle">{{ levelText }}</div>
@@ -278,6 +288,11 @@ export default {
 </template>
 
 <style scoped>
+.permanent-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .locked .sink-animation-block {
   border-color: rgb(100, 100, 100);
 }

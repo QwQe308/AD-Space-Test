@@ -1,3 +1,4 @@
+import { DEV } from "../../env";
 import { GameMechanicState } from "../game-mechanics/game-mechanic";
 
 /**
@@ -12,35 +13,32 @@ import { GameMechanicState } from "../game-mechanics/game-mechanic";
  */
 export class Restriction extends GameMechanicState {
   constructor(config) {
+    if (DEV) {
+      if (!config) throw ("Error in restriction: No config found.", config);
+      if (!config.requirement) throw ("Error in restriction: No config.requirement defined.", config);
+    }
+
     super(config);
     this._config.checkCompletionOnEvent = config.checkCompletionOnEvent ?? GAME_EVENT.GAME_TICK_AFTER;
     this._config.triggerOnCompletionChange = config.triggerOnCompletionChange;
 
-    if (!player.restrictions[this.id]) this.initialize();
-
-    this.registerEvents(this.checkCompletionOnEvent, () => this.checkCompletionState(true));
+    this.registerEvents(this._config.checkCompletionOnEvent, () => this.checkCompletionState(true));
   }
 
-  get type(){
-    return "normal"
-  }
-
-  get description() {
-    return this.config.description();
+  get type() {
+    return "normal";
   }
 
   get completed() {
     return this.data.completion;
   }
 
-  get defaultData() {
-    return {
-      completion: false,
-    };
+  get data() {
+    console.error("No data place is defined in restriction handler on getter!");
   }
 
-  get data() {
-    console.error("No data place is defined in restriction handler!");
+  description(x) {
+    return this.config.description(x);
   }
 
   checkCompletionState(auto = false) {
@@ -48,13 +46,9 @@ export class Restriction extends GameMechanicState {
     if (currentCompletion !== this.data.completion) this.onCompletionChange(currentCompletion);
   }
 
-  initialize() {
-    this.data = this.defaultData;
-  }
-
   onCompletionChange(state) {
     this.data.completion = state;
-    if(this.triggerOnCompletionChange) this.triggerOnCompletionChange(state);
+    if (this.triggerOnCompletionChange) this.triggerOnCompletionChange(state);
   }
 }
 
@@ -66,7 +60,6 @@ export class Restriction extends GameMechanicState {
  * (Or you can call it "is restriction not failed")
  * Will be automatically recorded once it returns false.
  * @param config.resetOnEvent A GameEvent, decides when it can be retryed.
- * @param config.defaultCompletable **Optional** Decides if it starts as completable before first reset event. Default as true.
  * @param config.checkFailOnEvent **Optional** Decides when to check failure. Best for situations like "no manual infinities" or so.
  * Default as GAME_TICK_AFTER.
  * @param config.checkCompletionOnEvent **Optional** Decides when to check completion.
@@ -79,35 +72,49 @@ export class Restriction extends GameMechanicState {
  */
 export class FailableRestriction extends Restriction {
   constructor(config) {
-    if(!config.requirement) config.requirement = () => true;
+    if (DEV) {
+      if (!config) throw ("Error in failable restriction: No config found.", config);
+      if (!config.completable) throw ("Error in failable restriction: No config.completable found.", config);
+      if (!config.resetOnEvent) throw ("Error in failable restriction: No config.resetOnEvent found.", config);
+    }
+
+    if (!config.requirement) config.requirement = () => true;
 
     super(config);
+
     this._config.defaultCompletable = config.defaultCompletable ?? true;
     this._config.checkFailOnEvent = config.checkFailOnEvent ?? GAME_EVENT.GAME_TICK_AFTER;
     this._config.noCheckOnCompletion = config.noCheckOnCompletion;
 
-    this.registerEvents(this.config.checkFailOnEvent, () => {
+    this.registerEvents(this._config.checkFailOnEvent, () => {
       this.data.stillCompletable &&= this.config.completable();
     });
 
-    this.registerEvents(this.config.resetOnEvent, () => {
+    this.registerEvents(this._config.resetOnEvent, () => {
       this.data.stillCompletable = true;
     });
   }
 
-  get type(){
-    return "failable"
+  get type() {
+    return "failable";
   }
 
   checkCompletionState(auto = false) {
-    let completion = this.data.stillCompletable && this.requirement();
+    let completion = this.data.stillCompletable && this.config.requirement();
     if (completion !== this.completion) this.onCompletionChange(completion);
   }
-
-  get defaultData() {
-    return {
-      stillCompletable: this.config.defaultCompletable,
-      completion: false,
-    };
-  }
 }
+
+export const RestrictionDefaultData = {
+  defaultRestriction: {
+    completion: false,
+  },
+  failableRestriction: {
+    stillCompletable: true,
+    completion: false,
+  },
+  uncompletableFailableRestriction: {
+    stillCompletable: false,
+    completion: false,
+  },
+};
