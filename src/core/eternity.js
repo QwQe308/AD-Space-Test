@@ -148,8 +148,8 @@ export function eternity(force, auto, specialConditions = {}) {
   playerInfinityUpgradesOnReset();
   AchievementTimers.marathon2.reset();
   applyEU1();
-  player.records.thisInfinity.maxAM = DC.D0;
-  player.records.thisEternity.maxAM = DC.D0;
+  if(!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
+  if(!Currency.antimatter.frozen) player.records.thisEternity.maxAM = DC.D0;
   Currency.antimatter.reset();
   ECTimeStudyState.invalidateCachedRequirements();
 
@@ -445,3 +445,11 @@ export const EternityUpgrade = mapGameDataToObject(
 );
 
 EternityUpgrade.epMult = new EPMultiplierState();
+
+// Extras
+export function eternityGiveRewardsList() {
+  return {
+    eternityPoints: gainedEternityPoints(),
+    eternities: gainedEternities()
+  }
+}

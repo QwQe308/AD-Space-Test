@@ -93,7 +93,7 @@ export default {
 
       this.amMult.copyFrom(getAMMultiplier());
       if (this.amMult.neq(1)) {
-        const amMultText = ` | Direct Antimatter multiplier: ${formatMultplier(this.amMult, 2, 2)}`;
+        const amMultText = ` | Direct Antimatter multiplier: ${formatMultiplier(this.amMult, 2, 2)}`;
         this.multiplierText += amMultText;
       }
 

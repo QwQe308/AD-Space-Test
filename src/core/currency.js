@@ -1,4 +1,4 @@
-import { PastEmpower } from "./_MOD/empowers/pastEmpower";
+import { PastEmpower } from "./_MOD/empowers/past/pastEmpower";
 import { DC } from "./constants";
 
 
@@ -205,6 +205,8 @@ Currency.antimatter = new class extends DecimalCurrency {
   get value() { return player.antimatter; }
 
   set value(value) {
+    if(this.frozen) return
+
     if (InfinityChallenges.nextIC) InfinityChallenges.notifyICUnlock(value);
     if (GameCache.cheapestAntimatterAutobuyer.value && value.gte(GameCache.cheapestAntimatterAutobuyer.value)) {
       // Clicking into the automation tab clears the trigger and prevents it from retriggering as long as the player
@@ -212,8 +214,6 @@ Currency.antimatter = new class extends DecimalCurrency {
       TabNotification.newAutobuyer.clearTrigger();
       TabNotification.newAutobuyer.tryTrigger();
     }
-
-    if(this.frozen) return
 
     player.antimatter = value;
     player.records.thisInfinity.maxAM = player.records.thisInfinity.maxAM.max(value);

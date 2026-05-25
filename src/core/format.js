@@ -80,7 +80,7 @@ window.formatAdd = function formatAdd(value, places, placesUnder1000) {
   return `+${format(value, places, placesUnder1000)}`;
 };
 
-window.formatMultplier = function formatMultplier(value, places, placesUnder1000) {
+window.formatMultiplier = function formatMultiplier(value, places, placesUnder1000) {
   if (typeof value === "number" && value < 1) return `/${format(1 / value, places, placesUnder1000)}`;
   if (value instanceof Decimal && value.lt(1)) return `/${format(value.recip(), places, placesUnder1000)}`;
   return `×${format(value, places, placesUnder1000)}`;

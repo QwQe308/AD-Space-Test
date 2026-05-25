@@ -31,12 +31,18 @@ export default {
       showLockedDimCostNote: true,
 
       unSoftCapped: false,
+      frozen: false,
     };
   },
   computed: {
     tesseractCountString() {
       const extra = this.extraTesseracts.gt(0) ? ` + ${format(this.extraTesseracts, 2, 2)}` : "";
       return `${formatInt(this.boughtTesseracts)}${extra}`;
+    },
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.frozen
+      }
     },
   },
   methods: {
@@ -68,6 +74,7 @@ export default {
       this.creditsClosed = GameEnd.creditsEverClosed;
 
       this.unSoftCapped = InfinityDimensions.unSoftCapped
+      this.frozen = Currency.infinityPower.frozen
     },
     maxAll() {
       InfinityDimensions.buyMax();
@@ -103,7 +110,7 @@ export default {
     <div>
       <p>
         You have
-        <span class="c-infinity-dim-description__accent">{{ format(infinityPower, 2, 1) }}</span>
+        <span class="c-infinity-dim-description__accent" :class="getFrozenClass">{{ format(infinityPower, 2, 1) }}</span>
         Infinity Power,
         <br>
         <span v-if="!isEC9Running">

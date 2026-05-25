@@ -50,6 +50,8 @@ import InfluenceAnalyzerTab from "./_MOD/imaginary/InfluenceAnalyzerTab";
 
 import AbyssResearchTab from "./_MOD/abyss/AbyssResearchTab.vue";
 
+import PastEmpowerTab from "./_MOD/empowers/past/PastEmpowerTab.vue";
+
 const TabComponents = {
   AntimatterDimensionsTab,
   InfinityDimensionsTab,
@@ -97,9 +99,14 @@ const TabComponents = {
   //mod
   SpaceResearchTab,
   SpaceChallengesTab,
+  
   MirrorTab,
+
   InfluenceAnalyzerTab,
-  AbyssResearchTab
+
+  AbyssResearchTab,
+
+  PastEmpowerTab,
 };
 
 export default TabComponents;

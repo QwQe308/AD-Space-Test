@@ -34,29 +34,29 @@ function createAbyssResearchesData() {
       data[i].cost = scalingConfig.cost;
     }
 
-    if(abyssResearches[i].restrictions){
+    if (abyssResearches[i].restrictions) {
       data[i].restrictionData = abyssResearches[i].restrictions.map((x) =>
         x.type === "failable"
           ? x.defaultUncompletable
             ? RestrictionDefaultData.uncompletableFailableRestriction
             : RestrictionDefaultData.failableRestriction
           : RestrictionDefaultData.defaultRestriction
-      )
+      );
     }
   }
   return data;
 }
 
-function createSpaceResearchesData(){
-  let data = {}
-  for(let i in spaceResearches){
-    data[i] =  {
+function createSpaceResearchesData() {
+  let data = {};
+  for (let i in spaceResearches) {
+    data[i] = {
       progress: DC.D0,
       pendingProgress: DC.D0,
       active: false,
-    }
+    };
   }
-  return data
+  return data;
 }
 
 // This is actually reassigned when importing saves
@@ -66,8 +66,18 @@ window.player = {
   //MOD
   //empowers
   empowers: {
-    past:{
+    past: {
       frozenCurrency: null,
+      simulating: null,
+      simulationSpeed: DC.D1,
+
+      simulationTimeThisReset: new Decimal(0),
+      simulationTrueTimeThisReset: 0,
+      simulationTickThisReset: 0,
+    },
+    present:{
+      spells: [],
+      mana: DC.D0,
     },
   },
   //abyss

@@ -1,4 +1,6 @@
 <script>
+import { DC } from '../../../core/constants';
+
 export default {
   name: "BigCrunchButton",
   data() {
@@ -17,6 +19,8 @@ export default {
       headerTextColored: true,
       creditsClosed: false,
       showIPRate: false,
+
+      frozen: false
     };
   },
   computed: {
@@ -69,6 +73,12 @@ export default {
         "transition-duration": "0.2s"
       };
     },
+    
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.frozen
+      }
+    },
   },
   methods: {
     update() {
@@ -80,6 +90,8 @@ export default {
       this.inAntimatterChallenge = Player.isInAntimatterChallenge;
       this.headerTextColored = player.options.headerTextColored;
       this.creditsClosed = GameEnd.creditsEverClosed;
+
+      this.frozen = Currency.infinityPoints.frozen
 
       const gainedIP = gainedInfinityPoints();
       this.currentIP.copyFrom(Currency.infinityPoints);
@@ -129,7 +141,7 @@ export default {
       <div v-if="!showIPRate" />
       <b>
         Big Crunch for
-        <span :style="amountStyle">{{ format(gainedIP, 2) }}</span>
+        <span :style="amountStyle" :class="getFrozenClass">{{ format(gainedIP, 2) }}</span>
         <span v-if="showIPRate"> IP</span>
         <span v-else> Infinity {{ pluralize("Point", gainedIP) }}</span>
       </b>

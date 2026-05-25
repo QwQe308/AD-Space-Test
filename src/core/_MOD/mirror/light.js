@@ -27,7 +27,7 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1e6);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `AM multiplier ${formatMultplier(eff, 2)}`,
+    effect: (eff) => `AM multiplier ${formatMultiplier(eff, 2)}`,
   },
   green: {
     amount: () => calcBaseLight(player.light.greenPercent),
@@ -35,7 +35,7 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1.01);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Dimension Boost base ${formatMultplier(eff, 2, 2)}`,
+    effect: (eff) => `Dimension Boost base ${formatMultiplier(eff, 2, 2)}`,
   },
   blue: {
     amount: () => calcBaseLight(player.light.bluePercent),
@@ -43,7 +43,7 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1.3);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Pre-Inf Research Speed ${formatMultplier(eff, 2)}`,
+    effect: (eff) => `Pre-Inf Research Speed ${formatMultiplier(eff, 2)}`,
   },
 
   //complex colors
@@ -53,7 +53,7 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1.05);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Infinity Dimensions ${formatMultplier(eff, 2, 2)}`,
+    effect: (eff) => `Infinity Dimensions ${formatMultiplier(eff, 2, 2)}`,
   },
   purple: {
     amount: () => calcComplexLight("red", "blue"), // Purple = Red + Blue
@@ -69,7 +69,7 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1.006);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Effective Space ${formatMultplier(eff, 2, 2)}`,
+    effect: (eff) => `Effective Space ${formatMultiplier(eff, 2, 2)}`,
   },
   //Final color
   white: {
@@ -79,6 +79,6 @@ export const light = {
       let eff = amount.mul(4).pow(0.9).pow_base(1.006);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Space ${formatMultplier(eff, 2, 2)}`,
+    effect: (eff) => `Space ${formatMultiplier(eff, 2, 2)}`,
   },
 };

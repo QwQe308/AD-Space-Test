@@ -25,6 +25,7 @@ export default {
       isDoomed: false,
       antimatter: new Decimal(0),
       antimatterPerSec: new Decimal(0),
+      antimatterFrozen: false,
     };
   },
   methods: {
@@ -34,11 +35,19 @@ export default {
 
       this.isModern = player.options.newUI;
       this.isDoomed = Pelle.isDoomed;
+      this.antimatterFrozen = Currency.antimatter.frozen;
       this.antimatter.copyFrom(Currency.antimatter);
       this.hasRealityButton = PlayerProgress.realityUnlocked() || TimeStudy.reality.isBought;
       if (!this.hasRealityButton) this.antimatterPerSec.copyFrom(Currency.antimatter.productionPerSecond);
     },
   },
+  computed: {
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.antimatterFrozen
+      }
+    },
+  }
 };
 </script>
 
@@ -47,7 +56,7 @@ export default {
     v-if="shouldDisplay"
     class="c-prestige-button-container"
   >
-    <span>You have <span class="c-game-header__antimatter">{{ format(antimatter, 2, 1) }}</span> antimatter.</span>
+    <span>You have <span class="c-game-header__antimatter" :class="getFrozenClass">{{ format(antimatter, 2, 1) }}</span> antimatter.</span>
     <div
       v-if="hasRealityButton"
       class="c-reality-container"
@@ -58,6 +67,11 @@ export default {
         :is-header="true"
       />
       <RealityButton v-else />
+    </div>
+    <div v-else-if="antimatterFrozen">
+      <span class="frozen-currency">Antimatter is frozen.</span>
+      <br>
+      <HeaderTickspeedInfo />
     </div>
     <div v-else>
       You are getting {{ format(antimatterPerSec, 2, 2) }} antimatter per second.

@@ -7,6 +7,7 @@ import { deepmergeAll } from "@/utility/deepmerge";
 import { DEV } from "@/env";
 import { SpeedrunMilestones } from "./core/speedrun";
 import { supportedBrowsers } from "./supported-browsers";
+import { PastEmpower } from "./core/_MOD/empowers/past/pastEmpower";
 
 if (GlobalErrorHandler.handled) {
   throw new Error("Initialization failed");
@@ -720,6 +721,7 @@ export function gameLoop(passedDiff, options = {}) {
   //MOD update related
   updateSpaceItems(diff);
   AbyssResearchHelperTools.update(diff);
+  PastEmpower.updateSimulationAfterTick(diff, trueDiff)
 
   // Stopping these checks after CREDITS_START reduces lag and allows for the glyph customization modal to appear
   if (GameEnd.endState < END_STATE_MARKERS.CREDITS_START) {

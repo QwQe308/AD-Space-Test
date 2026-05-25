@@ -2024,7 +2024,7 @@ br {
   height: 14rem;
   justify-content: space-around;
   align-items: center;
-  padding: 1rem;
+  padding-block: 1rem;
 }
 
 .o-prestige-button {

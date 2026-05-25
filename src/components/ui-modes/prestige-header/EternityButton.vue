@@ -25,6 +25,8 @@ export default {
       creditsClosed: false,
       showEPRate: false,
       isDilation: false,
+
+      frozen: false,
     };
   },
   computed: {
@@ -106,6 +108,11 @@ export default {
       ];
       return { color: `rgb(${rgb.join(",")})` };
     },
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.frozen
+      }
+    },
   },
   methods: {
     update() {
@@ -116,6 +123,8 @@ export default {
       this.canEternity = Player.canEternity;
       this.eternityGoal.copyFrom(Player.eternityGoal);
       this.headerTextColored = player.options.headerTextColored;
+
+      this.frozen = Currency.eternityPoints.frozen
 
       if (!this.canEternity) {
         this.type = EP_BUTTON_DISPLAY_TYPE.CANNOT_ETERNITY;
@@ -213,7 +222,7 @@ const EP_BUTTON_DISPLAY_TYPE = {
     <!-- Normal -->
     <template v-else-if="type === 1">
       Eternity for
-      <span :style="amountStyle">{{ format(gainedEP, 2) }}</span>
+      <span :style="amountStyle" :class="getFrozenClass">{{ format(gainedEP, 2) }}</span>
       <span v-if="showEPRate"> EP</span>
       <span v-else> Eternity {{ pluralize("Point", gainedEP) }}</span>
       <br />

@@ -13,6 +13,7 @@ export default {
       isTesseractUnlocked: false,
       tesseractCost: new Decimal(0),
       tesseractText: "",
+      frozen: false
     };
   },
   methods: {
@@ -22,6 +23,7 @@ export default {
       this.isTesseractUnlocked = Enslaved.isCompleted;
       this.tesseractCost = Tesseracts.nextCost;
       this.tesseractText = this.tesseractProgress();
+      this.frozen = Currency.infinityPoints.frozen
     },
     tesseractProgress() {
       const progress = this.infinityPoints.add(1).log10().div(this.tesseractCost.max(1).log10());
@@ -29,6 +31,13 @@ export default {
       return `(${formatPercents(progress, 2, 2)})`;
     },
   },
+  computed: {
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.frozen
+      }
+    },
+  }
 };
 </script>
 
@@ -39,7 +48,7 @@ export default {
   >
     <div class="c-infinity-points">
       You have
-      <span class="c-game-header__ip-amount">{{ format(infinityPoints, 2) }}</span>
+      <span class="c-game-header__ip-amount" :class="getFrozenClass">{{ format(infinityPoints, 2) }}</span>
       {{ pluralize("Infinity Point", infinityPoints) }}.
       <span
         v-if="isTesseractUnlocked"

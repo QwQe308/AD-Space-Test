@@ -21,12 +21,17 @@ export default {
 
 <template>
   <div class="influence">
-    <span class="name">
-      {{ config.name }} ({{ config.influenceStat }})
-    </span>
-    <span class="description">
-      {{ config.info }}
-    </span>
+    <div class="name">
+      {{ config.name }}
+    </div>
+    <div class="description">
+      <div class="description-content">
+        {{ config.info }}
+      </div>
+    </div>
+    <div class="influence-stat">
+      {{ config.influenceStat }}
+    </div>
   </div>
 </template>
 
@@ -51,8 +56,20 @@ export default {
   width: 150px;
 }
 .description{
-  text-align: left;
-  margin-left: 30px;
+  display: flex;
+  flex-grow: 1;
   font-size: 20px;
+}
+.influence-stat{
+  width: 150px;
+  text-align: end;
+  margin-left: auto;
+  margin-right: 30px;
+  color: var(--color-imaginary);
+  font-size: 20px;
+}
+.description-content{
+  margin-inline: auto;
+  text-align: center;
 }
 </style>

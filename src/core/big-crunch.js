@@ -73,9 +73,11 @@ export function bigCrunchReset(
 function bigCrunchGiveRewards() {
   bigCrunchUpdateStatistics();
 
-  const infinityPoints = gainedInfinityPoints();
-  Currency.infinityPoints.add(infinityPoints);
-  Currency.infinities.add(gainedInfinities().round());
+  if (!(player.empowers.past.simulating === "Infinity")) {
+    const infinityPoints = gainedInfinityPoints();
+    Currency.infinityPoints.add(infinityPoints);
+    Currency.infinities.add(gainedInfinities().round());
+  }
 
   bigCrunchTabChange(!PlayerProgress.infinityUnlocked());
   bigCrunchCheckUnlocks();
@@ -150,7 +152,7 @@ export function bigCrunchResetValues(enteringAntimatterChallenge) {
     remainingGalaxies = remainingGalaxies.add(Decimal.min(currentReplicantiGalaxies, 1));
   }
 
-  if(AbyssResearches.A21B.completed || AbyssResearches.A21.completed){
+  if (AbyssResearches.A21B.completed || AbyssResearches.A21.completed) {
     Replicanti.amount = currentReplicanti;
     remainingGalaxies = remainingGalaxies.add(Decimal.ceil(currentReplicantiGalaxies.div(2)));
   }
@@ -178,7 +180,7 @@ function bigCrunchCheckUnlocks() {
 export function secondSoftReset(enteringAntimatterChallenge) {
   player.dimensionBoosts = DC.D0;
   player.galaxies = DC.D0;
-  player.records.thisInfinity.maxAM = DC.D0;
+  if(!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
   Currency.antimatter.reset();
   softReset(0, true, true, enteringAntimatterChallenge);
   InfinityDimensions.resetAmount();
@@ -214,4 +216,12 @@ export function preProductionGenerateIP(diff) {
     Currency.infinityPoints.add(gainedThisTick);
   }
   Currency.infinityPoints.add(BreakInfinityUpgrade.ipGen.effectOrDefault(DC.D0).times(diff.div(60000)));
+}
+
+// extras
+export function bigCrunchGiveRewardsList() {
+  return {
+    infinityPoints: gainedInfinityPoints(),
+    infinities: gainedInfinities().round(),
+  };
 }

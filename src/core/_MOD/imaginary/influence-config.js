@@ -3,8 +3,7 @@ export const influence = {
     id: "abyss",
     name: "Abyss",
     info() {
-      if(AbyssResearches.C0.completed) return `Disables Achievements, part of Time Studies,]\d{e&5|§↬ↈ∞∰⊕ and$#∱?τ^%ɛ(@`
-      return `Disables Achievements, part of Time Studies, Base Research Speed /10 & ^0.9 and$#^%*(@`;
+      return `Disables Achievements, part of Time Studies, anddd$#∱?τ^%ɛ(@?`
     },
     influenceStat: 50,
     requirement() {

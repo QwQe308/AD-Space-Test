@@ -15,18 +15,30 @@ export default {
       showNextEP: false,
       eternityPoints: new Decimal(0),
       nextEP: new Decimal(0),
+
+      frozen: false,
     };
   },
   methods: {
     update() {
       this.showContainer = player.break || PlayerProgress.eternityUnlocked();
       this.showEP = PlayerProgress.eternityUnlocked();
+
+      this.frozen = Currency.eternityPoints.frozen
+
       this.eternityPoints.copyFrom(Currency.eternityPoints.value.floor());
       this.showNextEP = Player.canEternity && player.records.thisReality.maxEP.lt(100) &&
         gainedEternityPoints().lt(100);
       if (this.showNextEP) this.nextEP.copyFrom(requiredIPForEP(gainedEternityPoints().floor().toNumber() + 1));
     },
   },
+  computed: {
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.frozen
+      }
+    },
+  }
 };
 </script>
 
@@ -40,7 +52,7 @@ export default {
       class="c-eternity-points"
     >
       You have
-      <span class="c-game-header__ep-amount">{{ format(eternityPoints, 2) }}</span>
+      <span class="c-game-header__ep-amount" :class="getFrozenClass">{{ format(eternityPoints, 2) }}</span>
       {{ pluralize("Eternity Point", eternityPoints) }}.
       <span v-if="showNextEP">(Next EP at {{ format(nextEP, 1) }} IP)</span>
     </div>

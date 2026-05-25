@@ -66,8 +66,8 @@ Vue.mixin({
     formatAdd(value, places, placesUnder1000) {
       return formatAdd(value, places, placesUnder1000);
     },
-    formatMultplier(value, places, placesUnder1000) {
-      return formatMultplier(value, places, placesUnder1000);
+    formatMultiplier(value, places, placesUnder1000) {
+      return formatMultiplier(value, places, placesUnder1000);
     },
     formatX(value, places, placesUnder1000) {
       return formatX(value, places, placesUnder1000);
