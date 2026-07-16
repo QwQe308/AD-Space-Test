@@ -1,5 +1,5 @@
 <script>
-import { PresentMirrorUpgrades } from "../../../../../core/_MOD/empowers/present_mirror_abandoned/presentEmpower";
+import { PresentMirrorUpgrades } from "../../../../../core/_MOD/empowers/_present_mirror_abandoned/presentEmpower";
 
 export default {
   name: "Influence",

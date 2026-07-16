@@ -8,6 +8,8 @@ class SpellData {
     this.tempSpellPower = DC.D0;
     this.multiplier = DC.D1;
     this.directMultilpier = DC.D1;
+
+    this.instantGalaxies = DC.D0;
   }
 
   get totalSpellPower() {
@@ -41,7 +43,7 @@ const AffixBaseConfig = {
     description: (data, effect) =>
       `Instantly gain an Antimatter Galaxy. This effect is floored after applying spell power. [E+]`,
     effect: (data) => data.spellPower.floor(),
-    process: (data) => (data.directMultilpier = data.directMultilpier.mul(this.effect(data))),
+    process: (data) => (data.instantGalaxies = data.instantGalaxies.add(1)),
     cost: 10,
   },
   warping: {
