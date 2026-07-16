@@ -36,7 +36,7 @@ export default {
     <Influence
       v-for="item in influences"
       :id="item"
-      :key="item/"
+      :key="item"
     />
   </div>
 </template>

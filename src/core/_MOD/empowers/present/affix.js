@@ -1,5 +1,7 @@
 export class Affix {
   constructor({
+    name: name,
+
     description: description = () => {
       throw Error("No Description Function Defined!");
     },
@@ -10,14 +12,17 @@ export class Affix {
     cost: cost,
     unlocked: unlocked = () => true,
     noSpellPower: noSpellPower = false,
+    debuff: debuff = false,
     pending: pending = null,
   }) {
+    this._name = name;
     this._description = description;
     this._process = process;
     this._effect = effect;
     this._cost = cost;
     this._unlocked = unlocked;
     this._noSpellPower = noSpellPower;
+    this._debuff = debuff;
     this._pending = pending;
   }
 
@@ -25,8 +30,16 @@ export class Affix {
     return this._cost;
   }
 
+  get name() {
+    return this._name;
+  }
+
   get noSpellPower() {
     return this._noSpellPower;
+  }
+
+  get debuff() {
+    return this._debuff;
   }
 
   get unlocked() {

@@ -1,3 +1,4 @@
+import { DC } from "../../../constants";
 import { Affix } from "./affix";
 import { PendingEvent } from "./pendingEvent";
 
@@ -9,6 +10,7 @@ export class SpellData {
     this.directMultiplier = DC.D1;
 
     this.instantGalaxies = DC.D0;
+    this.warpTime = DC.D0;
 
     this.pending = new Set();
     this.manaCost = 0;
@@ -33,12 +35,86 @@ export class PresentEmpowerClass {
   set mana(newVal) {
     this.data.mana = newVal;
   }
+
+  get maxMana() {
+    return this.data.maxMana;
+  }
+
+  set maxMana(newVal) {
+    this.data.maxMana = newVal;
+  }
+
+  get spells() {
+    return this.data.spells;
+  }
+
+  get selectedAffixes() {
+    return this.data.selectedAffixes;
+  }
+
+  get manaPercentage() {
+    return this.maxMana === 0 ? 0 : this.mana / this.maxMana;
+  }
+
+  /**
+   * Add an affix to the selection list for spell assembly.
+   * @param {string} affixName
+   */
+  selectAffix(affixName) {
+    if (this.selectedAffixes.length >= 8) return;
+    const affix = Affixes[affixName];
+    if (!affix || !affix.unlocked) return;
+    const totalCost = this.selectedAffixes.reduce((sum, name) => sum + Affixes[name].cost, 0) + affix.cost;
+    if (totalCost > this.mana) return;
+    this.selectedAffixes.push(affixName);
+  }
+
+  /**
+   * Remove the last selected affix from the assembly list.
+   */
+  deselectLast() {
+    this.selectedAffixes.pop();
+  }
+
+  /**
+   * Clear all selected affixes.
+   */
+  clearSelection() {
+    this.selectedAffixes.length = 0;
+  }
+
+  /**
+   * Create a spell from currently selected affixes and add it to the spells list.
+   * @returns {SpellData|null}
+   */
+  createSpell() {
+    if (this.selectedAffixes.length === 0) return null;
+    if (this.spells.length >= 8) return null;
+    if (this.selectedAffixes.length > 8) return null;
+
+    const spellData = runSpell(this.selectedAffixes, DC.D1);
+    if (spellData.manaCost > this.mana) {
+      this.clearSelection();
+      return null;
+    }
+
+    this.mana -= spellData.manaCost;
+    // Clear pending Set before storing — PendingEvent objects must not enter player state
+    spellData.pending.clear();
+    this.spells.push({
+      affixes: [...this.selectedAffixes],
+      data: spellData,
+    });
+    this.clearSelection();
+    return spellData;
+  }
 }
 
 export const PresentEmpower = new PresentEmpowerClass();
 
 const AffixBaseConfig = {
   simple: {
+    name: "simple",
     description(data, effect) {
       return `<b>x10</b> EP & Eternities gain multiplier. [Ex]`;
     },
@@ -51,6 +127,7 @@ const AffixBaseConfig = {
     cost: 10,
   },
   bright: {
+    name: "bright",
     description(data, effect) {
       return `Instantly gain an Antimatter Galaxy. This effect is floored after applying spell power. [E+]`;
     },
@@ -63,6 +140,7 @@ const AffixBaseConfig = {
     cost: 10,
   },
   warping: {
+    name: "warping",
     description(data, effect) {
       return `Instantly warp 10 minute for Space Researches and Replicanti. [Et]`;
     },
@@ -70,11 +148,12 @@ const AffixBaseConfig = {
       return new Decimal(600).mul(data.spellPower);
     },
     process(data) {
-      data.directMultiplier = data.directMultiplier.mul(this.effect(data));
+      data.warpTime = data.warpTime.add(this.effect(data));
     },
-    cost: 10,
+    cost: 5,
   },
   waving: {
+    name: "waving",
     description(data, effect) {
       return `+20% spell power for the next affix, then -20% for the next after that, then repeat. [Ep+]`;
     },
@@ -99,6 +178,7 @@ const AffixBaseConfig = {
     cost: 10,
   },
   accelerating: {
+    name: "accelerating",
     description(data, effect) {
       return `+20% spell power for the following consecutive affixes with increasing costs. The next one is always affected. [Ep+]`;
     },
@@ -121,13 +201,15 @@ const AffixBaseConfig = {
         },
       });
     },
-    cost: 10,
+    cost: 15,
   },
   cursing: {
+    name: "cursing",
     description(data, effect) {
       return `The spell power and cost of the next affix is multiplied by -1. Useless if the next one is not affected by spell power. [En]`;
     },
     noSpellPower: true,
+    debuff: true,
     effect(data) {
       return new Decimal(-1);
     },
@@ -150,10 +232,10 @@ const AffixBaseConfig = {
   },
 };
 
-export const Affixes = {};
-for (const [key, config] of Object.entries(AffixBaseConfig)) {
-  Affixes[key] = new Affix(config);
-}
+export const Affixes = mapGameDataToObject(
+  AffixBaseConfig,
+  config => new Affix(config)
+);
 
 /**
  * Run a spell by processing an array of affix names in sequence.

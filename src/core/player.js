@@ -78,6 +78,9 @@ window.player = {
     present: {
       mirrorUpgrades: [],
       mana: 0,
+      maxMana: 100,
+      spells: [],
+      selectedAffixes: [],
     },
   },
   // Abyss
