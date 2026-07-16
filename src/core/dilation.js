@@ -170,7 +170,7 @@ export function getDilationGainPerSecond() {
       AlchemyResource.dilation,
       Ra.unlocks.continuousTTBoost.effects.dilatedTime,
       Ra.unlocks.peakGamespeedDT,
-      SpaceResearchRifts.r54//r 54
+      SpaceResearchRifts.r54// R 54
     );
   dtRate = dtRate.times(getAdjustedGlyphEffect("dilationDT"));
   dtRate = dtRate.times(Decimal.clampMin(Decimal.log10(Replicanti.amount.add(1)).mul(getAdjustedGlyphEffect("replicationdtgain")), 1));

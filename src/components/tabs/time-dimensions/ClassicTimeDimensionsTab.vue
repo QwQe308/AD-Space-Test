@@ -28,7 +28,7 @@ export default {
     getFrozenClass() {
       return {
         "frozen-currency": this.frozen
-      }
+      };
     },
   },
   methods: {
@@ -43,7 +43,7 @@ export default {
       this.incomeType = EternityChallenge(7).isRunning ? "Eighth Infinity Dimensions" : "Time Shards";
       this.areAutobuyersUnlocked = Autobuyer.timeDimension(1).isUnlocked;
 
-      this.frozen = Currency.timeShards.frozen
+      this.frozen = Currency.timeShards.frozen;
     },
     maxAll() {
       tryUnlockTimeDimensions();
@@ -77,7 +77,10 @@ export default {
       <p>
         You have gained
         <span class="c-time-dim-description__accent">{{ formatInt(totalUpgrades) }}</span> Tickspeed upgrades from
-        <span class="c-time-dim-description__accent" :class="getFrozenClass">{{ format(timeShards, 2, 1) }}</span> Time Shards.
+        <span
+          class="c-time-dim-description__accent"
+          :class="getFrozenClass"
+        >{{ format(timeShards, 2, 1) }}</span> Time Shards.
       </p>
       <p>
         Next Tickspeed upgrade at

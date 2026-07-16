@@ -2,7 +2,7 @@ import { DC } from "../../constants";
 
 export const spaceChallenges = [
   {
-    //SC1
+    // SC1
     id: 1,
     data: [
       {
@@ -37,7 +37,7 @@ export const spaceChallenges = [
     ],
   },
   {
-    //SC2
+    // SC2
     id: 2,
     data: [
       {
@@ -71,7 +71,7 @@ export const spaceChallenges = [
     ],
   },
   {
-    //SC3
+    // SC3
     id: 3,
     data: [
       {
@@ -109,7 +109,7 @@ export const spaceChallenges = [
     ],
   },
   {
-    //SC4
+    // SC4
     id: 4,
     data: [
       {
@@ -146,7 +146,7 @@ export const spaceChallenges = [
   },
 
   {
-    //SC5
+    // SC5
     id: 5,
     data: [
       {
@@ -173,14 +173,14 @@ export const spaceChallenges = [
           return player.challenge.normal.completedBits === 8190;
         },
         effectValue() {
-          return 1e6 / 1.6 ** NormalChallenges.all.filter((x) => x.isCompleted).length;
+          return 1e6 / 1.6 ** NormalChallenges.all.filter(x => x.isCompleted).length;
         },
       },
     ],
   },
 
   {
-    //SC6
+    // SC6
     id: 6,
     data: [
       {

@@ -118,7 +118,10 @@ export default {
 <template>
   <div class="l-antimatter-dim-tab">
     <div class="modes-container">
-      <button class="o-primary-btn l-button-container" @click="changeBuyMode">
+      <button
+        class="o-primary-btn l-button-container"
+        @click="changeBuyMode"
+      >
         {{ getUntil10Display() }}
       </button>
       <PrimaryButton
@@ -132,12 +135,21 @@ export default {
         <span v-else-if="isFullyAutomated"> Dimensional Sacrifice is Automated (Achievement 118) </span>
         <span v-else>Dimensional Sacrifice Disabled ({{ disabledCondition }})</span>
       </PrimaryButton>
-      <button class="o-primary-btn l-button-container" @click="maxAll">Max All (M)</button>
+      <button
+        class="o-primary-btn l-button-container"
+        @click="maxAll"
+      >
+        Max All (M)
+      </button>
     </div>
     <span>{{ multiplierText }}</span>
     <TickspeedRow />
     <div class="l-dimensions-container">
-      <AntimatterDimensionRow v-for="tier in 8" :key="tier" :tier="tier" />
+      <AntimatterDimensionRow
+        v-for="tier in 8"
+        :key="tier"
+        :tier="tier"
+      />
     </div>
     <div class="resets-container">
       <DimensionBoostRow />

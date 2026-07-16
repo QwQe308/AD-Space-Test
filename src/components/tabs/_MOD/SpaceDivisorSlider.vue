@@ -1,5 +1,5 @@
 <script>
-//!!! This is unused now !!!
+// !!! This is unused now !!!
 import SliderComponent from "@/components/SliderComponent";
 
 export default {
@@ -27,8 +27,8 @@ export default {
   methods: {
     update() {
       this.percentage = player.spaceDivisiorActivePercentage * 100;
-      this.shown = false; //isSCTierCompleted(4, 1)
-      //Unused for now
+      this.shown = false; // IsSCTierCompleted(4, 1)
+      // Unused for now
     },
     adjustSliderValue(value) {
       if (value === player.spaceDivisiorActivePercentage * 100) return;
@@ -43,6 +43,10 @@ export default {
 <template>
   <div v-if="shown">
     <b>Space Divisor active percentage: {{ formatInt(percentage) }}%. Changing requires a Big Crunch Reset.</b>
-    <SliderComponent v-bind="sliderProps" :value="percentage" @input="adjustSliderValue($event)" />
+    <SliderComponent
+      v-bind="sliderProps"
+      :value="percentage"
+      @input="adjustSliderValue($event)"
+    />
   </div>
 </template>

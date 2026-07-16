@@ -144,7 +144,7 @@ export const GameStorage = {
     this.loadPlayerObject(this.saves[slot] ?? Player.defaultStart);
     this.loadBackupTimes();
     this.backupOfflineSlots();
-    Tabs.all.find((t) => t.id === player.options.lastOpenTab).show(false);
+    Tabs.all.find(t => t.id === player.options.lastOpenTab).show(false);
     Modal.hideAll();
     Cloud.resetTempState();
     GameUI.notify.info("Game loaded");
@@ -293,7 +293,7 @@ export const GameStorage = {
   backupOfflineSlots() {
     const currentTime = Date.now();
     const offlineTimeMs = currentTime - this.lastUpdateOnLoad;
-    const offlineSlots = AutoBackupSlots.filter((slot) => slot.type === BACKUP_SLOT_TYPE.OFFLINE).sort(
+    const offlineSlots = AutoBackupSlots.filter(slot => slot.type === BACKUP_SLOT_TYPE.OFFLINE).sort(
       (a, b) => b.interval - a.interval
     );
     for (const backupInfo of offlineSlots) {
@@ -329,7 +329,7 @@ export const GameStorage = {
   // every time it saves
   tryOnlineBackups() {
     const toBackup = [];
-    for (const backupInfo of AutoBackupSlots.filter((slot) => slot.type === BACKUP_SLOT_TYPE.ONLINE)) {
+    for (const backupInfo of AutoBackupSlots.filter(slot => slot.type === BACKUP_SLOT_TYPE.ONLINE)) {
       const id = backupInfo.id;
       const timeSinceLast = player.backupTimer - (this.lastBackupTimes[id]?.backupTimer ?? 0);
       if (1000 * backupInfo.interval - timeSinceLast <= 800) toBackup.push(id);
@@ -341,14 +341,14 @@ export const GameStorage = {
   // since these may cause the backup timer to be significantly behind
   resetBackupTimer() {
     const latestBackupTime = Object.values(this.lastBackupTimes)
-      .map((t) => t && t.backupTimer)
+      .map(t => t && t.backupTimer)
       .max();
     player.backupTimer = Math.max(this.oldBackupTimer, player.backupTimer, latestBackupTime.toNumber());
   },
 
   // Saves the current game state to the first reserve slot it finds
   saveToReserveSlot() {
-    const targetSlot = AutoBackupSlots.find((slot) => slot.type === BACKUP_SLOT_TYPE.RESERVE).id;
+    const targetSlot = AutoBackupSlots.find(slot => slot.type === BACKUP_SLOT_TYPE.RESERVE).id;
     this.saveToBackup(targetSlot, player.backupTimer);
   },
 
@@ -382,7 +382,7 @@ export const GameStorage = {
   exportBackupsAsFile() {
     player.options.exportedFileCount++;
     const backupData = {};
-    for (const id of AutoBackupSlots.map((slot) => slot.id)) {
+    for (const id of AutoBackupSlots.map(slot => slot.id)) {
       const backup = this.loadFromBackup(id);
       if (backup) backupData[id] = backup;
     }
@@ -474,26 +474,26 @@ export const GameStorage = {
       // We do this because the codeis dumb and doesnt redecimalize if we dont for some reason
       // Also, if we do it later i think it fucks up the code down the line somehow
       if (player.version >= 83) {
-        const fixGlyph = (glyph) => {
+        const fixGlyph = glyph => {
           glyph.level = new Decimal(glyph.level);
           glyph.rawLevel = new Decimal(glyph.rawLevel);
           glyph.strength = new Decimal(glyph.strength);
           // eslint-disable-next-line consistent-return
           return glyph;
         };
-        player.celestials.teresa.bestAMSet = player.celestials.teresa.bestAMSet.map((n) => fixGlyph(n));
-        player.celestials.v.runGlyphs = player.celestials.v.runGlyphs.map((n) => n.map((g) => fixGlyph(g)));
-        player.reality.glyphs.active = player.reality.glyphs.active.map((n) => fixGlyph(n));
-        player.reality.glyphs.inventory = player.reality.glyphs.inventory.map((n) => fixGlyph(n));
+        player.celestials.teresa.bestAMSet = player.celestials.teresa.bestAMSet.map(n => fixGlyph(n));
+        player.celestials.v.runGlyphs = player.celestials.v.runGlyphs.map(n => n.map(g => fixGlyph(g)));
+        player.reality.glyphs.active = player.reality.glyphs.active.map(n => fixGlyph(n));
+        player.reality.glyphs.inventory = player.reality.glyphs.inventory.map(n => fixGlyph(n));
         for (let i = 0; i < 7; i++) {
-          player.reality.glyphs.sets[i].glyphs = player.reality.glyphs.sets[i].glyphs.map((n) => fixGlyph(n));
+          player.reality.glyphs.sets[i].glyphs = player.reality.glyphs.sets[i].glyphs.map(n => fixGlyph(n));
         }
-        player.records.bestReality.RMSet = player.records.bestReality.RMSet?.map((n) => fixGlyph(n));
-        player.records.bestReality.RMminSet = player.records.bestReality.RMminSet?.map((n) => fixGlyph(n));
-        player.records.bestReality.glyphLevelSet = player.records.bestReality.glyphLevelSet?.map((n) => fixGlyph(n));
-        player.records.bestReality.imCapSet = player.records.bestReality.imCapSet?.map((n) => fixGlyph(n));
-        player.records.bestReality.laitelaSet = player.records.bestReality.laitelaSet?.map((n) => fixGlyph(n));
-        player.records.bestReality.speedSet = player.records.bestReality.speedSet?.map((n) => fixGlyph(n));
+        player.records.bestReality.RMSet = player.records.bestReality.RMSet?.map(n => fixGlyph(n));
+        player.records.bestReality.RMminSet = player.records.bestReality.RMminSet?.map(n => fixGlyph(n));
+        player.records.bestReality.glyphLevelSet = player.records.bestReality.glyphLevelSet?.map(n => fixGlyph(n));
+        player.records.bestReality.imCapSet = player.records.bestReality.imCapSet?.map(n => fixGlyph(n));
+        player.records.bestReality.laitelaSet = player.records.bestReality.laitelaSet?.map(n => fixGlyph(n));
+        player.records.bestReality.speedSet = player.records.bestReality.speedSet?.map(n => fixGlyph(n));
       }
       for (const item in player.reality.glyphs.filter.types) {
         player.reality.glyphs.filter.types[item].rarity = new Decimal(player.reality.glyphs.filter.types[item].rarity);
@@ -519,7 +519,7 @@ export const GameStorage = {
           }
         }, 1000);
         player.options = JSON.parse(backUpOptions);
-        player.options.breakPlaceHolder = false
+        player.options.breakPlaceHolder = false;
         return;
       }
 
@@ -555,7 +555,7 @@ export const GameStorage = {
     AutomatorBackend.initializeFromSave();
     Lazy.invalidateAll();
 
-    AbyssResearchHelperTools.updateStatus()
+    AbyssResearchHelperTools.updateStatus();
 
     const rawDiff = Date.now() - player.lastUpdate;
     // We set offlineEnabled externally on importing or loading a backup; otherwise this is just a local load

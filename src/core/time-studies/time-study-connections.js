@@ -24,8 +24,8 @@ export class TimeStudyConnection {
   }
 }
 
-function isAbyssOn(){
-  return !player.options.breakPlaceHolder && PlayerProgress.imaginaryUnlocked()
+function isAbyssOn() {
+  return !player.options.breakPlaceHolder && PlayerProgress.imaginaryUnlocked();
 }
 
 /**

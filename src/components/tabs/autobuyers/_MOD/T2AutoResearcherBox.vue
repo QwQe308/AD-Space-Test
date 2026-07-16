@@ -20,8 +20,8 @@ export default {
     name: () => `T2 Auto Researcher`,
   },
   methods: {
-    update(){
-      this.extraInfo = `Auto Researches T2 at ${formatPercents(Autobuyer.T2AutoResearcher.efficiency)} rate`
+    update() {
+      this.extraInfo = `Auto Researches T2 at ${formatPercents(Autobuyer.T2AutoResearcher.efficiency)} rate`;
     }
   }
 };
@@ -31,9 +31,8 @@ export default {
   <AutobuyerBox
     :autobuyer="autobuyer"
     name="T2 Auto Researcher"
-    :extraInfos="extraInfo"
-  >
-  </AutobuyerBox>
+    :extra-infos="extraInfo"
+  />
 </template>
 
 <style scoped>

@@ -9,7 +9,7 @@ export function tryCompleteInfinityChallenges() {
     InfinityChallenge(4).complete();
   }
   if (EternityMilestone.autoIC.isReached) {
-    const toComplete = InfinityChallenges.all.filter((x) => x.isUnlocked && !x.isCompleted);
+    const toComplete = InfinityChallenges.all.filter(x => x.isUnlocked && !x.isCompleted);
     for (const challenge of toComplete) challenge.complete();
   }
 }
@@ -141,7 +141,7 @@ export const InfinityChallenges = {
     player.challenge.infinity.completedBits = 0;
   },
   get nextIC() {
-    return InfinityChallenges.all.find((x) => !x.isUnlocked);
+    return InfinityChallenges.all.find(x => !x.isUnlocked);
   },
   get nextICUnlockAM() {
     return this.nextIC?.unlockAM;
@@ -168,6 +168,6 @@ export const InfinityChallenges = {
    * @returns {InfinityChallengeState[]}
    */
   get completed() {
-    return InfinityChallenges.all.filter((ic) => ic.isCompleted);
+    return InfinityChallenges.all.filter(ic => ic.isCompleted);
   },
 };

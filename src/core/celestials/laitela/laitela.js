@@ -53,7 +53,7 @@ export const Laitela = {
   get matterExtraPurchaseFactor() {
     let extraPurchases = Decimal.pow(Currency.darkMatter.max.add(1).max(1).log10().div(50), 0.4).div(2).add(1);
     extraPurchases = extraPurchases.plusEffectsOf(SpaceResearchRifts.r44, AbyssResearches.A17);
-    //multpliers
+    // Multpliers
     extraPurchases = extraPurchases.times(SingularityMilestone.continuumMult.effectOrDefault(DC.D0).add(1));
     return extraPurchases;
   },
@@ -100,7 +100,7 @@ export const Laitela = {
   // Max purchase interval, then DM, then DE, working highest tier down in each case. No reason for the order.
   maxAllDMDimensions(maxTier) {
     // Note that tier is 1-indexed
-    const unlockedDimensions = DarkMatterDimensions.all.filter((d) => d.isUnlocked && d.tier <= maxTier);
+    const unlockedDimensions = DarkMatterDimensions.all.filter(d => d.isUnlocked && d.tier <= maxTier);
     for (let i = 0; i < maxTier; i++) {
       unlockedDimensions[i].buyManyInterval(Infinity);
     }

@@ -6,6 +6,12 @@ export default {
   components: {
     SpaceResearchRiftBar,
   },
+  props: {
+    rift: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
       isMaxed: false,
@@ -17,12 +23,6 @@ export default {
       hasEffectiveFill: false,
       effect: "",
     };
-  },
-  props: {
-    rift: {
-      type: Object,
-      required: true,
-    },
   },
   computed: {
     SpaceResearchRift() {
@@ -69,7 +69,10 @@ export default {
           </div>
         </div>
         <div class="c-pelle-rift-column">
-          <SpaceResearchRiftBar :rift="rift" style="margin: auto 0" />
+          <SpaceResearchRiftBar
+            :rift="rift"
+            style="margin: auto 0"
+          />
         </div>
         <div class="c-pelle-rift-rift-info-container">
           <div class="c-pelle-rift-status">

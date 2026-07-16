@@ -8,7 +8,7 @@ export const changelog = [
    *  @property {function: @return String} info  Text body of information for the entry.
    * }
    */
-   {
+  {
     date: [2025, 1, 23],
     name: "Patch #1",
     info: `
@@ -32,7 +32,7 @@ Currently unknown bug:
 Content up to TS111, but if you want, you can go reality and beyond.(Balanced to first reality)
 <br>
 `,
-  },{
+  }, {
     date: [2025, 1, 10],
     name: "Eternity Bonus Update",
     info: `
@@ -45,7 +45,7 @@ Allows to go beyond the placeholder!
 Content up to TS111, but if you want, you can go reality and beyond.(Balanced to first reality)
 <br>
 `,
-  },{
+  }, {
     date: [2025, 1, 9],
     name: "v0.5 Eternity - Part 1",
     info: `
@@ -60,7 +60,7 @@ Content up to TS111.
 <br>
 `,
   },
-   {
+  {
     date: [2024, 9, 8],
     name: "v0.41 Bug Fixing",
     info: `
@@ -72,7 +72,7 @@ Content up to Eternity.
 <br>
 `,
   },
-   {
+  {
     date: [2024, 9, 7],
     name: "v0.4 BE Migration",
     info: `

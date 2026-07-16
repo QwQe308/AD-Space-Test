@@ -1,5 +1,5 @@
 <script>
-import { DC } from '../../../core/constants';
+import { DC } from "../../../core/constants";
 
 export default {
   name: "BigCrunchButton",
@@ -73,11 +73,11 @@ export default {
         "transition-duration": "0.2s"
       };
     },
-    
+
     getFrozenClass() {
       return {
         "frozen-currency": this.frozen
-      }
+      };
     },
   },
   methods: {
@@ -91,7 +91,7 @@ export default {
       this.headerTextColored = player.options.headerTextColored;
       this.creditsClosed = GameEnd.creditsEverClosed;
 
-      this.frozen = Currency.infinityPoints.frozen
+      this.frozen = Currency.infinityPoints.frozen;
 
       const gainedIP = gainedInfinityPoints();
       this.currentIP.copyFrom(Currency.infinityPoints);
@@ -106,7 +106,7 @@ export default {
     },
     crunch() {
       if (!Player.canCrunch) return;
-      if(isSCRunningOnTierOrHigher(6, 1)) return GameUI.notify.error("Manually crunch is disabled in SC6")
+      if (isSCRunningOnTierOrHigher(6, 1)) return GameUI.notify.error("Manually crunch is disabled in SC6");
       manualBigCrunchResetRequest();
     }
   },
@@ -141,7 +141,10 @@ export default {
       <div v-if="!showIPRate" />
       <b>
         Big Crunch for
-        <span :style="amountStyle" :class="getFrozenClass">{{ format(gainedIP, 2) }}</span>
+        <span
+          :style="amountStyle"
+          :class="getFrozenClass"
+        >{{ format(gainedIP, 2) }}</span>
         <span v-if="showIPRate"> IP</span>
         <span v-else> Infinity {{ pluralize("Point", gainedIP) }}</span>
       </b>

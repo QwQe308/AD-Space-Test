@@ -33,9 +33,9 @@ export default {
         PastEmpower.simulationMaxSpeed,
       ];
 
-      this.gainOnThresholds = this.thresholds.map((value) => PastEmpower.simulationGainOnSpeed("Infinity", value));
+      this.gainOnThresholds = this.thresholds.map(value => PastEmpower.simulationGainOnSpeed("Infinity", value));
 
-      this.growthOnThresholds = this.gainOnThresholds.map((value) => ({
+      this.growthOnThresholds = this.gainOnThresholds.map(value => ({
         infinityPoints: Currency.infinityPoints.value.eq(0)
           ? null
           : value.infinityPoints.div(Currency.infinityPoints.value),
@@ -59,9 +59,12 @@ export default {
         <th>{{ format(thresholds[4], 2, 2) }}x (100%)</th>
       </tr>
       <tr>
-        <th>IP<br />(Growth)</th>
-        <td v-for="i in 5" :key="i">
-          {{ format(gainOnThresholds[i - 1].infinityPoints, 2, 2) }}<br />(+{{
+        <th>IP<br>(Growth)</th>
+        <td
+          v-for="i in 5"
+          :key="i"
+        >
+          {{ format(gainOnThresholds[i - 1].infinityPoints, 2, 2) }}<br>(+{{
             growthOnThresholds[i - 1].infinityPoints
               ? formatPercents(growthOnThresholds[i - 1].infinityPoints, 2)
               : "∞"
@@ -69,9 +72,12 @@ export default {
         </td>
       </tr>
       <tr>
-        <th>IS<br />(Growth)</th>
-        <td v-for="i in 5" :key="i">
-          {{ format(gainOnThresholds[i - 1].infinities, 2, 2) }}<br />(+{{
+        <th>IS<br>(Growth)</th>
+        <td
+          v-for="i in 5"
+          :key="i"
+        >
+          {{ format(gainOnThresholds[i - 1].infinities, 2, 2) }}<br>(+{{
             growthOnThresholds[i - 1].infinities ? formatPercents(growthOnThresholds[i - 1].infinities, 2) : "∞"
           }}/s)
         </td>

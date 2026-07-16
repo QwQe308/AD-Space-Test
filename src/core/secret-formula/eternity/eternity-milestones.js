@@ -47,10 +47,10 @@ export const eternityMilestones = {
         Eternities (${effectText})`;
     },
     activeCondition: () =>
-      player.options.offlineProgress
+      (player.options.offlineProgress
         ? `Active as long as neither of the other offline milestones
         (${formatInt(200)} or ${formatInt(1000)}) are also active`
-        : "",
+        : ""),
   },
   autoIC: {
     eternities: 8,
@@ -147,16 +147,16 @@ export const eternityMilestones = {
       // eslint-disable-next-line prefer-template
       return (
         `While offline, gain Infinities equal to ${formatPercents(0.5)}
-        your best Infinities/hour this Eternity ` +
-        (infinities.gt(0) ? `(Currently ${format(infinities, 2, 2)}/hour)` : "(Inactive)")
+        your best Infinities/hour this Eternity ${
+        infinities.gt(0) ? `(Currently ${format(infinities, 2, 2)}/hour)` : "(Inactive)"}`
       );
     },
     activeCondition: () =>
-      player.options.offlineProgress
+      (player.options.offlineProgress
         ? `Must be outside of Normal/Infinity Challenges and outside of EC4 and EC12,
         the Big Crunch Autobuyer must be turned on and set to time mode with ${formatInt(5)} seconds or less,
         and the Eternity Autobuyer must be turned off.`
-        : "",
+        : ""),
     pelleUseless: true,
   },
   replicantiNoReset: {
@@ -202,15 +202,15 @@ export const eternityMilestones = {
       const realTime = PlayerProgress.seenAlteredSpeed() ? " real-time" : "";
       // eslint-disable-next-line prefer-template
       return (
-        `While offline, gain Eternities at ${formatPercents(0.5)} the rate of your fastest${realTime} Eternity ` +
-        (eternities.gt(0) ? `(Currently ${format(eternities, 2, 2)}/hour)` : "(Inactive)")
+        `While offline, gain Eternities at ${formatPercents(0.5)} the rate of your fastest${realTime} Eternity ${
+          eternities.gt(0) ? `(Currently ${format(eternities, 2, 2)}/hour)` : "(Inactive)"}`
       );
     },
     activeCondition: () =>
-      player.options.offlineProgress
+      (player.options.offlineProgress
         ? `Must be outside of all Challenges and Dilation, and the Eternity Autobuyer must be set to Eternity at zero EP.
         This milestone's effect is capped at ${formatInt(33)}ms.`
-        : "",
+        : ""),
     pelleUseless: true,
   },
 };

@@ -25,7 +25,7 @@ export default {
       function celestialReality(celestial, name, tab) {
         return {
           name: () => `${name} Reality`,
-          isActive: (token) => token,
+          isActive: token => token,
           activityToken: () => celestial.isRunning,
           tabName: () => tab,
         };
@@ -38,18 +38,18 @@ export default {
         celestialReality(Ra, "Ra's", "ra"),
         celestialReality(Laitela, "Lai'tela's", "laitela"),
         {
-          name: (token) => `Space Challenge ${token}`,
-          isActive: (token) => token > 0,
+          name: token => `Space Challenge ${token}`,
+          isActive: token => token > 0,
           activityToken: () => player.challenge.space.current,
         },
         {
           name: () => "Time Dilation",
-          isActive: (token) => token,
+          isActive: token => token,
           activityToken: () => player.dilation.active,
         },
         {
-          name: (token) => `Eternity Challenge ${token}`,
-          isActive: (token) => token > 0,
+          name: token => `Eternity Challenge ${token}`,
+          isActive: token => token > 0,
           activityToken: () => player.challenge.eternity.current,
         },
         {
@@ -57,17 +57,17 @@ export default {
             `Mirror (${formatPercents(player.light.redPercent / 100)},${formatPercents(
               player.light.greenPercent / 100
             )},${formatPercents(player.light.bluePercent / 100)})`,
-          isActive: (token) => token,
+          isActive: token => token,
           activityToken: () => player.light.inMirror,
         },
         {
-          name: (token) => `Infinity Challenge ${token}`,
-          isActive: (token) => token > 0,
+          name: token => `Infinity Challenge ${token}`,
+          isActive: token => token > 0,
           activityToken: () => player.challenge.infinity.current,
         },
         {
-          name: (token) => `${NormalChallenge(token).config.name} Challenge`,
-          isActive: (token) => token > 0,
+          name: token => `${NormalChallenge(token).config.name} Challenge`,
+          isActive: token => token > 0,
           activityToken: () => player.challenge.normal.current,
         },
       ];
@@ -111,7 +111,7 @@ export default {
       return this.infinityUnlocked || this.activeChallengeNames.length > 0;
     },
     isInFailableEC() {
-      return this.activeChallengeNames.some((str) => str.match(/Eternity Challenge (4|12)/gu));
+      return this.activeChallengeNames.some(str => str.match(/Eternity Challenge (4|12)/gu));
     },
     challengeDisplay() {
       if (this.inPelle && this.activeChallengeNames.length > 0) {
@@ -127,7 +127,7 @@ export default {
   methods: {
     update() {
       this.infinityUnlocked = PlayerProgress.infinityUnlocked();
-      this.activityTokens = this.parts.map((part) => part.activityToken());
+      this.activityTokens = this.parts.map(part => part.activityToken());
       // Dilation in Pelle can't be left once entered, but we still want to allow leaving more nested challenges
       this.showExit =
         this.inPelle && player.dilation.active
@@ -211,7 +211,7 @@ export default {
     exitDisplay() {
       if (Player.isInAntimatterChallenge) return (player.options.retryChallenge && !isSCRunningOnTierOrHigher(6, 1)) ? "Retry Challenge" : "Exit Challenge";
       if (player.light.inMirror) return canBreakMirror() ? "Break The Mirror" : "Escape The Mirror";
-      if (Player.anyChallenge instanceof SpaceChallengeState) return "Exit Challenge"
+      if (Player.anyChallenge instanceof SpaceChallengeState) return "Exit Challenge";
       if (Player.isInAnyChallenge) return (player.options.retryChallenge && !isSCRunningOnTierOrHigher(6, 1)) ? "Retry Challenge" : "Exit Challenge";
       if (player.dilation.active) return "Exit Dilation";
       if (this.resetCelestial) return "Restart Reality";
@@ -228,11 +228,20 @@ export default {
 </script>
 
 <template>
-  <div v-if="isVisible" class="l-game-header__challenge-text">
-    <span :class="textClassObject()" @click="textClicked"> You are currently in {{ challengeDisplay }} </span>
+  <div
+    v-if="isVisible"
+    class="l-game-header__challenge-text"
+  >
+    <span
+      :class="textClassObject()"
+      @click="textClicked"
+    > You are currently in {{ challengeDisplay }} </span>
     <FailableEcText v-if="isInFailableEC" />
     <span class="l-padding-line" />
-    <PrimaryButton v-if="showExit" @click="exitButtonClicked">
+    <PrimaryButton
+      v-if="showExit"
+      @click="exitButtonClicked"
+    >
       {{ exitText }}
     </PrimaryButton>
   </div>

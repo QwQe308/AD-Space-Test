@@ -1,5 +1,6 @@
 <script>
 import SliderComponent from "@/components/SliderComponent";
+
 export default {
   name: "ColorSlider",
   components: {
@@ -35,8 +36,8 @@ export default {
         interval: 10,
         width: "50rem",
         tooltip: false,
-        bgClass: "c-mirror-slider__bg_" + this.color,
-        processClass: "c-mirror-slider__process_" + this.color,
+        bgClass: `c-mirror-slider__bg_${this.color}`,
+        processClass: `c-mirror-slider__process_${this.color}`,
       };
     },
   },
@@ -48,11 +49,11 @@ export default {
     adjustSliderValue(value) {
       if (value === this.playerData()) return;
       this.percentage = value;
-      player.light[this.color + "Percent"] = this.percentage;
+      player.light[`${this.color}Percent`] = this.percentage;
       bigCrunchReset(true, true);
     },
     playerData() {
-      return player.light[this.color + "Percent"];
+      return player.light[`${this.color}Percent`];
     },
   },
 };
@@ -60,10 +61,14 @@ export default {
 
 <template>
   <div :style="'color:' + color">
-    <big> {{ colors[color] }}: {{ formatPercents(this.percentage / 100) }} </big>
+    <big> {{ colors[color] }}: {{ formatPercents(percentage / 100) }} </big>
     <big v-if="percentageMultplier !== 1">
-      (active: {{ formatPercents((this.percentage * this.percentageMultplier) / 100) }})
+      (active: {{ formatPercents((percentage * percentageMultplier) / 100) }})
     </big>
-    <SliderComponent v-bind="sliderProps" :value="percentage" @input="adjustSliderValue($event)" />
+    <SliderComponent
+      v-bind="sliderProps"
+      :value="percentage"
+      @input="adjustSliderValue($event)"
+    />
   </div>
 </template>

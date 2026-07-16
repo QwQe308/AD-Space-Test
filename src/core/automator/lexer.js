@@ -5,7 +5,7 @@ import { createToken, Lexer } from "chevrotain";
 
 import { DC } from "../constants";
 
-const createCategory = (name) => createToken({ name, pattern: Lexer.NA, longer_alt: Identifier });
+const createCategory = name => createToken({ name, pattern: Lexer.NA, longer_alt: Identifier });
 
 // Shorthand for creating tokens and adding them to a list
 const tokenLists = {};
@@ -227,7 +227,7 @@ for (let i = 1; i <= 12; ++i) {
   });
 }
 
-//MOD resources
+// MOD resources
 createInCategory(AutomatorCurrency, "Prisms", /(prisms)/i, {
   $autocomplete: "prisms",
   $getter: () => player.light.prisms,
@@ -319,7 +319,7 @@ const createKeyword = (name, pattern, props = {}) => {
   return token;
 };
 
-//orginal command
+// Orginal command
 createKeyword("Auto", /auto/i);
 createKeyword("Buy", /buy/i);
 // Necessary to hide it from Codemirror's tab auto-completion
@@ -364,7 +364,7 @@ createKeyword("XHighest", /x[ \t]+highest/i, {
   $autocomplete: "x highest",
 });
 
-//Mod command
+// Mod command
 createKeyword("Mirror", /mirror/i);
 createKeyword("Set", /set/i);
 createKeyword("Enter", /enter/i);
@@ -380,17 +380,17 @@ createInCategory(BuyType, "InfinityDimensions", /infinity[ \t]+dimensions/i, {
   $autocomplete: "infinity dimensions",
 });
 createInCategory(BuyType, "InfinityUpgrades", /infinity[ \t]+upgrades/i, {
-  $toTigger: () => InfinityUpgrade.all.forEach((x) => x.purchase()),
+  $toTigger: () => InfinityUpgrade.all.forEach(x => x.purchase()),
   $unlocked: () => true,
   $autocomplete: "infinity upgrades",
 });
 createInCategory(BuyType, "BreakInfinityUpgrades", /break[ \t]+infinity[ \t]+upgrades/i, {
-  $toTigger: () => BreakInfinityUpgrade.all.forEach((x) => x.purchase()),
+  $toTigger: () => BreakInfinityUpgrade.all.forEach(x => x.purchase()),
   $unlocked: () => true,
   $autocomplete: "break infinity upgrades",
 });
 createInCategory(BuyType, "ReplicantiUpgrades", /replicanti[ \t]+upgrades/i, {
-  $toTigger: () => Object.keys(ReplicantiUpgrade).forEach((x) => ReplicantiUpgrade[x].autobuyerTick()),
+  $toTigger: () => Object.keys(ReplicantiUpgrade).forEach(x => ReplicantiUpgrade[x].autobuyerTick()),
   $unlocked: () => true,
   $autocomplete: "replicanti upgrades",
 });
@@ -430,7 +430,7 @@ export const automatorTokens = [
   Exclamation,
   BlackHoleStr,
   NumberLiteral,
-  //mod
+  // Mod
   BuyType,
   ...tokenLists.BuyType,
   AutomatorCurrency,
@@ -466,13 +466,13 @@ for (const token of lexer.lexerDefinition) {
 
 // We use this while building up the grammar
 export const tokenMap = automatorTokens.mapToObject(
-  (e) => e.name,
-  (e) => e
+  e => e.name,
+  e => e
 );
 
-const automatorCurrencyNames = tokenLists.AutomatorCurrency.map((i) => i.$autocomplete.toUpperCase());
+const automatorCurrencyNames = tokenLists.AutomatorCurrency.map(i => i.$autocomplete.toUpperCase());
 
-export const standardizeAutomatorValues = function (x) {
+export const standardizeAutomatorValues = function(x) {
   try {
     if (automatorCurrencyNames.includes(x.toUpperCase())) return x.toUpperCase();
   } catch {
@@ -496,6 +496,6 @@ export const standardizeAutomatorValues = function (x) {
 // final resulting array. Note that this technically duplicates words present in multiple phrases (eg. "pending")
 const ignoredPatterns = ["Identifier", "LCurly", "RCurly"];
 export const forbiddenConstantPatterns = lexer.lexerDefinition
-  .filter((p) => !ignoredPatterns.includes(p.name))
-  .map((p) => p.PATTERN.source)
-  .flatMap((p) => (p.includes("(") || p.includes(")") ? p : p.split("[ \\t]+")));
+  .filter(p => !ignoredPatterns.includes(p.name))
+  .map(p => p.PATTERN.source)
+  .flatMap(p => (p.includes("(") || p.includes(")") ? p : p.split("[ \\t]+")));

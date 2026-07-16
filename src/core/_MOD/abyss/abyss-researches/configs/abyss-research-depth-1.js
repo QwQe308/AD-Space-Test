@@ -9,7 +9,7 @@ function getEternityStateCompleted(id) {
   return AbyssResearches[id].completed;
 }
 
-let baseConfig = {
+const baseConfig = {
   // ARs taken from depth 0.
   A21B: {
     position: [-2, -1],
@@ -62,7 +62,7 @@ let baseConfig = {
     next: [],
   },
 
-  //New ARs.
+  // New ARs.
 
   B0: {
     position: [0, 0],
@@ -133,13 +133,13 @@ let baseConfig = {
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to revise the PAST.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
-      baseInfo += `\n\n--------Difficultity--------\n\n`
+      baseInfo += `\n\n--------Difficultity--------\n\n`;
       switch (getEternityTotalState()) {
         // No empowers
         case 0:
-          baseInfo += `Time ----- ◆◆◇◇◇\n`
-          baseInfo += `Strategy - ◆◆◇◇◇\n`
-          baseInfo += `Active --- ◆◆◆◆◇\n`
+          baseInfo += `Time ----- ◆◆◇◇◇\n`;
+          baseInfo += `Strategy - ◆◆◇◇◇\n`;
+          baseInfo += `Active --- ◆◆◆◆◇\n`;
       }
       return baseInfo;
     },

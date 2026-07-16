@@ -1,12 +1,12 @@
 import { DC } from "../../constants";
 
 export function dimInfinityExponent() {
-  let exponent = TimeStudy(31).effectOrDefault(1)
-  return exponent
+  const exponent = TimeStudy(31).effectOrDefault(1);
+  return exponent;
 }
 
 export function dimInfinityMult() {
-  let exponent = dimInfinityExponent()
+  const exponent = dimInfinityExponent();
   return Currency.infinitiesTotal.value.times(0.2).plus(1).pow(exponent);
 }
 function chargedDimInfinityMult() {

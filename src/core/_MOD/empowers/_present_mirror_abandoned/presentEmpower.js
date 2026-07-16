@@ -40,11 +40,11 @@ class MirrorUpgrade extends GameMechanicState {
   }
 
   upgrade() {
-    this.pendingLevel = this.pendingLevel + 1;
+    this.pendingLevel += 1;
   }
 
   downgrade() {
-    this.pendingLevel = this.pendingLevel - 1;
+    this.pendingLevel -= 1;
   }
 
   update() {
@@ -95,7 +95,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `All light is ${formatX(effect, 1, 1)} more powerful in base effect.`;
         },
-        effect: (reverted) => Decimal.pow(1.1, reverted),
+        effect: reverted => Decimal.pow(1.1, reverted),
       },
     ],
   },
@@ -113,7 +113,7 @@ export const presentMirrorUpgradeConfig = {
             1
           )} extra galaxies, equal to ± purple light / 50.<br>(cannot let total galaxies fall below 0)`;
         },
-        effect: (reverted) => Decimal.div(light.purple.amount(), 50 * reverted).floor(),
+        effect: reverted => Decimal.div(light.purple.amount(), 50 * reverted).floor(),
       },
     ],
   },
@@ -126,7 +126,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `Yellow light also affects 1st Time Dimension.<br>(${formatX(effect, 2, 2)})`;
         },
-        effect: (reverted) => light.yellow.effectValue().abs().pow(reverted),
+        effect: reverted => light.yellow.effectValue().abs().pow(reverted),
       },
     ],
   },
@@ -139,7 +139,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `Cyan light also affects Replicanti. (${formatX(effect, 2, 2)})`;
         },
-        effect: (reverted) => light.cyan.effectValue().abs().pow(reverted),
+        effect: reverted => light.cyan.effectValue().abs().pow(reverted),
       },
     ],
   },
@@ -153,7 +153,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `Red light's effect is raised by space nerf. (${formatPow(effect, 2, 2)})`;
         },
-        effect: (reverted) => getSpaceNerf().pow(reverted),
+        effect: reverted => getSpaceNerf().pow(reverted),
       },
     ],
   },
@@ -166,7 +166,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `Green light also affects infinities gain. (${formatX(effect, 2, 2)})`;
         },
-        effect: (reverted) => light.green.effectValue().abs().pow(reverted),
+        effect: reverted => light.green.effectValue().abs().pow(reverted),
       },
     ],
   },
@@ -179,7 +179,7 @@ export const presentMirrorUpgradeConfig = {
         description(effect) {
           return `Blue light affects T3 Space Researches. (${formatX(effect, 2, 2)})`;
         },
-        effect: (reverted) => light.blue.effectValue().abs().pow(reverted),
+        effect: reverted => light.blue.effectValue().abs().pow(reverted),
       },
     ],
   },
@@ -187,5 +187,5 @@ export const presentMirrorUpgradeConfig = {
 
 export const PresentMirrorUpgrades = mapGameDataToObject(
   presentMirrorUpgradeConfig,
-  (config) => new MirrorUpgrade(config)
+  config => new MirrorUpgrade(config)
 );

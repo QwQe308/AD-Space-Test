@@ -1,22 +1,22 @@
 import { DC } from "../constants";
 
 function getSpaceNerfExponent() {
-  return 0.925; //dilated ^0.925
+  return 0.925; // Dilated ^0.925
 }
 
 export function getSpaceDivisor() {
-  //space amount divisor
+  // Space amount divisor
   let divisor = new Decimal(1);
   divisor = divisor.timesEffectsOf(
     DilationUpgrade.spaceDivisorDT,
     SpaceResearchRifts.r22,
     AbyssResearches.A9
-  )
+  );
   if (isSCRunningOnTier(3, 2)) {
     let sc3Nerf = DC.D1;
-    SpaceResearchTierDetail[0].forEach((x) => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.1))));
-    SpaceResearchTierDetail[1].forEach((x) => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.3))));
-    SpaceResearchTierDetail[2].forEach((x) => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.6))));
+    SpaceResearchTierDetail[0].forEach(x => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.1))));
+    SpaceResearchTierDetail[1].forEach(x => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.3))));
+    SpaceResearchTierDetail[2].forEach(x => (sc3Nerf = sc3Nerf.add(SpaceResearchRifts[x].level.mul(0.6))));
     divisor = divisor.div(sc3Nerf);
   }
   divisor = divisor.div(light.white.effectValue());
@@ -24,7 +24,7 @@ export function getSpaceDivisor() {
 }
 
 export function getEffectiveSpace() {
-  let effectiveSpace = player.space.mul(getEffectiveSpaceMult()).mul(light.cyan.effectValue());
+  const effectiveSpace = player.space.mul(getEffectiveSpaceMult()).mul(light.cyan.effectValue());
   return effectiveSpace;
 }
 
@@ -52,8 +52,8 @@ export function getAMMultiplier() {
 }
 
 function getSpaceAmount(realAM) {
-  //calc space amount
-  let baseSpace = Decimal.pow10(
+  // Calc space amount
+  const baseSpace = Decimal.pow10(
     realAM
       .max(10)
       .log10()
@@ -61,7 +61,7 @@ function getSpaceAmount(realAM) {
   )
     .pow(2)
     .div(100)
-    .sub(1); //100 ^ lg(realAM) ^ (1-dil) /100 -1
+    .sub(1); // 100 ^ lg(realAM) ^ (1-dil) /100 -1
   return baseSpace;
 }
 
@@ -70,21 +70,21 @@ export function getSpaceNerf(space = getSpaceAfterCalc()) {
 }
 
 export function produceAM(proc, diff) {
-  let recordAM = player.antimatter;
+  const recordAM = player.antimatter;
 
-  let amMult = getAMMultiplier();
-  let realAM = player.antimatter.div(amMult).pow(getSpaceNerf());
-  let pendingAM = realAM.add(proc);
+  const amMult = getAMMultiplier();
+  const realAM = player.antimatter.div(amMult).pow(getSpaceNerf());
+  const pendingAM = realAM.add(proc);
   player.space = getSpaceAmount(pendingAM);
 
-  let pendingTrueAM = pendingAM.root(getSpaceNerf()).mul(amMult)
-  if (player.light.inMirror) pendingTrueAM = pendingTrueAM.min(getMirrorRequirement())//some may want to use > in command so thats it
+  let pendingTrueAM = pendingAM.root(getSpaceNerf()).mul(amMult);
+  if (player.light.inMirror) pendingTrueAM = pendingTrueAM.min(getMirrorRequirement());// Some may want to use > in command so thats it
   Currency.antimatter.value = pendingTrueAM;
   player.records.totalAntimatter = player.records.totalAntimatter.max(player.antimatter);
 
   player.amProc = player.antimatter.sub(recordAM).div(diff.div(1000)).max(0);
 
-  //some precision bugs happened after using BE and has to do so
+  // Some precision bugs happened after using BE and has to do so
   if (player.dimensions.antimatter[0].amount.eq(0)) Currency.antimatter.bumpTo(10);
 }
 

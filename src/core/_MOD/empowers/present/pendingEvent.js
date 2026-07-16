@@ -38,21 +38,21 @@ export class PendingEvent {
   }
 
   process(currentAffix) {
-    let extras = this._process({
+    const extras = this._process.call(this, {
       extras: this.extras,
       data: this.data,
       event: this,
       baseSpellPower: this.baseSpellPower,
       occured: this.occured,
-      currentAffix: currentAffix,
+      currentAffix,
     });
     if (extras !== undefined) this.extras = extras;
   }
 
-  count() {
+  count(currentAffix) {
     this.delay--;
     if (this.delay === 0) {
-      this.process();
+      this.process(currentAffix);
       this.unmount();
     } else if (this.delay < 0) {
       this.unmount();
@@ -61,7 +61,7 @@ export class PendingEvent {
 
   mount(delay = undefined, extras = undefined, updateSpellPower = false) {
     if (delay !== undefined) this.delay = delay;
-    else this.delay = this.baseDelay
+    else this.delay = this.baseDelay;
     this.data.pending.add(this);
     if (extras !== undefined) this.extras = extras;
     if (updateSpellPower) this.baseSpellPower = new Decimal(this.data.spellPower);
@@ -73,8 +73,8 @@ export class PendingEvent {
 }
 
 function fakeData(data, power) {
-  let result = {};
-  result.assign(result, data);
+  const result = {};
+  Object.assign(result, data);
   result.spellPower = power;
   return result;
 }

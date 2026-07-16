@@ -171,7 +171,7 @@ export function processManualReality(sacrifice, glyphID) {
     // If this is our first Reality, lock in the initial seed and then give the companion and starting glyphs
     player.reality.seed = player.reality.initialSeed;
     Glyphs.addToInventory(GlyphGenerator.startingGlyph(gainedGlyphLevel()));
-    //Glyphs.addToInventory(GlyphGenerator.companionGlyph(Currency.eternityPoints.value));  //It's causing some bugs
+    // Glyphs.addToInventory(GlyphGenerator.companionGlyph(Currency.eternityPoints.value));  //It's causing some bugs
   } else if (Perk.firstPerk.isEffectActive) {
     // If we have firstPerk, we pick from 4+ glyphs, and glyph generation functions as normal.
     GlyphSelection.generate(GlyphSelection.choiceCount);
@@ -300,7 +300,7 @@ function updateRealityRecords(realityProps) {
     player.records.bestReality.realTime = player.records.thisReality.realTime;
     player.records.bestReality.speedSet = Glyphs.copyForRecords(Glyphs.active.filter(g => g !== null));
   }
-  player.records.bestReality.trueTime = Math.min(player.records.bestReality.trueTime, player.records.thisReality.trueTime)
+  player.records.bestReality.trueTime = Math.min(player.records.bestReality.trueTime, player.records.thisReality.trueTime);
 }
 
 function giveRealityRewards(realityProps) {
@@ -759,11 +759,11 @@ export function finishProcessReality(realityProps) {
     player.break = true;
   }
 
-  //MOD
-  SpaceResearchTierDetail[1].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[2].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[3].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].reset());
+  // MOD
+  SpaceResearchTierDetail[1].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[2].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[3].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[4].forEach(x => SpaceResearchRifts[x].reset());
 
   player.space = new Decimal(0);
   Currency.antimatter.reset();

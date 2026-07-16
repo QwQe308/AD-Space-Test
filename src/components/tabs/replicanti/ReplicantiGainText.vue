@@ -67,8 +67,8 @@ export default {
         remainingTime = new Decimal();
       }
 
-      const galaxiesPerSecond = log10GainFactorPerTickUncapped.times(new Decimal(ticksPerSecond).div(Replicanti.galaxies.divisor? Replicanti.galaxies.divisor.log10() : DLOG10_MAXNUM));
-      const timeFromZeroRG = (galaxies) => galaxies.add(49.5).div(49.5).ln().mul(50);
+      const galaxiesPerSecond = log10GainFactorPerTickUncapped.times(new Decimal(ticksPerSecond).div(Replicanti.galaxies.divisor ? Replicanti.galaxies.divisor.log10() : DLOG10_MAXNUM));
+      const timeFromZeroRG = galaxies => galaxies.add(49.5).div(49.5).ln().mul(50);
       let baseGalaxiesPerSecond, effectiveMaxRG, effectiveCurrentRG;
       if (RealityUpgrade(6).isBought && !Pelle.isDoomed) {
         baseGalaxiesPerSecond = galaxiesPerSecond.divide(RealityUpgrade(6).effectValue);
@@ -150,7 +150,7 @@ export default {
 </script>
 
 <template>
-  <p>{{ remainingTimeText }}<br />{{ galaxyText }}</p>
+  <p>{{ remainingTimeText }}<br>{{ galaxyText }}</p>
 </template>
 
 <style scoped></style>

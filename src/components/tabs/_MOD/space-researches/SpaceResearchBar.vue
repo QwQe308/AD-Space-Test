@@ -39,8 +39,8 @@ export default {
       this.isMaxed = rift.isMaxed;
       this.percentage = rift.percentage;
 
-      if(rift.trueFillSpeed.gt(0)) this.timeToNext = TimeSpan.fromSeconds(rift.pendingRequirement.sub(rift.pendingProgress).div(rift.trueFillSpeed).toNumber()).toTimeEstimate()
-      else this.timeToNext = "Forever"
+      if (rift.trueFillSpeed.gt(0)) this.timeToNext = TimeSpan.fromSeconds(rift.pendingRequirement.sub(rift.pendingProgress).div(rift.trueFillSpeed).toNumber()).toTimeEstimate();
+      else this.timeToNext = "Forever";
     },
     formatRift(value) {
       return typeof value === "number" ? `${formatInt(100 * value)}%` : format(value, 2);
@@ -74,26 +74,37 @@ export default {
     <div class="l-overflow-hidden">
       <!-- Note: These are separate because permanent and animated fill both use the same positional attributes -->
       <div
-        v-if="!isMaxed" class="o-pelle-rift-bar-fill"
+        v-if="!isMaxed"
+        class="o-pelle-rift-bar-fill"
         :style="{
           width: `${Math.clampMax(percentage * 100, 100)}%`,
         }"
       />
       <div
-        v-else class="o-pelle-rift-bar-fill"
+        v-else
+        class="o-pelle-rift-bar-fill"
         :style="{
           width: `100%`,
         }"
       />
       <!-- This bar overlay adds the shadow within the bar so the ugly edges don't show -->
       <div class="o-pelle-rift-bar-overlay" />
-      <div v-if="isActive && !isMaxed" class="o-pelle-rift-bar-active-fill" />
+      <div
+        v-if="isActive && !isMaxed"
+        class="o-pelle-rift-bar-active-fill"
+      />
     </div>
-    <div v-if="!isMaxed" class="o-pelle-rift-bar-percentage">
+    <div
+      v-if="!isMaxed"
+      class="o-pelle-rift-bar-percentage"
+    >
       {{ formatPercents(percentage, 3) }}
       <span>({{ isActive ? "Filling" : "Idle" }})</span>
     </div>
-    <div v-else class="o-pelle-rift-bar-percentage">
+    <div
+      v-else
+      class="o-pelle-rift-bar-percentage"
+    >
       {{ formatPercents(1, 3) }}
     </div>
   </div>

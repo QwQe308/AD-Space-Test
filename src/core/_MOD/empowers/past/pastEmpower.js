@@ -67,7 +67,7 @@ class PastEmpowerClass {
   }
 
   get simulationMaxSpeed() {
-    let maxSpeed = DC.E1;
+    const maxSpeed = DC.E1;
     return maxSpeed;
   }
 
@@ -91,7 +91,7 @@ class PastEmpowerClass {
     if (CurrentSimulationConfig.checkSuccess()) {
       if (fakeSimulationTime < 2000) {
         this.simulationSpeed = this.simulationSpeed.mul(2000 / fakeSimulationTime).min(this.simulationMaxSpeed);
-        if(this.simulationSpeed.eq(this.simulationMaxSpeed)) return console.log(fakeSimulationTime)
+        if (this.simulationSpeed.eq(this.simulationMaxSpeed)) return console.log(fakeSimulationTime);
       }
       CurrentSimulationConfig.giveRewards(this.simulationSpeed, this.data.simulationTimeThisReset.div(1000));
       CurrentSimulationConfig.reset();
@@ -122,7 +122,7 @@ class PastEmpowerClass {
 }
 
 function calcRewards(rewardsList, simulationSpeed) {
-  for (let i in rewardsList) {
+  for (const i in rewardsList) {
     rewardsList[i] = rewardsList[i].mul(simulationSpeed).div(0.033);
   }
   return rewardsList;

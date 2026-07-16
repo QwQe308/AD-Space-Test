@@ -6,9 +6,10 @@ import HeaderChallengeEffects from "../HeaderChallengeEffects";
 import HeaderPrestigeGroup from "../HeaderPrestigeGroup";
 import NewsTicker from "../NewsTicker";
 
+import HeaderSpaceInfo from "../../tabs/_MOD/HeaderSpaceInfo.vue";
+
 import GameSpeedDisplay from "@/components/GameSpeedDisplay";
 
-import HeaderSpaceInfo from "../../tabs/_MOD/HeaderSpaceInfo.vue";
 
 export default {
   name: "ModernUi",
@@ -48,11 +49,11 @@ export default {
   },
   methods: {
     update() {
-      this.inAbyssResearchTab = Tab.space.abyssResearch.isOpen; //marign-bottom is so annoying in this tab
-      this.maxConcurrent = AbyssResearches.A1.maxConcurrent; //for any node thats same so thats it
+      this.inAbyssResearchTab = Tab.space.abyssResearch.isOpen; // Marign-bottom is so annoying in this tab
+      this.maxConcurrent = AbyssResearches.A1.maxConcurrent; // For any node thats same so thats it
       this.abyssResearchSpeed.copyFrom(globalAbyssResearchSpeed());
-      let activeNodesInfo = [];
-      for (let id of player.activeAbyssResearches) {
+      const activeNodesInfo = [];
+      for (const id of player.activeAbyssResearches) {
         let text = String(id);
         switch (AbyssResearches[id].type) {
           case "unlimited":
@@ -64,11 +65,11 @@ export default {
           case "single":
             break;
         }
-        let researchSpeed = AbyssResearches[id].researchSpeed;
-        let timeToNext = researchSpeed.gt(0)
+        const researchSpeed = AbyssResearches[id].researchSpeed;
+        const timeToNext = researchSpeed.gt(0)
           ? TimeSpan.fromSeconds(
-              AbyssResearches[id].cost.sub(AbyssResearches[id].progress).div(researchSpeed).toNumber()
-            ).toSimplifiedTimeEstimate()
+            AbyssResearches[id].cost.sub(AbyssResearches[id].progress).div(researchSpeed).toNumber()
+          ).toSimplifiedTimeEstimate()
           : "Forever";
         text += ` (${formatPercents(AbyssResearches[id].percentage)}) (${timeToNext})`;
         activeNodesInfo.push(text);
@@ -91,26 +92,47 @@ export default {
 
 <template>
   <div id="page">
-    <link rel="stylesheet" type="text/css" href="stylesheets/new-ui-styles.css" />
-    <div :key="newGameKey" class="game-container" :style="topMargin">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="stylesheets/new-ui-styles.css"
+    >
+    <div
+      :key="newGameKey"
+      class="game-container"
+      :style="topMargin"
+    >
       <NewsTicker v-if="news" />
       <BigCrunchButton />
-      <div v-if="!bigCrunch" class="tab-container">
+      <div
+        v-if="!bigCrunch"
+        class="tab-container"
+      >
         <HeaderPrestigeGroup />
-        <div class="information-header" :class="informationHeaderClass">
+        <div
+          class="information-header"
+          :class="informationHeaderClass"
+        >
           <HeaderChallengeDisplay />
           <HeaderChallengeEffects />
           <GameSpeedDisplay v-if="hasReality" />
-          <br v-if="hasReality" />
+          <br v-if="hasReality">
           <HeaderBlackHole />
           <HeaderSpaceInfo />
         </div>
         <slot />
-        <div class="active-research-info" v-if="activeNodesInfo.length > 0 || inAbyssResearchTab">
+        <div
+          v-if="activeNodesInfo.length > 0 || inAbyssResearchTab"
+          class="active-research-info"
+        >
           <h3>Researching ({{ activeNodesInfo.length }}/{{ maxConcurrent }})</h3>
           <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
           <div class="active-list">
-            <div v-for="(info, index) in activeNodesInfo" :key="index" class="active-item">
+            <div
+              v-for="(info, index) in activeNodesInfo"
+              :key="index"
+              class="active-item"
+            >
               {{ info }}
             </div>
           </div>

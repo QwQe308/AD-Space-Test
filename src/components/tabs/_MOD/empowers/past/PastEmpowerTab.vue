@@ -2,6 +2,7 @@
 import { PastEmpower } from "../../../../../core/_MOD/empowers/past/pastEmpower";
 import { DC } from "../../../../../core/constants";
 import GlyphComponent from "../../../../GlyphComponent.vue";
+
 import InfinitySimulationHeader from "./Infinity/InfinitySimulationHeader.vue";
 import InfinitySimulationInfo from "./Infinity/InfinitySimulationInfo.vue";
 
@@ -35,6 +36,7 @@ export default {
       simulationMaxSpeed: PastEmpower.simulationMaxSpeed,
     };
   },
+  computed: {},
   methods: {
     update() {
       this.frozenCurrency = PastEmpower.freezing;
@@ -63,7 +65,7 @@ export default {
       PastEmpower.toggleSimulation(id);
     },
     fakeGlyph(config) {
-      let typeName = config.glyph;
+      const typeName = config.glyph;
       return {
         type: typeName,
         strength: this.simulatingPrestige === config.name ? 2 : 1,
@@ -71,22 +73,21 @@ export default {
       };
     },
   },
-  computed: {},
 };
 </script>
 
 <template>
   <div class="past-tab">
     <div class="tip">
-      Click a currency to freeze/unfreeze it. Frozen currencies cannot be decreased/increased by any way.<br />
+      Click a currency to freeze/unfreeze it. Frozen currencies cannot be decreased/increased by any way.<br>
       You can only freeze a single currency at the same time.
     </div>
     <div class="freeze">
       <div v-for="currenciesData in currenciesAvailableForFreeze">
         <button
+          v-tooltip="currenciesData.name"
           class="freeze-button"
           :class="getFreezeButtonClass(currenciesData.id)"
-          v-tooltip="currenciesData.name"
           @click="toggleFreeze(currenciesData.id)"
         >
           {{ currenciesData.symbol }}
@@ -95,23 +96,42 @@ export default {
     </div>
     <div class="simulation">
       <div class="simulation-warpper">
-        <div class="simulation-title">Prestige Simulation</div>
-        <hr class="simulation-division" />
+        <div class="simulation-title">
+          Prestige Simulation
+        </div>
+        <hr class="simulation-division">
         <div class="simulation-panel">
           <!-- Left Simulation Selection Panel -->
           <div class="left-simulation-panel">
-            <span v-for="(config, index) in prestigesAvailableForSimulation" class="o-single-glyph" :key="index">
-              <div class="clickable-glyph-icon-container" @click="toggleSimulationDisplay(config.name)">
-                <GlyphComponent class="clickable-glyph-icon" v-tooltip="config.name" :glyph="fakeGlyph(config)" />
+            <span
+              v-for="(config, index) in prestigesAvailableForSimulation"
+              :key="index"
+              class="o-single-glyph"
+            >
+              <div
+                class="clickable-glyph-icon-container"
+                @click="toggleSimulationDisplay(config.name)"
+              >
+                <GlyphComponent
+                  v-tooltip="config.name"
+                  class="clickable-glyph-icon"
+                  :glyph="fakeGlyph(config)"
+                />
               </div>
-              <div class="select-arrow" :class="getSimulatingArrowClass(config.name)" />
+              <div
+                class="select-arrow"
+                :class="getSimulatingArrowClass(config.name)"
+              />
             </span>
           </div>
 
           <!-- Middle Simulation Info Panel -->
           <div class="mid-simulation-panel">
             <div class="mid-simulation-panel-warpper">
-              <div class="weak-text header" v-if="simulatingPrestige">
+              <div
+                v-if="simulatingPrestige"
+                class="weak-text header"
+              >
                 <div class="speed">
                   <p>Currently simulating: {{ simulatingPrestige }}</p>
                   <p>Simulating speed: {{ format(simulationSpeed, 2, 2) }} / {{ format(simulationMaxSpeed, 2, 2) }}</p>
@@ -124,7 +144,7 @@ export default {
                   <InfinitySimulationHeader v-if="simulatingPrestige === 'Infinity'" />
                 </div>
               </div>
-              <br />
+              <br>
               <div class="main">
                 <InfinitySimulationInfo v-if="displayingSimulation === 'Infinity'" />
               </div>
@@ -132,14 +152,23 @@ export default {
           </div>
 
           <!-- Corner Simulation Start Button -->
-          <div v-if="displayingSimulation" class="corner-simulation-button-container">
+          <div
+            v-if="displayingSimulation"
+            class="corner-simulation-button-container"
+          >
             <button
+              v-tooltip="displayingSimulation !== simulatingPrestige && 'Will pause running simulation!'"
               class="corner-simulation-start-button o-primary-btn"
               @click="toggleSimulating(displayingSimulation)"
-              v-tooltip="this.displayingSimulation !== this.simulatingPrestige && 'Will pause running simulation!'"
             >
-              <div v-if="simulatingPrestige === displayingSimulation" class="fa fa-pause" />
-              <div v-else class="fa fa-play" />
+              <div
+                v-if="simulatingPrestige === displayingSimulation"
+                class="fa fa-pause"
+              />
+              <div
+                v-else
+                class="fa fa-play"
+              />
             </button>
           </div>
         </div>

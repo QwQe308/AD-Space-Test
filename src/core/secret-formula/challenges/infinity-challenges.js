@@ -34,9 +34,9 @@ export const infinityChallenges = [
       multiplier on all Antimatter Dimensions which increases based on Antimatter Galaxies.`,
     goal: DC.E5300,
     isQuickResettable: false,
-    effect: () => Laitela.continuumActive
+    effect: () => (Laitela.continuumActive
       ? Decimal.pow(player.galaxies.times(0.005).add(1.05), Tickspeed.continuumValue)
-      : Decimal.pow(player.galaxies.times(0.005).add(1.05), player.totalTickBought),
+      : Decimal.pow(player.galaxies.times(0.005).add(1.05), player.totalTickBought)),
     formatEffect: value => formatX(value, 2, 2),
     reward: {
       description: `Antimatter Dimension multiplier based on Antimatter Galaxies and Tickspeed purchases`,

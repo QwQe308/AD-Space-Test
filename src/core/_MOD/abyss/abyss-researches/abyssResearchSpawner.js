@@ -1,48 +1,48 @@
 import { DEV } from "../../../../env";
 
 export const abyssDepths = [
-  ["0", () => !AbyssResearches["C0"].completed],
-  ["1", () => AbyssResearches["C0"].completed],
+  ["0", () => !AbyssResearches.C0.completed],
+  ["1", () => AbyssResearches.C0.completed],
 ];
 
 export function quickSpawnResearches(config, layer) {
-  //safety checker
+  // Safety checker
   if (DEV) abyssResearchSafetyChecker(config, layer);
 
-  for (let i in config) {
+  for (const i in config) {
     config[i].id = i;
     config[i].depth = layer;
     if (!config[i].tooltipTags) config[i].tooltipTags = [];
     if (!config[i].next) config[i].next = [];
     if (!config[i].previous) config[i].previous = [];
-    for (let nextID of config[i].next) {
-      let nextNode = config[nextID];
+    for (const nextID of config[i].next) {
+      const nextNode = config[nextID];
       if (nextNode.previous === undefined) nextNode.previous = [];
       nextNode.previous.push(i);
     }
   }
 }
 
-//check if the config is valid
+// Check if the config is valid
 export function abyssResearchSafetyChecker(config, layer) {
   let error = false;
-  let positions = [];
-  for (let i in config) {
-    //global checker
-    for (let item of ["description", "type", "position"]) {
+  const positions = [];
+  for (const i in config) {
+    // global checker
+    for (const item of ["description", "type", "position"]) {
       if (!config[i][item]) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No ${item} defined)`);
         error = true;
       }
     }
-    //position checker
-    if (positions.filter((x) => x[0] === config[i].position[0] && x[1] === config[i].position[1]).length > 0) {
+    // Position checker
+    if (positions.filter(x => x[0] === config[i].position[0] && x[1] === config[i].position[1]).length > 0) {
       console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (Position replicated)`);
       error = true;
     }
     positions.push(config[i].position);
-    //restriction checker (disabled as currently restriction class will check it automatically)
-    //type checker
+    // Restriction checker (disabled as currently restriction class will check it automatically)
+    // type checker
     if (config[i].type === "single") {
       if (!config[i].cost) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
@@ -125,8 +125,8 @@ export const NODE_TYPE = {
   UNLIMITED: "unlimited",
   CORE: "core",
   LINK: "link",
-}
+};
 
 export const SCALING_TYPE = {
   LINEAR: "linear",
-}
+};

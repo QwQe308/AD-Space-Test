@@ -409,12 +409,12 @@ then second, and so on until the 8th Antimatter Dimension, and then buy max Tick
 <br>
 <br>
 <b>Dimension base prices:</b> ${Array.range(1, 8)
-        .map((tier) => format(AntimatterDimension(tier)._baseCost, 2, 2))
-        .join(", ")}
+    .map(tier => format(AntimatterDimension(tier)._baseCost, 2, 2))
+    .join(", ")}
 <br>
 <b>Base per ${formatInt(10)} bought dimension price increases:</b> ${Array.range(1, 8)
-        .map((tier) => format(AntimatterDimension(tier)._baseCostMultiplier, 2, 2))
-        .join(", ")}
+  .map(tier => format(AntimatterDimension(tier)._baseCostMultiplier, 2, 2))
+  .join(", ")}
 <br>
 <br>
 <b>Hotkeys: 1, 2, 3, 4, 5, 6, 7, 8</b> for buy until ${formatInt(10)} Xth Dimension
@@ -709,20 +709,20 @@ of Infinity Dimensions does not carry between crunches, all the multipliers you 
 <br>
 <br>
 <b>Infinity Dimension unlock thresholds (antimatter):</b> ${Array.range(1, 8)
-        .map((tier) => formatPostBreak(InfinityDimension(tier)._unlockRequirement))
-        .join(", ")}
+    .map(tier => formatPostBreak(InfinityDimension(tier)._unlockRequirement))
+    .join(", ")}
 <br>
 <b>Infinity Dimension purchase multipliers:</b> ${Array.range(1, 8)
-        .map((tier) => format(InfinityDimension(tier)._powerMultiplier))
-        .join(", ")}
+    .map(tier => format(InfinityDimension(tier)._powerMultiplier))
+    .join(", ")}
 <br>
 <b>Infinity Dimension base prices (IP):</b> ${Array.range(1, 8)
-        .map((tier) => format(InfinityDimension(tier)._baseCost))
-        .join(", ")}
+    .map(tier => format(InfinityDimension(tier)._baseCost))
+    .join(", ")}
 <br>
 <b>Infinity Dimension price increases:</b> ${Array.range(1, 8)
-        .map((tier) => format(InfinityDimension(tier)._costMultiplier))
-        .join(", ")}
+    .map(tier => format(InfinityDimension(tier)._costMultiplier))
+    .join(", ")}
 <br>
 <br>
 Instead of antimatter, the 1st Infinity Dimension produces Infinity Power, which gives a multiplier applied
@@ -747,8 +747,8 @@ amount of antimatter before you can attempt them.
 <br>
 <br>
 <b>Infinity Challenge unlock thresholds:</b> ${GameDatabase.challenges.infinity
-        .map((ic) => formatPostBreak(ic.unlockAM))
-        .join(", ")}
+    .map(ic => formatPostBreak(ic.unlockAM))
+    .join(", ")}
 `,
       isUnlocked: () => Autobuyer.bigCrunch.hasMaxedInterval || PlayerProgress.eternityUnlocked(),
       tags: ["rewards", "break", "ic", "midgame"],
@@ -863,12 +863,12 @@ ${format(TimeDimension(1)._costIncreaseThresholds[2])} EP each dimension purchas
 purpose of cost increases, causing the price to rise much more steeply.
 <br>
 <b>Time Dimension base prices (EP):</b> ${Array.range(1, 8)
-        .map((tier) => format(TimeDimension(tier)._baseCost))
-        .join(", ")}
+    .map(tier => format(TimeDimension(tier)._baseCost))
+    .join(", ")}
 <br>
 <b>Time Dimension base price increases:</b> ${Array.range(1, 8)
-        .map((tier) => format(TimeDimension(tier)._costMultiplier))
-        .join(", ")}
+    .map(tier => format(TimeDimension(tier)._costMultiplier))
+    .join(", ")}
 <br>
 <br>
 Each threshold to gain another Tickspeed Upgrade is ${formatPercents(0.33)} more Time Shards than the previous,
@@ -1561,16 +1561,16 @@ You can toggle a setting to automatically store offline time as stored real time
 <br>
 <br>
 Their first unlock costs ${format(
-        TimeSpan.fromMilliseconds(new Decimal(ENSLAVED_UNLOCKS.FREE_TICKSPEED_SOFTCAP.price)).totalYears
-      )}
+    TimeSpan.fromMilliseconds(new Decimal(ENSLAVED_UNLOCKS.FREE_TICKSPEED_SOFTCAP.price)).totalYears
+  )}
 years of stored game time. It increases the softcap to Tickspeed Upgrades gained from Time Dimensions
 (the point at which their cost starts increasing faster)
 by ${format(1e5)} Tickspeed Upgrades.
 <br>
 <br>
 At ${format(
-        TimeSpan.fromMilliseconds(new Decimal(ENSLAVED_UNLOCKS.RUN.price)).totalYears
-      )} years of stored game time, you are able
+    TimeSpan.fromMilliseconds(new Decimal(ENSLAVED_UNLOCKS.RUN.price)).totalYears
+  )} years of stored game time, you are able
 to finally unlock their Reality. The reward for completing The Nameless Ones' Reality is
 ${
   Enslaved.isCompleted
@@ -1590,7 +1590,7 @@ The Nameless Ones will not directly unlock the next Celestial.
         "endgame",
         "testers",
         "celestial",
-        ...credits.people.map((p) => p.name),
+        ...credits.people.map(p => p.name),
       ],
       tab: "celestials/enslaved",
     },
@@ -2115,7 +2115,7 @@ Rifts once the current cap has been reached.`,
   ],
 };
 
-(function () {
+(function() {
   for (let i = 0; i < h2p.tabs.length; i++) {
     const tab = h2p.tabs[i];
     tab.id = i;
@@ -2168,7 +2168,7 @@ Rifts once the current cap has been reached.`,
     addPhrase(tab.alias, tab);
   }
 
-  const map2dToObject = function (arr, keyFun, valueFun) {
+  const map2dToObject = function(arr, keyFun, valueFun) {
     const out = {};
     for (let idx1 = 0; idx1 < arr.length; idx1++) {
       for (let idx2 = 0; idx2 < arr[idx1].length; idx2++) {
@@ -2179,10 +2179,10 @@ Rifts once the current cap has been reached.`,
   };
 
   // Very suboptimal code coming up. If anybody has a better solution, PLEASE, implement it.
-  const keyboardify = (keybrd) =>
+  const keyboardify = keybrd =>
     map2dToObject(
-      keybrd.split(",").map((str) => str.split("")),
-      (key) => key,
+      keybrd.split(",").map(str => str.split("")),
+      key => key,
       (_key, x, y) => ({ x, y })
     );
 
@@ -2196,7 +2196,7 @@ Rifts once the current cap has been reached.`,
 
   const keyboards = [qwerty, qwertz, azerty, dvorak, colemak, workman, qwprf];
 
-  const keyboardDist = function (a, b, keyboard) {
+  const keyboardDist = function(a, b, keyboard) {
     const aPos = keyboard[a],
       bPos = keyboard[b];
     if (!aPos || !bPos) return 100;
@@ -2208,7 +2208,7 @@ Rifts once the current cap has been reached.`,
   // to a function which roughly estimates how likely the user is to mispress the key based on its
   // minimum distance from several common keyboard layouts.
   // I have no idea how the actual "distance" calculation works but as long as it does don't touch it.
-  const howBadlyTypoedWithKeyboard = function (a, b, keyboard) {
+  const howBadlyTypoedWithKeyboard = function(a, b, keyboard) {
     // If they're the same, skip all calculations
     if (a === b) return 0;
     const aLen = a.length;
@@ -2235,7 +2235,7 @@ Rifts once the current cap has been reached.`,
     return d[aLen][bLen];
   };
 
-  const howBadlyTypoed = function (a, b) {
+  const howBadlyTypoed = function(a, b) {
     // Arbitrarily large number
     let minTypoed = 1e10;
     for (const keyboard of keyboards) {
@@ -2246,7 +2246,7 @@ Rifts once the current cap has been reached.`,
 
   const specialChars = ["'", '"', ",", "-", ".", "_"];
 
-  const replaceSpecialChars = function (str) {
+  const replaceSpecialChars = function(str) {
     let result = str;
     for (const i of specialChars) {
       result = result.replaceAll(i, "");
@@ -2257,13 +2257,13 @@ Rifts once the current cap has been reached.`,
   // There are a LOT of magic numbers in this code, mostly from arbitrary choices for "What number is large enough to
   // act as a placeholder for 'basically not found'?"
   // This will need some cleanup if possible.
-  h2p.search = (query) => {
+  h2p.search = query => {
     const truncatedQuery = replaceSpecialChars(query);
-    if (truncatedQuery === "") return h2p.tabs.map((x) => ({ tab: x, relevance: 1.5 }));
+    if (truncatedQuery === "") return h2p.tabs.map(x => ({ tab: x, relevance: 1.5 }));
     const searchTerms = truncatedQuery
       .toLowerCase()
       .split(" ")
-      .filter((str) => str !== "");
+      .filter(str => str !== "");
 
     // A higher "Relevance" value actually means it's further away from the search, important to keep in mind
     const relevances = Array.repeat(1e4, h2p.tabs.length);
@@ -2281,8 +2281,8 @@ Rifts once the current cap has been reached.`,
       }
     }
     const results = h2p.tabs
-      .filter((x) => relevances[x.id] < 0.9)
-      .map((x) => ({ tab: x, relevance: relevances[x.id] }));
+      .filter(x => relevances[x.id] < 0.9)
+      .map(x => ({ tab: x, relevance: relevances[x.id] }));
     // Provide both the relevance and the tab itself
 
     // Sort by id first, then push more relevant results to top.
@@ -2290,4 +2290,4 @@ Rifts once the current cap has been reached.`,
     // Provide both the relevance and the tab itself
     return results;
   };
-})();
+}());

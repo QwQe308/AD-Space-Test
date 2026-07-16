@@ -11,9 +11,9 @@ export class T2AutoResearcherState extends AutobuyerState {
   }
 
   get efficiency() {
-    if(!this.data.isBought || !this.data.isActive || !player.auto.autobuyersOn) return 0
-    if(isSCTierCompleted(3, 1)) return 2
-    return 0.5
+    if (!this.data.isBought || !this.data.isActive || !player.auto.autobuyersOn) return 0;
+    if (isSCTierCompleted(3, 1)) return 2;
+    return 0.5;
   }
 
   get isBought() {
@@ -21,7 +21,7 @@ export class T2AutoResearcherState extends AutobuyerState {
   }
 
   get isUnlocked() {
-    return false
+    return false;
   }
 
   get antimatterCost() {

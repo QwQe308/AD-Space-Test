@@ -16,7 +16,7 @@ export function canBreakMirror() {
 }
 
 export function getMirrorRequirement() {
-  let highestPercent = Math.max(player.light.redPercent, player.light.greenPercent, player.light.bluePercent);
+  const highestPercent = Math.max(player.light.redPercent, player.light.greenPercent, player.light.bluePercent);
   return DC.E10000.pow(highestPercent / 100 + 1);
 }
 
@@ -24,7 +24,7 @@ export function getPendingPrisms() {
   return player.light.redPercent + player.light.greenPercent + player.light.bluePercent;
 }
 
-export function getPrismReplicantiNerf(){
-  if(TimeStudy(22).isBought) return DC.D1
-  return new Decimal(((player.light.prisms + 20) / 320) ** (-1))
+export function getPrismReplicantiNerf() {
+  if (TimeStudy(22).isBought) return DC.D1;
+  return new Decimal(((player.light.prisms + 20) / 320) ** (-1));
 }

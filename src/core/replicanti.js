@@ -147,7 +147,7 @@ export function totalReplicantiSpeedMult(overCap) {
   totalMult = totalMult.times(Pelle.specialGlyphEffect.replication);
   if (Pelle.isDisabled("replicantiIntervalMult")) return totalMult;
 
-  totalMult = totalMult.div(getPrismReplicantiNerf())
+  totalMult = totalMult.div(getPrismReplicantiNerf());
   const preCelestialEffects = Effects.product(
     TimeStudy(52),
     TimeStudy(213),
@@ -157,7 +157,7 @@ export function totalReplicantiSpeedMult(overCap) {
     SpaceResearchRifts.r52,
     AbyssResearches.A19,
   );
-  
+
   if (TimeStudy(21).isBought) {
     totalMult = totalMult.div(3);
   }
@@ -184,9 +184,9 @@ export function totalReplicantiSpeedMult(overCap) {
 export function replicantiCap() {
   return EffarigUnlock.infinity.canBeApplied
     ? Currency.infinitiesTotal.value
-        .pow(TimeStudy(31).isBought ? 120 : 30)
-        .clampMin(1)
-        .times(DC.NUMMAX)
+      .pow(TimeStudy(31).isBought ? 120 : 30)
+      .clampMin(1)
+      .times(DC.NUMMAX)
     : DC.NUMMAX;
 }
 
@@ -301,6 +301,7 @@ class ReplicantiUpgradeState {
   get id() {
     throw new NotImplementedError();
   }
+
   /** @abstract */
   get value() {
     throw new NotImplementedError();
@@ -320,6 +321,7 @@ class ReplicantiUpgradeState {
   get cost() {
     throw new NotImplementedError();
   }
+
   /** @abstract */
   set cost(value) {
     throw new Error("Use baseCost to set cost");
@@ -333,6 +335,7 @@ class ReplicantiUpgradeState {
   get baseCost() {
     return this.cost;
   }
+
   /** @abstract */
   set baseCost(value) {
     throw new NotImplementedError();
@@ -341,6 +344,7 @@ class ReplicantiUpgradeState {
   get cap() {
     return undefined;
   }
+
   get isCapped() {
     return false;
   }
@@ -379,6 +383,7 @@ export const ReplicantiUpgrade = {
     get value() {
       return player.replicanti.chance;
     }
+
     set value(value) {
       player.replicanti.chance = value;
     }
@@ -395,6 +400,7 @@ export const ReplicantiUpgrade = {
     get baseCost() {
       return player.replicanti.chanceCost;
     }
+
     set baseCost(value) {
       player.replicanti.chanceCost = value;
     }
@@ -426,7 +432,7 @@ export const ReplicantiUpgrade = {
         .plus(1)
         .log(this.costIncrease);
       N = Decimal.round(Decimal.min(N.floor().div(100).add(this.value), this.cap).sub(this.value).mul(100));
-      if(EternityChallenge(8).isRunning) N = N.min(player.eterc8repl)
+      if (EternityChallenge(8).isRunning) N = N.min(player.eterc8repl);
       if (N.lte(0)) return;
       const totalCost = this.cost.times(
         Decimal.pow(this.costIncrease, N)
@@ -452,6 +458,7 @@ export const ReplicantiUpgrade = {
     get value() {
       return player.replicanti.interval;
     }
+
     set value(value) {
       player.replicanti.interval = value;
     }
@@ -468,6 +475,7 @@ export const ReplicantiUpgrade = {
     get baseCost() {
       return player.replicanti.intervalCost;
     }
+
     set baseCost(value) {
       player.replicanti.intervalCost = value;
     }
@@ -501,6 +509,7 @@ export const ReplicantiUpgrade = {
     get value() {
       return player.replicanti.boughtGalaxyCap;
     }
+
     set value(value) {
       player.replicanti.boughtGalaxyCap = value;
     }
@@ -517,6 +526,7 @@ export const ReplicantiUpgrade = {
     get baseCost() {
       return player.replicanti.galCost;
     }
+
     set baseCost(value) {
       player.replicanti.galCost = value;
     }
@@ -618,9 +628,9 @@ export const ReplicantiUpgrade = {
     autobuyerTick() {
       // This isn't a hot enough autobuyer to worry about doing an actual inverse.
       let bulk = this.bulkPurchaseCalc();
-      if(EternityChallenge(8).isRunning) bulk = bulk.min(player.eterc8repl)
+      if (EternityChallenge(8).isRunning) bulk = bulk.min(player.eterc8repl);
       if (!bulk || bulk.floor().sub(this.value).lte(0)) return;
-      if(EternityChallenge(8).isRunning) player.eterc8repl -= bulk.toNumber()
+      if (EternityChallenge(8).isRunning) player.eterc8repl -= bulk.toNumber();
       Currency.infinityPoints.subtract(this.baseCostAfterCount(this.value).sub(1));
       this.value = this.value.add(bulk.sub(this.value));
       this.baseCost = this.baseCostAfterCount(this.value);
@@ -676,10 +686,10 @@ export const Replicanti = {
       galCost: DC.E270,
     };
   },
-  get unlockCost(){
-    let baseCost = DC.E55
-    if(PlayerProgress.imaginaryUnlocked()) baseCost = DC.E140
-    return baseCost.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1])
+  get unlockCost() {
+    let baseCost = DC.E55;
+    if (PlayerProgress.imaginaryUnlocked()) baseCost = DC.E140;
+    return baseCost.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1]);
   },
   unlock(freeUnlock = false) {
     const cost = this.unlockCost;

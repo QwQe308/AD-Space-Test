@@ -17,7 +17,7 @@ export function antimatterDimensionCommonMultiplier() {
     BreakInfinityUpgrade.currentAMMult,
     BreakInfinityUpgrade.achievementMult,
     BreakInfinityUpgrade.slowestChallengeMult,
-  )
+  );
   multiplier = multiplier.timesEffectsOf(
     InfinityUpgrade.totalTimeMult,
     InfinityUpgrade.thisInfinityTimeMult,
@@ -31,7 +31,7 @@ export function antimatterDimensionCommonMultiplier() {
     Achievement(84),
     Achievement(91),
     Achievement(92),
-    //TimeStudy(91),
+    // TimeStudy(91),
     TimeStudy(101),
     TimeStudy(161),
     TimeStudy(193),
@@ -101,7 +101,7 @@ function applyNDMultipliers(mult, tier) {
   multiplier = multiplier.times(Decimal.pow(AntimatterDimensions.buyTenMultiplier, buy10Value));
   multiplier = multiplier.times(DimBoost.multiplierToNDTier(tier));
 
-  let infinitiedMult = DC.D1.timesEffectsOf(
+  const infinitiedMult = DC.D1.timesEffectsOf(
     AntimatterDimension(tier).infinityUpgrade,
     BreakInfinityUpgrade.infinitiedMult
   );
@@ -111,7 +111,7 @@ function applyNDMultipliers(mult, tier) {
     multiplier = multiplier.div(
       Decimal.pow(AntimatterDimensions.buyTenMultiplier, buy10Value).times(DimBoost.multiplierToNDTier(tier))
     );
-  if (isSCRunningOnTier(4, 2)) multiplier = Decimal.pow(AntimatterDimensions.buyTenMultiplier, buy10Value).times(DimBoost.multiplierToNDTier(tier))
+  if (isSCRunningOnTier(4, 2)) multiplier = Decimal.pow(AntimatterDimensions.buyTenMultiplier, buy10Value).times(DimBoost.multiplierToNDTier(tier));
 
   if (tier === 1) {
     multiplier = multiplier
@@ -324,7 +324,7 @@ export function buyMaxDimension(tier, bulk = Infinity) {
 
   // This is the bulk-buy math, explicitly ignored if abnormal cost increases are active
   const maxBought = dimension.costScale.getMaxBought(
-    Decimal.floor(dimension.bought.div(10)).add(dimension.costBumps), 
+    Decimal.floor(dimension.bought.div(10)).add(dimension.costBumps),
     dimension.currencyAmount,
     DC.E1
   );
@@ -359,13 +359,13 @@ class AntimatterDimensionState extends DimensionState {
   get costScale() {
     let baseCost = NormalChallenge(6).isRunning
       ? this._c6BaseCost
-      : this._baseCost
+      : this._baseCost;
     baseCost = baseCost.dividedByEffectsOf(
       SpaceResearchRifts.r12,
       AbyssResearches.A4
-    )
+    );
     return new ExponentialCostScaling({
-      baseCost: baseCost,
+      baseCost,
       baseIncrease: NormalChallenge(6).isRunning ? this._c6BaseCostMultiplier : this._baseCostMultiplier,
       costScale: new Decimal(Player.dimensionMultDecrease),
       scalingCostThreshold: DC.NUMMAX
@@ -462,9 +462,9 @@ class AntimatterDimensionState extends DimensionState {
       (EternityChallenge(3).isRunning && tier > 4) ||
       (NormalChallenge(10).isRunning && tier > 6) ||
       (Laitela.isRunning && tier > Laitela.maxAllowedDimension) ||
-      (isSCRunningOnTier(2, 1) && tier > 4) || //sc2-1
-      (isSCRunningOnTier(2, 2) && tier > 4) //sc2-2
-      ) {
+      (isSCRunningOnTier(2, 1) && tier > 4) || // Sc2-1
+      (isSCRunningOnTier(2, 2) && tier > 4) // Sc2-2
+    ) {
       return false;
     }
     return this.totalAmount.gt(0);
@@ -474,7 +474,7 @@ class AntimatterDimensionState extends DimensionState {
    * @returns {Decimal}
    */
   get currencyAmount() {
-    if (isSCRunningOnTier(3, 1)) return player.matter; //sc3-1
+    if (isSCRunningOnTier(3, 1)) return player.matter; // Sc3-1
     return this.tier >= 3 && NormalChallenge(6).isRunning
       ? AntimatterDimension(this.tier - 2).amount
       : Currency.antimatter.value;
@@ -485,7 +485,7 @@ class AntimatterDimensionState extends DimensionState {
    */
   set currencyAmount(value) {
     if (this.tier >= 3 && NormalChallenge(6).isRunning) AntimatterDimension(this.tier - 2).amount = value;
-    else if (isSCRunningOnTier(3, 1)) player.matter = value;//sc3-1
+    else if (isSCRunningOnTier(3, 1)) player.matter = value;// Sc3-1
     else Currency.antimatter.value = value;
   }
 
@@ -638,9 +638,9 @@ class AntimatterDimensionState extends DimensionState {
 export const AntimatterDimension = AntimatterDimensionState.createAccessor();
 
 export const AntimatterDimensions = {
-  /**.
-   * @type {AntimatterDimensionState[]}
-   */
+  // .
+  // @type {AntimatterDimensionState[]}
+  //
   all: AntimatterDimension.index.compact(),
 
   reset() {

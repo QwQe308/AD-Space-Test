@@ -10,7 +10,7 @@ export class PlayerProgress {
   get isEternityUnlocked() {
     return new Decimal(this._player.eternities).gt(0) || this.isRealityUnlocked;
   }
-  
+
   get isEternityUnlocked() {
     return new Decimal(this._player.eternities).gt(0) || this.isRealityUnlocked;
   }
@@ -68,18 +68,18 @@ export class PlayerProgress {
     return InfinityChallenges.all.some(c => c.isCompleted);
   }
 
-  //added
+  // Added
   static dimensionBoostUnlocked() {
-    return player.dimensionBoosts.gt(0) || this.galaxyUnlocked()
+    return player.dimensionBoosts.gt(0) || this.galaxyUnlocked();
   }
 
   static galaxyUnlocked() {
-    return player.galaxies.gt(0) || this.infinityUnlocked()
+    return player.galaxies.gt(0) || this.infinityUnlocked();
   }
 
   static IDUnlocked(id) {
     return this.eternityUnlocked() ||
-          InfinityDimension(id).isUnlocked
+          InfinityDimension(id).isUnlocked;
   }
 
   static reachedEternities(count) {

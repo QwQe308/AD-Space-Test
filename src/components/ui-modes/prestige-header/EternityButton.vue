@@ -65,7 +65,7 @@ export default {
         [0, 255, 0],
       ];
       const ratio = this.gainedEP.max(1).log10().div(this.currentEP.max(1).log10());
-      const interFn = (index) => {
+      const interFn = index => {
         if (ratio.lt(0.9)) return stepRGB[0][index];
         if (ratio.lt(1)) {
           const r = ratio.sub(0.9).mul(10);
@@ -111,7 +111,7 @@ export default {
     getFrozenClass() {
       return {
         "frozen-currency": this.frozen
-      }
+      };
     },
   },
   methods: {
@@ -124,7 +124,7 @@ export default {
       this.eternityGoal.copyFrom(Player.eternityGoal);
       this.headerTextColored = player.options.headerTextColored;
 
-      this.frozen = Currency.eternityPoints.frozen
+      this.frozen = Currency.eternityPoints.frozen;
 
       if (!this.canEternity) {
         this.type = EP_BUTTON_DISPLAY_TYPE.CANNOT_ETERNITY;
@@ -212,25 +212,30 @@ const EP_BUTTON_DISPLAY_TYPE = {
     <!-- Cannot Eternity -->
     <template v-if="type === -1">
       Reach {{ format(eternityGoal, 2, 2) }}
-      <br />
+      <br>
       Infinity Points
     </template>
 
     <!-- First time -->
-    <template v-else-if="type === 0"> Other times await... I need to become Eternal </template>
+    <template v-else-if="type === 0">
+      Other times await... I need to become Eternal
+    </template>
 
     <!-- Normal -->
     <template v-else-if="type === 1">
       Eternity for
-      <span :style="amountStyle" :class="getFrozenClass">{{ format(gainedEP, 2) }}</span>
+      <span
+        :style="amountStyle"
+        :class="getFrozenClass"
+      >{{ format(gainedEP, 2) }}</span>
       <span v-if="showEPRate"> EP</span>
       <span v-else> Eternity {{ pluralize("Point", gainedEP) }}</span>
-      <br />
+      <br>
       <template v-if="showEPRate">
         Current: {{ format(currentEPRate, 2, 2) }} EP/min
-        <br />
+        <br>
         Peak: {{ format(peakEPRate, 2, 2) }} EP/min
-        <br />
+        <br>
         at {{ format(peakEPRateVal, 2, 2) }} EP
       </template>
     </template>
@@ -254,7 +259,7 @@ const EP_BUTTON_DISPLAY_TYPE = {
       <template v-else>
         Eternity for <span :style="tachyonAmountStyle">{{ format(gainedTachyons, 2, 1) }}</span> TP
       </template>
-      <br />
+      <br>
       You should explore a bit and look at new content before clicking me!
     </template>
 
@@ -262,18 +267,18 @@ const EP_BUTTON_DISPLAY_TYPE = {
     <template v-else-if="type === 6">
       Other challenges await...
       <template v-if="fullyCompleted">
-        <br />
+        <br>
         (This challenge is already fully completed)
       </template>
       <template v-else>
-        <br />
+        <br>
         {{ quantifyInt("completion", gainedCompletions) }} on Eternity
         <template v-if="failedRestriction">
-          <br />
+          <br>
           {{ failedRestriction }}
         </template>
         <template v-else-if="hasMoreCompletions">
-          <br />
+          <br>
           Next goal at {{ format(nextGoalAt) }} IP
         </template>
       </template>

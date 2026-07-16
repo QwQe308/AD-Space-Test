@@ -42,7 +42,7 @@ export const IP = {
       const div = Effects.min(308, Achievement(103));
       return `log(AM)/${formatInt(308)} ➜ log(AM)/${format(div, 2, 1)}`;
     },
-    powValue: () => Decimal.div(308 ,Effects.min(308, Achievement(103))),
+    powValue: () => Decimal.div(308, Effects.min(308, Achievement(103))),
     isActive: () => Achievement(103).canBeApplied,
     icon: MultiplierTabIcons.DIVISOR("IP"),
   },

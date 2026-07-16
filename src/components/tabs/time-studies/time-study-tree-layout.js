@@ -62,8 +62,8 @@ export class TimeStudyTreeLayout {
     ];
 
     this.rows.push(
-        normalRow(                         TS(41), TS(42)                             ),
-        normalRow(                    TS(52),  TS(51),  EC(5)                         )
+      normalRow(                         TS(41), TS(42)                             ),
+      normalRow(                    TS(52),  TS(51),  EC(5)                         )
     );
 
     this.rows.push(
@@ -72,62 +72,62 @@ export class TimeStudyTreeLayout {
       normalRow(                      TS(81),  TS(82),  TS(83)                        ),
       normalRow(                      TS(91),  TS(92),  TS(93)                        ),
       normalRow(                      TS(101), TS(102), TS(103)                       ),
-    )
-
-    if(player.options.breakPlaceHolder || !PlayerProgress.imaginaryUnlocked()){
-
-    this.rows.push(
-      normalRow(                       EC(7),  TS(111), TS(112)                       ),
-      normalRow(                      TS(121), TS(122), TS(123)                       ),
-      normalRow(               EC(6), TS(131), TS(132), TS(133), EC(8)                ),
-      normalRow(                      TS(141), TS(142), TS(143)                       ),
-      normalRow(               EC(9),   null, TS(151),   null,   EC(4)                ),
     );
 
-    if (type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_181 ||
-      type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_TRIAD_STUDIES) {
+    if (player.options.breakPlaceHolder || !PlayerProgress.imaginaryUnlocked()) {
+
       this.rows.push(
-        normalRow(                       TS(161), EC(2), TS(162)                        ),
-        normalRow(                         null, TS(171),  null                         ),
-        normalRow(                        EC(1), TS(181),  EC(3)                        )
+        normalRow(                       EC(7),  TS(111), TS(112)                       ),
+        normalRow(                      TS(121), TS(122), TS(123)                       ),
+        normalRow(               EC(6), TS(131), TS(132), TS(133), EC(8)                ),
+        normalRow(                      TS(141), TS(142), TS(143)                       ),
+        normalRow(               EC(9),   null, TS(151),   null,   EC(4)                ),
       );
+
+      if (type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_181 ||
+      type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_TRIAD_STUDIES) {
+        this.rows.push(
+          normalRow(                       TS(161), EC(2), TS(162)                        ),
+          normalRow(                         null, TS(171),  null                         ),
+          normalRow(                        EC(1), TS(181),  EC(3)                        )
+        );
+      } else {
+        this.rows.push(
+          normalRow(                           TS(161), TS(162)                        ),
+          normalRow(                               TS(171)                                ),
+          normalRow(                         EC(1), EC(2), EC(3)                          ),
+          normalRow(                               TS(181)                                )
+        );
+      }
+
+      this.rows.push(
+        normalRow(                               EC(10)                                 ),
+        normalRow(             TS(191),          TS(192),          TS(193)              ),
+        normalRow(                               TS(201)                                ),
+        normalRow(    TS(211),          TS(212),          TS(213),          TS(214)     ),
+        wideRow  (TS(221), TS(222), TS(223), TS(224), TS(225), TS(226), TS(227), TS(228))
+      );
+
+      if (type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_TRIAD_STUDIES && !Pelle.isDoomed) {
+        this.rows.push(
+          normalRow(                 TS(301), TS(302), TS(303), TS(304)                 )
+        );
+      }
+
+      this.rows.push(
+        normalRow(    TS(231),          TS(232),          TS(233),          TS(234)     ),
+        normalRow(              EC(11),                             EC(12)              ),
+        normalRow(                          TimeStudy.dilation                          ),
+        normalRow(          TimeStudy.timeDimension(5), TimeStudy.timeDimension(6)      ),
+        normalRow(          TimeStudy.timeDimension(7), TimeStudy.timeDimension(8)      ),
+        normalRow(                          TimeStudy.reality                           )
+      );
+
     } else {
       this.rows.push(
-        normalRow(                           TS(161), TS(162)                        ),
-        normalRow(                               TS(171)                                ),
-        normalRow(                         EC(1), EC(2), EC(3)                          ),
-        normalRow(                               TS(181)                                )
+        normalRow(                       TS(111)                       )
       );
     }
-
-    this.rows.push(
-      normalRow(                               EC(10)                                 ),
-      normalRow(             TS(191),          TS(192),          TS(193)              ),
-      normalRow(                               TS(201)                                ),
-      normalRow(    TS(211),          TS(212),          TS(213),          TS(214)     ),
-      wideRow  (TS(221), TS(222), TS(223), TS(224), TS(225), TS(226), TS(227), TS(228))
-    );
-
-    if (type === STUDY_TREE_LAYOUT_TYPE.ALTERNATIVE_TRIAD_STUDIES && !Pelle.isDoomed) {
-      this.rows.push(
-        normalRow(                 TS(301), TS(302), TS(303), TS(304)                 )
-      );
-    }
-
-    this.rows.push(
-      normalRow(    TS(231),          TS(232),          TS(233),          TS(234)     ),
-      normalRow(              EC(11),                             EC(12)              ),
-      normalRow(                          TimeStudy.dilation                          ),
-      normalRow(          TimeStudy.timeDimension(5), TimeStudy.timeDimension(6)      ),
-      normalRow(          TimeStudy.timeDimension(7), TimeStudy.timeDimension(8)      ),
-      normalRow(                          TimeStudy.reality                           )
-    );
-
-  }else{
-    this.rows.push(
-      normalRow(                       TS(111)                       )
-    )
-  }
     /* eslint-enable no-multi-spaces, space-in-parens, func-call-spacing */
 
     /**
@@ -216,11 +216,11 @@ export const STUDY_TREE_LAYOUT_TYPE = {
   ALTERNATIVE_62_181: 3,
   ALTERNATIVE_TRIAD_STUDIES: 4,
   get current() {
-    //const alt62 = Perk.bypassEC5Lock.isBought;
+    // Const alt62 = Perk.bypassEC5Lock.isBought;
     const alt181 = Perk.bypassEC1Lock.isBought && Perk.bypassEC2Lock.isBought && Perk.bypassEC3Lock.isBought;
     if (Ra.canBuyTriad) return this.ALTERNATIVE_TRIAD_STUDIES;
-    //if (alt62 && alt181) return this.ALTERNATIVE_62_181;
-    //if (alt62) return this.ALTERNATIVE_62;
+    // If (alt62 && alt181) return this.ALTERNATIVE_62_181;
+    // if (alt62) return this.ALTERNATIVE_62;
     if (alt181) return this.ALTERNATIVE_181;
     return this.NORMAL;
   }

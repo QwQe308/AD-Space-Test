@@ -1,7 +1,8 @@
 <script>
-import SpaceResearchRift from "./SpaceResearch.vue";
 import SpaceDivisorSlider from "../SpaceDivisorSlider.vue";
 import PrimaryButton from "../../../PrimaryButton.vue";
+
+import SpaceResearchRift from "./SpaceResearch.vue";
 
 export default {
   name: "SpaceResearchBarPanel",
@@ -17,7 +18,7 @@ export default {
       researchSpeed: new Decimal(0),
       tierResearchSpeed: [],
       resetsNothing: [],
-      SpaceResearchTierDetail: SpaceResearchTierDetail,
+      SpaceResearchTierDetail,
       dimensionBoostUnlocked: false,
       galaxyUnlocked: false,
       hasBroken: false,
@@ -34,8 +35,8 @@ export default {
   },
   methods: {
     update() {
-      //this.decayRate = Pelle.riftDrainPercent;
-      //this.isCollapsed = player.celestials.pelle.collapsed.rifts;
+      // This.decayRate = Pelle.riftDrainPercent;
+      // this.isCollapsed = player.celestials.pelle.collapsed.rifts;
       this.researchSpeed.copyFrom(globalResearchSpeed());
 
       this.dimensionBoostUnlocked = PlayerProgress.dimensionBoostUnlocked();
@@ -49,13 +50,13 @@ export default {
       }
     },
     toggleCollapse() {
-      //player.celestials.pelle.collapsed.rifts = !this.isCollapsed;
+      // Player.celestials.pelle.collapsed.rifts = !this.isCollapsed;
     },
     totalrifts() {
       return SpaceResearchRifts.all.length;
     },
     showSpaceHowTo() {
-      ui.view.h2pForcedTab = GameDatabase.h2p.tabs.filter((tab) => tab.name === "*About Space")[0];
+      ui.view.h2pForcedTab = GameDatabase.h2p.tabs.filter(tab => tab.name === "*About Space")[0];
       Modal.h2p.show();
     },
   },
@@ -68,21 +69,28 @@ export default {
       <!-- <i :class="collapseIcon" class="c-collapse-icon-clickable" @click="toggleCollapse" /> -->
       Space Researches
     </div>
-    <div v-if="!isCollapsed" class="l-pelle-content-container">
-      Researches can be progressed by clicking on their bars.<br />
-      Research speed is based on dimension boosts and space amount.<br /><br />
-      <big>Current global research speed: {{ format(researchSpeed, 2) }} /s</big><br />
+    <div
+      v-if="!isCollapsed"
+      class="l-pelle-content-container"
+    >
+      Researches can be progressed by clicking on their bars.<br>
+      Research speed is based on dimension boosts and space amount.<br><br>
+      <big>Current global research speed: {{ format(researchSpeed, 2) }} /s</big><br>
 
-      <PrimaryButton class="o-primary-btn--subtab-option" @click="showSpaceHowTo"> How to play </PrimaryButton
-      ><br /><br />
+      <PrimaryButton
+        class="o-primary-btn--subtab-option"
+        @click="showSpaceHowTo"
+      >
+        How to play
+      </PrimaryButton><br><br>
 
       <SpaceDivisorSlider />
 
       <div class="c-pelle-bar-container">
         <big><big>--- Antimatter - T0 ---</big></big>
-        <big v-if="tierResearchSpeed[0].neq(researchSpeed)"
-          >T0 research speed: {{ format(tierResearchSpeed[0], 2) }} /s</big
-        >
+        <big v-if="tierResearchSpeed[0].neq(researchSpeed)">
+          T0 research speed: {{ format(tierResearchSpeed[0], 2) }} /s
+        </big>
         <SpaceResearchRift
           v-for="rift in rifts"
           v-if="SpaceResearchTierDetail[0].includes(rift.config.key) && rift.unlocked"
@@ -90,14 +98,19 @@ export default {
           :rift="rift"
         />
       </div>
-      <br /><br />
+      <br><br>
 
-      <div class="c-pelle-bar-container" v-if="dimensionBoostUnlocked">
+      <div
+        v-if="dimensionBoostUnlocked"
+        class="c-pelle-bar-container"
+      >
         <big><big>--- Dimension Boost - T1 ---</big></big>
-        <big v-if="tierResearchSpeed[1].neq(researchSpeed)"
-          >T1 research speed: {{ format(tierResearchSpeed[1], 2) }} /s</big
-        >
-        <div v-if="!resetsNothing[1]">Leveling up these requires a Dimension Boost reset.</div>
+        <big v-if="tierResearchSpeed[1].neq(researchSpeed)">
+          T1 research speed: {{ format(tierResearchSpeed[1], 2) }} /s
+        </big>
+        <div v-if="!resetsNothing[1]">
+          Leveling up these requires a Dimension Boost reset.
+        </div>
         <SpaceResearchRift
           v-for="rift in rifts"
           v-if="SpaceResearchTierDetail[1].includes(rift.config.key) && rift.unlocked"
@@ -105,14 +118,19 @@ export default {
           :rift="rift"
         />
       </div>
-      <br /><br />
+      <br><br>
 
-      <div class="c-pelle-bar-container" v-if="galaxyUnlocked">
+      <div
+        v-if="galaxyUnlocked"
+        class="c-pelle-bar-container"
+      >
         <big><big>--- Galaxy - T2 ---</big></big>
-        <big v-if="tierResearchSpeed[2].neq(researchSpeed)"
-          >T2 research speed: {{ format(tierResearchSpeed[2], 2) }} /s</big
-        >
-        <div v-if="!resetsNothing[2]">Leveling up these requires a Galaxy reset.</div>
+        <big v-if="tierResearchSpeed[2].neq(researchSpeed)">
+          T2 research speed: {{ format(tierResearchSpeed[2], 2) }} /s
+        </big>
+        <div v-if="!resetsNothing[2]">
+          Leveling up these requires a Galaxy reset.
+        </div>
         <SpaceResearchRift
           v-for="rift in rifts"
           v-if="SpaceResearchTierDetail[2].includes(rift.config.key) && rift.unlocked"
@@ -120,14 +138,19 @@ export default {
           :rift="rift"
         />
       </div>
-      <br /><br />
+      <br><br>
 
-      <div class="c-pelle-bar-container" v-if="hasBroken">
+      <div
+        v-if="hasBroken"
+        class="c-pelle-bar-container"
+      >
         <big><big>--- Infinity - T3 ---</big></big>
-        <big v-if="tierResearchSpeed[3].neq(researchSpeed)"
-          >T3 research speed: {{ format(tierResearchSpeed[3], 2) }} /s</big
-        >
-        <div v-if="!resetsNothing[3]">Leveling up these requires a Infinity reset.</div>
+        <big v-if="tierResearchSpeed[3].neq(researchSpeed)">
+          T3 research speed: {{ format(tierResearchSpeed[3], 2) }} /s
+        </big>
+        <div v-if="!resetsNothing[3]">
+          Leveling up these requires a Infinity reset.
+        </div>
         <SpaceResearchRift
           v-for="rift in rifts"
           v-if="SpaceResearchTierDetail[3].includes(rift.config.key) && rift.unlocked"
@@ -135,14 +158,19 @@ export default {
           :rift="rift"
         />
       </div>
-      <br /><br />
+      <br><br>
 
-      <div class="c-pelle-bar-container" v-if="eternityUnlocked">
+      <div
+        v-if="eternityUnlocked"
+        class="c-pelle-bar-container"
+      >
         <big><big>--- Eternity - T4 ---</big></big>
-        <big v-if="tierResearchSpeed[4].neq(researchSpeed)"
-          >T4 research speed: {{ format(tierResearchSpeed[4], 2) }} /s</big
-        >
-        <div v-if="!resetsNothing[4]">Leveling up these requires a Eternity reset.</div>
+        <big v-if="tierResearchSpeed[4].neq(researchSpeed)">
+          T4 research speed: {{ format(tierResearchSpeed[4], 2) }} /s
+        </big>
+        <div v-if="!resetsNothing[4]">
+          Leveling up these requires a Eternity reset.
+        </div>
         <SpaceResearchRift
           v-for="rift in rifts"
           v-if="SpaceResearchTierDetail[4].includes(rift.config.key) && rift.unlocked"
@@ -150,7 +178,7 @@ export default {
           :rift="rift"
         />
       </div>
-      <br /><br />
+      <br><br>
     </div>
   </div>
 </template>

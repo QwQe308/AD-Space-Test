@@ -1,5 +1,6 @@
 import { DC } from "../constants";
 import { GameMechanicState } from "../game-mechanics";
+
 import { SteamRuntime } from "@/steam";
 
 class AchievementState extends GameMechanicState {
@@ -176,7 +177,7 @@ export const Achievements = {
   }),
 
   get power() {
-    if(imaginaryInfluences.abyss.isUnlocked) return DC.D1;
+    if (imaginaryInfluences.abyss.isUnlocked) return DC.D1;
     if (Pelle.isDisabled("achievementMult")) return DC.D1;
     return Achievements._power.value;
   },

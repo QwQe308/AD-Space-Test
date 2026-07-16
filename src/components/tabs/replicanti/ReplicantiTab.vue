@@ -53,8 +53,8 @@ export default {
     replicantiChanceSetup() {
       return new ReplicantiUpgradeButtonSetup(
         ReplicantiUpgrade.chance,
-        (value) => `Replicate chance: ${formatPercents(value)}`,
-        (cost) => `+${formatPercents(0.01)} Costs: ${format(cost)} IP`
+        value => `Replicate chance: ${formatPercents(value)}`,
+        cost => `+${formatPercents(0.01)} Costs: ${format(cost)} IP`
       );
     },
     replicantiIntervalSetup() {
@@ -72,15 +72,15 @@ export default {
       }
       return new ReplicantiUpgradeButtonSetup(
         upgrade,
-        (value) => `Interval: ${formatInterval(value)}`,
-        (cost) => `➜ ${formatInterval(upgrade.nextValue)} Costs: ${format(cost)} IP`
+        value => `Interval: ${formatInterval(value)}`,
+        cost => `➜ ${formatInterval(upgrade.nextValue)} Costs: ${format(cost)} IP`
       );
     },
     maxGalaxySetup() {
       const upgrade = ReplicantiUpgrade.galaxies;
       return new ReplicantiUpgradeButtonSetup(
         upgrade,
-        (value) => {
+        value => {
           let description = `Max Replicanti Galaxies: `;
           const extra = upgrade.extra;
           if (extra.gt(0)) {
@@ -91,7 +91,7 @@ export default {
           }
           return description;
         },
-        (cost) => `+${formatInt(1)} Costs: ${format(cost)} IP`
+        cost => `+${formatInt(1)} Costs: ${format(cost)} IP`
       );
     },
     boostText() {
@@ -187,11 +187,14 @@ export default {
 
 <template>
   <div class="l-replicanti-tab">
-    <div v-if="!isUnlocked && !normalUnlock" class="prismNerf">
+    <div
+      v-if="!isUnlocked && !normalUnlock"
+      class="prismNerf"
+    >
       Your replicanti speed is divided due to lack of prisms.
-      <br />
+      <br>
       Note that replicanti is not essential for progress of mirror until e140 IP.
-      <br />
+      <br>
       You may not want to unlock it if you are going to challenge yourself. It's not that hard.
     </div>
     <PrimaryButton
@@ -201,40 +204,56 @@ export default {
       onclick="Replicanti.unlock();"
     >
       Unlock Replicanti
-      <br />
+      <br>
       Cost: {{ format(unlockCost) }} IP
     </PrimaryButton>
     <template v-else>
-      <div v-if="isDoomed" class="modified-cap">
+      <div
+        v-if="isDoomed"
+        class="modified-cap"
+      >
         Your Replicanti cap has been removed due to the second {{ scrambledText }} milestone.
       </div>
-      <div v-else-if="hasRaisedCap" class="modified-cap">
+      <div
+        v-else-if="hasRaisedCap"
+        class="modified-cap"
+      >
         Completion of Effarig's Infinity is giving you the following rewards:
-        <br />
+        <br>
         Your Replicanti cap without TS192 is now {{ format(replicantiCap, 2) }} ({{ capMultText }})
-        <br />
+        <br>
         {{ quantifyInt("extra Replicanti Galaxy", effarigInfinityBonusRG) }}
         (Next Replicanti Galaxy at {{ format(nextEffarigRGThreshold, 2) }} cap)
       </div>
-      <div class="prismNerf" v-if="prismNerf.neq(1)">
+      <div
+        v-if="prismNerf.neq(1)"
+        class="prismNerf"
+      >
         Your replicanti speed is divided by {{ format(prismNerf, 2, 2) }} due to lack of prisms.
-        <br />
+        <br>
         Note that replicanti is not essential for progress of mirror until e140 IP.
       </div>
       <p class="c-replicanti-description">
         You have
         <span class="c-replicanti-description__accent">{{ format(amount, 2, 0) }}</span>
         Replicanti, translated to
-        <br />
+        <br>
         <span v-html="boostText" />
       </p>
-      <div v-if="hasMaxText" class="c-replicanti-description">
+      <div
+        v-if="hasMaxText"
+        class="c-replicanti-description"
+      >
         Your maximum Replicanti reached this Reality is
-        <span v-tooltip="toMaxTooltip" class="max-accent">{{ format(maxReplicanti, 2) }}</span
-        >.
+        <span
+          v-tooltip="toMaxTooltip"
+          class="max-accent"
+        >{{ format(maxReplicanti, 2) }}</span>.
       </div>
-      <br />
-      <div v-if="isInEC8">You have {{ quantifyInt("purchase", ec8Purchases) }} left within Eternity Challenge 8.</div>
+      <br>
+      <div v-if="isInEC8">
+        You have {{ quantifyInt("purchase", ec8Purchases) }} left within Eternity Challenge 8.
+      </div>
       <div class="l-replicanti-upgrade-row">
         <ReplicantiUpgradeButton :setup="replicantiChanceSetup" />
         <ReplicantiUpgradeButton :setup="replicantiIntervalSetup" />
@@ -242,13 +261,13 @@ export default {
       </div>
       <div>
         The Max Replicanti Galaxy upgrade can be purchased endlessly, but costs increase
-        <br />
+        <br>
         more rapidly above {{ formatInt(distantRG) }} Replicanti Galaxies and even more so above
         {{ formatInt(remoteRG) }} Replicanti Galaxies.
       </div>
-      <br /><br />
+      <br><br>
       <ReplicantiGainText />
-      <br />
+      <br>
       <ReplicantiGalaxyButton v-if="canSeeGalaxyButton" />
     </template>
   </div>

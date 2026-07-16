@@ -31,7 +31,7 @@ export const AM = {
     isActive: () => true,
     icon: MultiplierTabIcons.SPACE,
   },
-  //following are Direct AM Multpliers
+  // Following are Direct AM Multpliers
   AMMult: {
     name: "Direct Antimatter Multiplier",
     displayOverride: () => `x${format(getAMMultiplier(), 2, 2)}`,

@@ -11,7 +11,7 @@ export default {
   },
   methods: {
     update() {
-      ({ infinityPoints: this.ipGain,  infinities: this.isGain} = PastEmpower.simulationGain);
+      ({ infinityPoints: this.ipGain, infinities: this.isGain } = PastEmpower.simulationGain);
     },
   },
 };

@@ -180,7 +180,7 @@ function bigCrunchCheckUnlocks() {
 export function secondSoftReset(enteringAntimatterChallenge) {
   player.dimensionBoosts = DC.D0;
   player.galaxies = DC.D0;
-  if(!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
+  if (!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
   Currency.antimatter.reset();
   softReset(0, true, true, enteringAntimatterChallenge);
   InfinityDimensions.resetAmount();
@@ -192,9 +192,9 @@ export function secondSoftReset(enteringAntimatterChallenge) {
   Player.resetRequirements("infinity");
   AchievementTimers.marathon2.reset();
 
-  SpaceResearchTierDetail[1].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[2].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[3].forEach((x) => SpaceResearchRifts[x].refresh());
+  SpaceResearchTierDetail[1].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[2].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[3].forEach(x => SpaceResearchRifts[x].refresh());
 }
 
 export function preProductionGenerateIP(diff) {
@@ -218,7 +218,7 @@ export function preProductionGenerateIP(diff) {
   Currency.infinityPoints.add(BreakInfinityUpgrade.ipGen.effectOrDefault(DC.D0).times(diff.div(60000)));
 }
 
-// extras
+// Extras
 export function bigCrunchGiveRewardsList() {
   return {
     infinityPoints: gainedInfinityPoints(),

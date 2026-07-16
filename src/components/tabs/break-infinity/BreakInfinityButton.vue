@@ -24,7 +24,7 @@ export default {
       return undefined;
     },
     text() {
-      if (isSCRunningOnTier(5, 1)) return "DISABLED"
+      if (isSCRunningOnTier(5, 1)) return "DISABLED";
       if (this.isEnslaved) return "FEEL ETERNITY";
       return this.isBroken ? "INFINITY IS BROKEN" : "BREAK INFINITY";
     }
@@ -36,7 +36,7 @@ export default {
       this.isEnslaved = Enslaved.isRunning;
     },
     clicked() {
-      if (isSCRunningOnTier(5, 1)) return
+      if (isSCRunningOnTier(5, 1)) return;
       if (this.isEnslaved) Enslaved.feelEternity();
       else if (!this.isBroken && this.isUnlocked) Modal.breakInfinity.show();
     }

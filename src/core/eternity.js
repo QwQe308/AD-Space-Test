@@ -1,7 +1,8 @@
+import { DEV } from "../env";
+
 import { GameMechanicState, SetPurchasableMechanicState } from "./game-mechanics";
 import { DC } from "./constants";
 import FullScreenAnimationHandler from "./full-screen-animation-handler";
-import { DEV } from "../env";
 
 function giveEternityRewards(auto) {
   player.records.bestEternity.time = Decimal.min(player.records.thisEternity.time, player.records.bestEternity.time);
@@ -148,8 +149,8 @@ export function eternity(force, auto, specialConditions = {}) {
   playerInfinityUpgradesOnReset();
   AchievementTimers.marathon2.reset();
   applyEU1();
-  if(!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
-  if(!Currency.antimatter.frozen) player.records.thisEternity.maxAM = DC.D0;
+  if (!Currency.antimatter.frozen) player.records.thisInfinity.maxAM = DC.D0;
+  if (!Currency.antimatter.frozen) player.records.thisEternity.maxAM = DC.D0;
   Currency.antimatter.reset();
   ECTimeStudyState.invalidateCachedRequirements();
 
@@ -227,11 +228,11 @@ export function initializeResourcesAfterEternity() {
   player.eterc8ids = 50;
   player.eterc8repl = 40;
   Player.resetRequirements("eternity");
-  //MOD
-  SpaceResearchTierDetail[1].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[2].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[3].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].refresh());
+  // MOD
+  SpaceResearchTierDetail[1].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[2].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[3].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[4].forEach(x => SpaceResearchRifts[x].refresh());
 
   player.space = new Decimal(0);
   Currency.antimatter.reset();
@@ -254,7 +255,7 @@ export function applyEU1() {
 // code since those run asynchronously from gameLoop
 export function applyEU2() {
   if (player.eternityUpgrades.size < 6 && Perk.autounlockEU2.canBeApplied) {
-    const secondRow = EternityUpgrade.all.filter((u) => u.id > 3);
+    const secondRow = EternityUpgrade.all.filter(u => u.id > 3);
     for (const upgrade of secondRow) {
       if (player.eternityPoints.gte(upgrade.cost / 1e10)) player.eternityUpgrades.add(upgrade.id);
     }
@@ -274,7 +275,7 @@ function askEternityConfirmation() {
 export function gainedEternities() {
   if (Pelle.isDisabled("eternityMults")) return new Decimal(1);
   let esMult = new Decimal(getAdjustedGlyphEffect("timeetermult")).timesEffectsOf(
-    RealityUpgrade(3), 
+    RealityUpgrade(3),
     Achievement(113),
     SpaceResearchRifts.r53
   );
@@ -294,8 +295,8 @@ export class EternityMilestoneState {
     return Currency.eternities.gte(this.config.eternities);
   }
 }
-export const EternityMilestone = mapGameDataToObject(GameDatabase.eternity.milestones, (config) =>
-  config.isBaseResource ? new EternityMilestoneState(config) : new EternityMilestoneState(config)
+export const EternityMilestone = mapGameDataToObject(GameDatabase.eternity.milestones, config =>
+  (config.isBaseResource ? new EternityMilestoneState(config) : new EternityMilestoneState(config))
 );
 
 class EternityUpgradeState extends SetPurchasableMechanicState {
@@ -441,7 +442,7 @@ class EPMultiplierState extends GameMechanicState {
 
 export const EternityUpgrade = mapGameDataToObject(
   GameDatabase.eternity.upgrades,
-  (config) => new EternityUpgradeState(config)
+  config => new EternityUpgradeState(config)
 );
 
 EternityUpgrade.epMult = new EPMultiplierState();
@@ -451,5 +452,5 @@ export function eternityGiveRewardsList() {
   return {
     eternityPoints: gainedEternityPoints(),
     eternities: gainedEternities()
-  }
+  };
 }

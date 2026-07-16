@@ -3,8 +3,8 @@ import { DC } from "../../../../constants";
 
 // Yes, layer 0 serves as a toturial.
 
-let baseConfig = {
-  //row 0
+const baseConfig = {
+  // Row 0
   A1: {
     position: [0, -2],
     type: NODE_TYPE.UNLIMITED,
@@ -24,7 +24,7 @@ let baseConfig = {
     next: ["A2", "A3"],
   },
 
-  //row 1
+  // Row 1
   A2: {
     position: [-1, -1],
     type: NODE_TYPE.SINGLE,
@@ -52,7 +52,7 @@ let baseConfig = {
     next: ["A6", "A7", "A8"],
   },
 
-  //row 2
+  // Row 2
   A4: {
     position: [-2, 0],
     type: NODE_TYPE.LIMITED,
@@ -92,7 +92,7 @@ let baseConfig = {
         },
         requirement() {
           return (
-            AntimatterDimensions.all.filter((x) => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8
+            AntimatterDimensions.all.filter(x => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8
           );
         },
       },
@@ -137,12 +137,12 @@ let baseConfig = {
         },
         requirement() {
           if (Tickspeed.totalUpgrades.gte(308)) return false;
-          let primes = [
+          const primes = [
             2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103,
             107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223,
             227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307,
           ];
-          // break_eternity.js may have some precision losses so heres a round
+          // Break_eternity.js may have some precision losses so heres a round
           return primes.includes(Math.round(Tickspeed.totalUpgrades.toNumber()));
         },
       },
@@ -177,7 +177,7 @@ let baseConfig = {
     next: ["A10"],
   },
 
-  //row 4
+  // Row 4
   A9: {
     position: [-1, 1],
     type: NODE_TYPE.UNLIMITED,
@@ -218,7 +218,7 @@ let baseConfig = {
     },
     next: ["A11"],
   },
-  //row 5
+  // Row 5
   A11: {
     position: [0, 2],
     type: NODE_TYPE.UNLIMITED,
@@ -238,7 +238,7 @@ let baseConfig = {
     next: ["A12", "A13", "A14"],
   },
 
-  //row 6
+  // Row 6
   A12: {
     position: [-1, 3],
     type: NODE_TYPE.SINGLE,
@@ -319,7 +319,7 @@ let baseConfig = {
     next: ["A17"],
   },
 
-  //row 7
+  // Row 7
   A15: {
     position: [-1, 4],
     type: NODE_TYPE.SINGLE,
@@ -350,7 +350,7 @@ let baseConfig = {
           return DC.D3;
         },
         requirement() {
-          let a = DimBoost.totalBoosts,
+          const a = DimBoost.totalBoosts,
             b = player.galaxies;
           if (a.eq(0) || b.eq(0)) return false;
           function gcd(a, b) {
@@ -378,7 +378,7 @@ let baseConfig = {
     next: ["A20"],
   },
 
-  //row 8
+  // Row 8
   A18: {
     position: [-1, 5],
     type: NODE_TYPE.UNLIMITED,
@@ -434,7 +434,7 @@ let baseConfig = {
     next: ["A21"],
   },
 
-  //row 9
+  // Row 9
   A21: {
     position: [0, 6],
     type: NODE_TYPE.SINGLE,
@@ -445,7 +445,7 @@ let baseConfig = {
     next: ["C0"],
   },
 
-  //row 10 *Core*
+  // Row 10 *Core*
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
@@ -458,7 +458,7 @@ let baseConfig = {
     },
     onLevelUp() {
       player.abyssResearchCanvas.currentAbyssResearchDepth = "1";
-      for (let i of ["A21B", "A7B", "A6B", "A16B"]) {
+      for (const i of ["A21B", "A7B", "A6B", "A16B"]) {
         AbyssResearches[i].progress = new Decimal(1e5);
         AbyssResearches[i].unlock();
       }
@@ -466,9 +466,9 @@ let baseConfig = {
       AbyssResearchHelperTools.updateStatus();
       for (let i = 1; i <= 21; i++) {
         player.activeAbyssResearches = new Set();
-        player.abyssResearches["A" + i].unlocked = false;
-        player.abyssResearches["A" + i].shown = false;
-        AbyssResearches["A" + i].reset();
+        player.abyssResearches[`A${i}`].unlocked = false;
+        player.abyssResearches[`A${i}`].shown = false;
+        AbyssResearches[`A${i}`].reset();
       }
     },
     restrictions: [

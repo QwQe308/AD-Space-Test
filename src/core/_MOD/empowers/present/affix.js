@@ -10,6 +10,7 @@ export class Affix {
     cost: cost,
     unlocked: unlocked = () => true,
     noSpellPower: noSpellPower = false,
+    pending: pending = null,
   }) {
     this._description = description;
     this._process = process;
@@ -17,36 +18,50 @@ export class Affix {
     this._cost = cost;
     this._unlocked = unlocked;
     this._noSpellPower = noSpellPower;
+    this._pending = pending;
   }
 
   get cost() {
-    return this.cost;
+    return this._cost;
   }
 
   get noSpellPower() {
-    return this._noSpellPower
+    return this._noSpellPower;
+  }
+
+  get unlocked() {
+    return this._unlocked();
+  }
+
+  process(data) {
+    return this._process.call(this, data);
+  }
+
+  pending(data) {
+    if (!this._pending) return null;
+    return this._pending.call(this, data);
   }
 
   effect(data) {
-    return this._effect(data);
+    return this._effect.call(this, data);
   }
 
   description(data) {
-    let effect = this._effect(data);
-    let description = this._description(data, effect)
-    for(let i in ABBREVIATIONS){
-      description = description.replaceAll(i, ABBREVIATIONS[i](data, effect))
+    const effect = this.effect(data);
+    let description = this._description.call(this, data, effect);
+    for (const i in ABBREVIATIONS) {
+      description = description.replaceAll(i, ABBREVIATIONS[i](data, effect));
     }
     return description;
   }
 }
 
 const ABBREVIATIONS = {
-  "[En]" : (data, effect) => `<br>(Spell Power does nothing)`,
-  "[E]" : (data, effect) => `<br>(${format(effect, 2, 2)})`,
-  "[E+]" : (data, effect) => `<br>(${formatAdd(effect)})`,
-  "[Ep+]" : (data, effect) => Decimal.lt(effect, 0) ? `<br>(-${formatPercents(Decimal.neg(effect), 2, 2)}` : `<br>(+${formatPercents(effect, 2, 2)})`,
-  "[Ex]" : (data, effect) => `<br>(${formatMultiplier(effect)})`,
-  "[E^]" : (data, effect) => `<br>(${formatPow(effect)})`,
-  "[Et]" : (data, effect) => `<br>(${TimeSpan.fromSeconds(effect)})`,
-}
+  "[En]": (data, effect) => `<br>(Spell Power does nothing)`,
+  "[E]": (data, effect) => `<br>(${format(effect, 2, 2)})`,
+  "[E+]": (data, effect) => `<br>(${formatAdd(effect)})`,
+  "[Ep+]": (data, effect) => (Decimal.lt(effect, 0) ? `<br>(-${formatPercents(Decimal.neg(effect), 2, 2)}` : `<br>(+${formatPercents(effect, 2, 2)})`),
+  "[Ex]": (data, effect) => `<br>(${formatMultiplier(effect)})`,
+  "[E^]": (data, effect) => `<br>(${formatPow(effect)})`,
+  "[Et]": (data, effect) => `<br>(${TimeSpan.fromSeconds(effect)})`,
+};

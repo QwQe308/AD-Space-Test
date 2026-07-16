@@ -1,3 +1,7 @@
+import { space } from "../_MOD/space-data";
+
+import { imaginary } from "../_MOD/imaginary/imaginary-data";
+
 import { multiplierTabTree, multiplierTabValues } from "./multiplier-tab";
 
 import { achievements } from "./achievements";
@@ -19,8 +23,6 @@ import { sidebarResources } from "./sidebar-resources";
 import { speedrunMilestones } from "./speedrun-milestones";
 import { tabNotifications } from "./tab-notifications";
 import { tabs } from "./tabs";
-import { space } from "../_MOD/space-data";
-import { imaginary } from "../_MOD/imaginary/imaginary-data";
 
 export const GameDatabase = {
   achievements,

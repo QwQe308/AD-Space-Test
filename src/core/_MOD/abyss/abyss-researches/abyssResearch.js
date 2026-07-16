@@ -1,9 +1,10 @@
 import { DC } from "../../../constants";
 import { GameMechanicState } from "../../../utils";
+
 import { abyssDepths, globalAbyssResearchSpeed } from "./abyssResearchSpawner";
 import { AbyssFailableRestriction, AbyssRestriction } from "./abyssRestrictionsHandler";
 
-//currently only allows linear
+// Currently only allows linear
 class AbyssResearchClass extends GameMechanicState {
   constructor(config) {
     super(config);
@@ -22,9 +23,9 @@ class AbyssResearchClass extends GameMechanicState {
     if (config.restrictions) {
       try {
         this.config.restrictions = config.restrictions.map((x, index) =>
-          x.type === "failable"
+          (x.type === "failable"
             ? new AbyssFailableRestriction(x, this.id, index)
-            : new AbyssRestriction(x, this.id, index)
+            : new AbyssRestriction(x, this.id, index))
         );
       } catch (err) {
         console.error(`*Error found in assigning restriction to Abyss Research ${this.id} |`, err);
@@ -104,11 +105,11 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get permanent() {
-    return this.config.permanent
+    return this.config.permanent;
   }
 
   get maxConcurrent() {
-    //maxiumn concurrent researches
+    // Maxiumn concurrent researches
     let maxConcurrent = 1;
     if (AbyssResearches.A6.isEffectActive) maxConcurrent++;
     if (AbyssResearches.A6B.isEffectActive) maxConcurrent++;
@@ -148,18 +149,18 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get restrictionStates() {
-    return this.restrictions.map((x) => x.completed);
+    return this.restrictions.map(x => x.completed);
   }
 
   get totalRestrictionNerf() {
     if (!this.hasRestriction) return DC.D1;
     return this.restrictions
-      .map((x) => (x.completed ? DC.D1 : x.nerf))
+      .map(x => (x.completed ? DC.D1 : x.nerf))
       .reduce((a, b) => Decimal.mul(a, b), DC.D1);
   }
 
   get restrictionsAllCompleted() {
-    return !this.restrictions.map((x) => x.completed).includes(false);
+    return !this.restrictions.map(x => x.completed).includes(false);
   }
 
   updateScaling() {
@@ -176,8 +177,8 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   updateLevel() {
-    let preLevel = this.level;
-    let isFirstLevel = preLevel.eq(0);
+    const preLevel = this.level;
+    const isFirstLevel = preLevel.eq(0);
     switch (this.type) {
       case "core":
         if (this.coreRestrictionCompleted || this.progress.gte(this.config.cost)) {
@@ -212,7 +213,7 @@ class AbyssResearchClass extends GameMechanicState {
         if (this.scaling.purchases.lt(1)) return false;
         this.level = this.level.add(this.scaling.purchases).min(this.maxLevel);
         this.cost = this.scaling.nextCost;
-        player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); //to avoid unwanted update
+        player.abyssResearches[this.id].progress = this.progress.sub(this.scaling.totalCost); // To avoid unwanted update
 
         break;
     }
@@ -220,14 +221,14 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   updateCompletion() {
-    for (let tag of this.tooltipTags) {
+    for (const tag of this.tooltipTags) {
       player.abyssResearchTooltipsShown.add(tag);
     }
 
     // This shows nearby nodes, 2 layers away at maxiumn, and unlocks nodes next to it.
-    let recorder = [];
-    let callback = (start, layer) => {
-      for (let node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+    const recorder = [];
+    const callback = (start, layer) => {
+      for (const node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
         if (recorder.includes(node)) continue;
         recorder.push(node);
         if (layer === 1) AbyssResearches[node].unlock();
@@ -253,9 +254,9 @@ class AbyssResearchClass extends GameMechanicState {
     if (!player.abyssResearches[this.id].unlocked) return;
 
     // This shows nearby nodes, 1 layers away at maxiumn.
-    let recorder = [];
-    let callback = (start, layer) => {
-      for (let node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+    const recorder = [];
+    const callback = (start, layer) => {
+      for (const node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
         if (recorder.includes(node)) continue;
         recorder.push(node);
         AbyssResearches[node].show();
@@ -302,7 +303,7 @@ class AbyssResearchClass extends GameMechanicState {
 
 export const AbyssResearches = mapGameDataToObject(
   GameDatabase.space.abyssResearches,
-  (config) => new AbyssResearchClass(config)
+  config => new AbyssResearchClass(config)
 );
 
 class AbyssResearchHelper {
@@ -321,20 +322,20 @@ class AbyssResearchHelper {
 
   initializeHelperData() {
     // Sort by depth
-    let abyssResearchesSortByDepth = {};
-    for (let i of abyssDepths) {
+    const abyssResearchesSortByDepth = {};
+    for (const i of abyssDepths) {
       abyssResearchesSortByDepth[i[0]] = {};
     }
-    for (let i in AbyssResearches) {
+    for (const i in AbyssResearches) {
       if (i === "all") continue;
       abyssResearchesSortByDepth[AbyssResearches[i].depth][i] = AbyssResearches[i];
     }
     this.data.sortByDepth = abyssResearchesSortByDepth;
 
     // Abyss Research Cores related to automation
-    let abyssResearchCores = {};
-    for (let index in AbyssResearches) {
-      let research = AbyssResearches[index];
+    const abyssResearchCores = {};
+    for (const index in AbyssResearches) {
+      const research = AbyssResearches[index];
       if (research.type !== "core" && !research.automation) continue;
       abyssResearchCores[research.depth] = research;
     }
@@ -346,16 +347,16 @@ class AbyssResearchHelper {
       player.records.thisReality.maxSpace = player.space;
     }
 
-    player.activeAbyssResearches.forEach((research) => {
+    player.activeAbyssResearches.forEach(research => {
       AbyssResearches[research].addProgress(AbyssResearches[research].researchSpeed.mul(diff).div(1000));
     });
 
-    for (let index in this.cores) {
+    for (const index in this.cores) {
       const Core = this.cores[index];
       if (!Core || !Core.completed) continue;
       const Depth = Core.depth;
       const Efficiency = Core.effectValue;
-      for (let research in this.sortByDepth[Depth]) {
+      for (const research in this.sortByDepth[Depth]) {
         if (AbyssResearches[research].maxed) continue;
         AbyssResearches[research].addProgress(
           AbyssResearches[research].researchSpeed.mul(Efficiency).mul(diff).div(1000)
@@ -366,7 +367,7 @@ class AbyssResearchHelper {
 
   // Tool Functions
   updateStatus() {
-    for (let research of AbyssResearches.all) {
+    for (const research of AbyssResearches.all) {
       research.updateCompletionWithCondition();
       research.initializeCost();
     }

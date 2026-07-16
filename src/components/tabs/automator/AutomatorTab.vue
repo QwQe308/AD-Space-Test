@@ -37,7 +37,7 @@ export default {
       return quantify("command", Decimal.div(1000, this.interval), 2, 2);
     },
     intervalText() {
-      const speedupText = ``; /*`Each Reality makes it run ${formatPercents(0.006, 1)} faster, up to a maximum of
+      const speedupText = ``; /* `Each Reality makes it run ${formatPercents(0.006, 1)} faster, up to a maximum of
         ${formatInt(1000)} per second.`*/
       return this.interval === 1
         ? `The Automator is running at max speed (${formatInt(1000)} commands per real-time second).`
@@ -64,7 +64,10 @@ export default {
 </script>
 
 <template>
-  <div :class="tabClass" class="c-automator-tab l-automator-tab">
+  <div
+    :class="tabClass"
+    class="c-automator-tab l-automator-tab"
+  >
     <div v-if="automatorUnlocked">
       <div>
         {{ intervalText }}
@@ -76,12 +79,19 @@ export default {
       <span :class="{ 'c-overlimit': totalChars > maxTotalChars }">
         Across all scripts: {{ formatInt(totalChars) }} / {{ formatInt(maxTotalChars) }}
       </span>
-      <br />
-      <span v-if="!withinLimit" class="c-overlimit">
+      <br>
+      <span
+        v-if="!withinLimit"
+        class="c-overlimit"
+      >
         (Your changes will not be saved due to being over a character limit!)
       </span>
       <div class="c-automator-split-pane">
-        <SplitPane :min-percent="44" :default-percent="50" split="vertical">
+        <SplitPane
+          :min-percent="44"
+          :default-percent="50"
+          split="vertical"
+        >
           <template #paneL>
             <AutomatorEditor />
           </template>

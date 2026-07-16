@@ -5,9 +5,9 @@ export class SpaceChallengeState extends GameMechanicState {
     super(config);
   }
 
-  /* get unlockAM() {
-    return this.config.unlockAM;
-  } */
+  // Get unlockAM() {
+  // return this.config.unlockAM;
+  // }
 
   get isUnlocked() {
     return this.config.data[0].isUnlocked();
@@ -28,7 +28,7 @@ export class SpaceChallengeState extends GameMechanicState {
       this.start();
       return;
     }
-    Modal.startSpaceChallenge.show(this.id); //to change
+    Modal.startSpaceChallenge.show(this.id); // To change
   }
 
   start() {
@@ -59,7 +59,7 @@ export class SpaceChallengeState extends GameMechanicState {
   }
 
   get maxCompletions() {
-    return this.config.data.filter((x) => x.isUnlocked()).length;
+    return this.config.data.filter(x => x.isUnlocked()).length;
   }
 
   get isFullyCompleted() {
@@ -96,11 +96,11 @@ export class SpaceChallengeState extends GameMechanicState {
   }
 
   get effectValue() {
-    return this.currentTier.effectValue()
+    return this.currentTier.effectValue();
   }
 
   exit() {
-    this.currentTier.exit()
+    this.currentTier.exit();
     player.challenge.space.current = 0;
   }
 }
@@ -135,22 +135,22 @@ export const SpaceChallenges = {
    * @param value {Decimal} - total antimatter
    */
   notifyChallUnlock(value) {
-    /* if (SpaceChallenges.nextSC === undefined) return;
-    for (const sc of SpaceChallenges.all) {
-      if (sc.isUnlocked || sc.completions) continue;
-      //if (value.lt(sc.unlockAM)) break;
-      // This has a reasonably high likelihood of happening when the player isn't looking at the game, so
-      // we also give it a tab notification
-      TabNotification.ICUnlock.clearTrigger();
-      GameUI.notify.infinity(`You have unlocked Space Challenge ${sc.id}`, 7000);
-      TabNotification.ICUnlock.tryTrigger();
-    } */
+    // If (SpaceChallenges.nextSC === undefined) return;
+    // for (const sc of SpaceChallenges.all) {
+    // if (sc.isUnlocked || sc.completions) continue;
+    // //if (value.lt(sc.unlockAM)) break;
+    // // This has a reasonably high likelihood of happening when the player isn't looking at the game, so
+    // // we also give it a tab notification
+    // TabNotification.ICUnlock.clearTrigger();
+    // GameUI.notify.infinity(`You have unlocked Space Challenge ${sc.id}`, 7000);
+    // TabNotification.ICUnlock.tryTrigger();
+    // }
   },
   /**
    * @returns {SpaceChallengeState[]}
    */
   get completed() {
-    return SpaceChallenges.all.filter((sc) => sc.completions);
+    return SpaceChallenges.all.filter(sc => sc.completions);
   },
 };
 

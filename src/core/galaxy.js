@@ -207,8 +207,8 @@ export function galaxyReset() {
   }
   softReset(0);
 
-  SpaceResearchTierDetail[1].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[2].forEach((x) => SpaceResearchRifts[x].refresh());
+  SpaceResearchTierDetail[1].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[2].forEach(x => SpaceResearchRifts[x].refresh());
 
   if (Notations.current === Notation.emoji) player.requirementChecks.permanent.emojiGalaxies =
   player.requirementChecks.permanent.emojiGalaxies.add(1);
@@ -242,7 +242,7 @@ export function requestGalaxyReset(bulk, limit = Number.MAX_VALUE) {
   return true;
 }
 
-//added
+// Added
 export function forceGalaxyReset() {
   player.galaxies = player.galaxies.sub(1);
   galaxyReset();

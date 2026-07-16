@@ -61,7 +61,11 @@ export default {
 </script>
 
 <template>
-  <button v-if="isVisible" :class="buttonClassObject" @click="tryUnlockNextInfinityDimension">
+  <button
+    v-if="isVisible"
+    :class="buttonClassObject"
+    @click="tryUnlockNextInfinityDimension"
+  >
     {{ text }}
   </button>
 </template>

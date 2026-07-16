@@ -20,8 +20,8 @@ function getGlyphTypes() {
 }
 
 function createAbyssResearchesData() {
-  let data = {};
-  for (let i in abyssResearches) {
+  const data = {};
+  for (const i in abyssResearches) {
     data[i] = {
       level: DC.D0,
       progress: DC.D0,
@@ -29,18 +29,18 @@ function createAbyssResearchesData() {
       shown: false,
     };
 
-    let scalingConfig = abyssResearches[i].scaling;
+    const scalingConfig = abyssResearches[i].scaling;
     if (scalingConfig && scalingConfig.type === "linear") {
       data[i].cost = scalingConfig.cost;
     }
 
     if (abyssResearches[i].restrictions) {
-      data[i].restrictionData = abyssResearches[i].restrictions.map((x) =>
-        x.type === "failable"
+      data[i].restrictionData = abyssResearches[i].restrictions.map(x =>
+        (x.type === "failable"
           ? x.defaultUncompletable
             ? RestrictionDefaultData.uncompletableFailableRestriction
             : RestrictionDefaultData.failableRestriction
-          : RestrictionDefaultData.defaultRestriction
+          : RestrictionDefaultData.defaultRestriction)
       );
     }
   }
@@ -48,8 +48,8 @@ function createAbyssResearchesData() {
 }
 
 function createSpaceResearchesData() {
-  let data = {};
-  for (let i in spaceResearches) {
+  const data = {};
+  for (const i in spaceResearches) {
     data[i] = {
       progress: DC.D0,
       pendingProgress: DC.D0,
@@ -63,8 +63,8 @@ function createSpaceResearchesData() {
 // eslint-disable-next-line prefer-const
 window.player = {
   version: 103,
-  //MOD
-  //empowers
+  // MOD
+  // empowers
   empowers: {
     past: {
       frozenCurrency: null,
@@ -75,11 +75,12 @@ window.player = {
       simulationTrueTimeThisReset: 0,
       simulationTickThisReset: 0,
     },
-    present:{
+    present: {
       mirrorUpgrades: [],
+      mana: 0,
     },
   },
-  //abyss
+  // Abyss
   abyssResearchCanvas: {
     currentAbyssResearchDepth: "0",
     offsetX: 750,
@@ -90,10 +91,10 @@ window.player = {
   activeAbyssResearches: new Set(),
   abyssResearches: createAbyssResearchesData(),
   abyssResearchTooltipsShown: new Set(),
-  //imaginary influence
+  // Imaginary influence
   imaginaryInfluence: [],
   pendingMessage: [],
-  //mirror
+  // Mirror
   light: {
     inMirror: false,
     prisms: 0,
@@ -102,16 +103,16 @@ window.player = {
     bluePercent: 0,
     presets: [],
   },
-  //space
+  // Space
   space: DC.D0,
   spaceDivisiorActivePercentage: 1,
   amProc: DC.D0,
-  //sc
+  // Sc
   spaceChalls: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
-  //space research
+  // Space research
   spaceResearches: createSpaceResearchesData(),
 
-  //original
+  // Original
   antimatter: DC.E1,
   dimensions: {
     antimatter: Array.range(0, 8).map(() => ({
@@ -119,14 +120,14 @@ window.player = {
       costBumps: DC.D0,
       amount: DC.D0,
     })),
-    infinity: Array.range(0, 8).map((tier) => ({
+    infinity: Array.range(0, 8).map(tier => ({
       isUnlocked: false,
       bought: DC.D0,
       amount: DC.D0,
       cost: [DC.E7, DC.E9, DC.E12, DC.E20, DC.E140, DC.E200, DC.E250, DC.E280][tier],
       baseAmount: DC.D0,
     })),
-    time: Array.range(0, 8).map((tier) => ({
+    time: Array.range(0, 8).map(tier => ({
       cost: [DC.D1, DC.D5, DC.E2, DC.E3, DC.E2350, DC.E2650, DC.E3000, DC.E3350][tier],
       amount: DC.D0,
       bought: DC.D0,
@@ -162,7 +163,7 @@ window.player = {
   auto: {
     autobuyersOn: true,
     disableContinuum: false,
-    //MOD AUTO
+    // MOD AUTO
     T0AutoResearcher: {
       isBought: false,
       isActive: true,
@@ -244,7 +245,7 @@ window.player = {
       isActive: true,
     },
     antimatterDims: {
-      all: Array.range(0, 8).map((tier) => ({
+      all: Array.range(0, 8).map(tier => ({
         isUnlocked: false,
         cost: 1,
         interval: [500, 600, 700, 800, 900, 1000, 1100, 1200][tier],
@@ -584,16 +585,16 @@ window.player = {
         trash: AUTO_GLYPH_REJECT.SACRIFICE,
         simple: 0,
         types: Object.keys(getGlyphTypes())
-          .filter((t) => GlyphInfo.generatedGlyphTypes.includes(t))
+          .filter(t => GlyphInfo.generatedGlyphTypes.includes(t))
           .mapToObject(
-            (t) => t,
-            (t) => ({
+            t => t,
+            t => ({
               rarity: new Decimal(),
               score: 0,
               effectCount: 0,
               specifiedMask: [],
               effectScores: [...Array(GlyphInfo[t].effectIDs.length).keys()].mapToObject(
-                (e) => GlyphInfo[t].effectIDs[e],
+                e => GlyphInfo[t].effectIDs[e],
                 () => 0
               ),
             })
@@ -679,7 +680,7 @@ window.player = {
     achTimer: new Decimal(),
     hasCheckedFilter: false,
   },
-  blackHole: Array.range(0, 2).map((id) => ({
+  blackHole: Array.range(0, 2).map(id => ({
     id,
     intervalUpgrades: DC.D0,
     powerUpgrades: DC.D0,
@@ -906,8 +907,8 @@ window.player = {
   tutorialState: 0,
   tutorialActive: true,
   options: {
-    testServer: false, //***
-    breakPlaceHolder: false, //***
+    testServer: false, //* **
+    breakPlaceHolder: false, //* **
     news: {
       enabled: true,
       repeatBuffer: 40,
@@ -1112,7 +1113,7 @@ export const Player = {
 
   get tickSpeedMultDecrease() {
     return GameCache.tickSpeedMultDecrease.value;
-  }, //test
+  }, // Test
 
   get dimensionMultDecrease() {
     return GameCache.dimensionMultDecrease.value;

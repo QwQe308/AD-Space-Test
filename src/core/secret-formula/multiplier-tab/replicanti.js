@@ -20,7 +20,7 @@ export const replicanti = {
   timeStudy: {
     name: "Time Studies",
     multValue: () => {
-      const preReality = Effects.product(TimeStudy(52)).mul(TimeStudy(21).isBought ? 1/3 : 1);
+      const preReality = Effects.product(TimeStudy(52)).mul(TimeStudy(21).isBought ? 1 / 3 : 1);
       return preReality;
     },
     isActive: () => PlayerProgress.eternityUnlocked() && !Pelle.isDoomed,

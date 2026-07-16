@@ -99,7 +99,7 @@ export function totalIPMult() {
     Achievement(141).effects.ipGain,
     InfinityUpgrade.ipMult,
     GlyphEffect.ipMult,
-    SpaceResearchRifts.r41,//MOD r41
+    SpaceResearchRifts.r41, // MOD r41
     AbyssResearches.A14
   );
   ipMult = ipMult.times(Replicanti.amount.powEffectOf(AlchemyResource.exponential));
@@ -209,6 +209,6 @@ class InfinityIPMultUpgrade extends GameMechanicState {
   }
 }
 
-export const InfinityUpgrade = mapGameDataToObject(GameDatabase.infinity.upgrades, (config) =>
-  config.id === "ipMult" ? new InfinityIPMultUpgrade(config) : new InfinityUpgradeState(config)
+export const InfinityUpgrade = mapGameDataToObject(GameDatabase.infinity.upgrades, config =>
+  (config.id === "ipMult" ? new InfinityIPMultUpgrade(config) : new InfinityUpgradeState(config))
 );

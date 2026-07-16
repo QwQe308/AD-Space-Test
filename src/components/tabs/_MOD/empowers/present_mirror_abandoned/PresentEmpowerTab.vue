@@ -19,7 +19,7 @@ export default {
   methods: {
     update() {
       this.inMirror = player.light.inMirror;
-      for (let i in light) {
+      for (const i in light) {
         this.$set(this.colors, i, {
           amount: format(light[i].amount(), 2),
           effect: light[i].effect(light[i].effectValue()),
@@ -29,7 +29,7 @@ export default {
       this.pendingPrisms = getPendingPrisms();
     },
     showMirrorHowTo() {
-      ui.view.h2pForcedTab = GameDatabase.h2p.tabs.filter((tab) => tab.name === "*The Mirror")[0];
+      ui.view.h2pForcedTab = GameDatabase.h2p.tabs.filter(tab => tab.name === "*The Mirror")[0];
       Modal.h2p.show();
     },
   },
@@ -39,65 +39,84 @@ export default {
 <template>
   <div class="mirror-tab">
     <div style="color:#aaaaaa">
-      Reach target AM in Mirror to update your mirror upgrades' levels. Negative levels means their effect is reversed.<br />
-      Mirror upgrades' level will be reversed in Mirror. You can manually set them to negative values, for better performance inside Mirror.<br />
+      Reach target AM in Mirror to update your mirror upgrades' levels. Negative levels means their effect is reversed.<br>
+      Mirror upgrades' level will be reversed in Mirror. You can manually set them to negative values, for better performance inside Mirror.<br>
       Target AM is based on your highest light.
     </div>
 
-    <PrimaryButton class="o-primary-btn--subtab-option h2p" @click="showMirrorHowTo"> How to play </PrimaryButton>
-    <br /><br />
-    <EnterMirrorButton /><br /><br />
+    <PrimaryButton
+      class="o-primary-btn--subtab-option h2p"
+      @click="showMirrorHowTo"
+    >
+      How to play
+    </PrimaryButton>
+    <br><br>
+    <EnterMirrorButton /><br><br>
     <div v-if="inMirror">
       <big>Current Goal: {{ format(mirrorReq, 2) }} Antimatter</big>
     </div>
-    <br /><br />
+    <br><br>
     <div class="color-row">
       <div class="color-column">
         <div class="color-column">
-          Red:<br />
-          <big style="color: red">{{ colors.red.amount }}</big> <br />
+          Red:<br>
+          <big style="color: red">
+            {{ colors.red.amount }}
+          </big> <br>
           {{ colors.red.effect }}
         </div>
-        <br />
+        <br>
 
         <div class="color-column">
-          Yellow:<br />
-          <big style="color: yellow">{{ colors.yellow.amount }}</big> <br />
+          Yellow:<br>
+          <big style="color: yellow">
+            {{ colors.yellow.amount }}
+          </big> <br>
           {{ colors.yellow.effect }}
         </div>
-        <br />
+        <br>
       </div>
       <div class="color-column">
         <div class="color-column">
-          Green:<br />
-          <big style="color: green">{{ colors.green.amount }}</big> <br />
+          Green:<br>
+          <big style="color: green">
+            {{ colors.green.amount }}
+          </big> <br>
           {{ colors.green.effect }}
         </div>
-        <br />
+        <br>
 
         <div class="color-column">
-          Purple:<br />
-          <big style="color: purple">{{ colors.purple.amount }}</big> <br />
+          Purple:<br>
+          <big style="color: purple">
+            {{ colors.purple.amount }}
+          </big> <br>
           {{ colors.purple.effect }}
         </div>
-        <br />
+        <br>
 
         <div class="color-column">
-          White:<br />
-          <big style="color: white">{{ colors.white.amount }}</big> <br />
+          White:<br>
+          <big style="color: white">
+            {{ colors.white.amount }}
+          </big> <br>
           {{ colors.white.effect }}
         </div>
       </div>
       <div class="color-column">
         <div class="color-column">
-          Blue:<br />
-          <big style="color: blue">{{ colors.blue.amount }}</big> <br />
+          Blue:<br>
+          <big style="color: blue">
+            {{ colors.blue.amount }}
+          </big> <br>
           {{ colors.blue.effect }}
         </div>
 
         <div class="color-column">
-          Cyan:<br />
-          <big style="color: cyan">{{ colors.cyan.amount }}</big> <br />
+          Cyan:<br>
+          <big style="color: cyan">
+            {{ colors.cyan.amount }}
+          </big> <br>
           {{ colors.cyan.effect }}
         </div>
       </div>

@@ -15,11 +15,11 @@ class Influence extends GameMechanicState {
   }
 
   get info() {
-    return this.config.info()
+    return this.config.info();
   }
 
-  get influenceStat(){
-    return this.config.influenceStat
+  get influenceStat() {
+    return this.config.influenceStat;
   }
 
   get isUnlocked() {
@@ -42,13 +42,13 @@ class Influence extends GameMechanicState {
 
   unlock() {
     if (this.isUnlocked) return;
-    if(this.config.tigger) this.config.tigger()
-    if(!this.config.noImmediatePush) player.imaginaryInfluence.push(this.id)
+    if (this.config.tigger) this.config.tigger();
+    if (!this.config.noImmediatePush) player.imaginaryInfluence.push(this.id);
     EventHub.dispatch(GAME_EVENT.INFLUENCE_TIGGERED);
   }
 }
 
 export const imaginaryInfluences = mapGameDataToObject(
   GameDatabase.imaginary.influence,
-  (config) => new Influence(config)
+  config => new Influence(config)
 );

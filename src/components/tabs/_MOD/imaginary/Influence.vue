@@ -7,14 +7,14 @@ export default {
       required: true
     }
   },
+  computed: {
+    config() {
+      return imaginaryInfluences[this.id];
+    }
+  },
   methods: {
     update() {
     },
-  },
-  computed: {
-    config(){
-      return imaginaryInfluences[this.id]
-    }
   }
 };
 </script>

@@ -22,7 +22,7 @@ import { TickspeedAutobuyerState } from "./tickspeed-autobuyer";
 import { TimeDimensionAutobuyerState } from "./time-dimension-autobuyer";
 import { TimeTheoremAutobuyerState } from "./time-theorem-autobuyer";
 
-//MOD AUTO
+// MOD AUTO
 import { T0AutoResearcherState } from "./_MOD/t0-auto-researcher";
 import { T1AutoResearcherState } from "./_MOD/t1-auto-researcher";
 import { T2AutoResearcherState } from "./_MOD/t2-auto-researcher";
@@ -54,7 +54,7 @@ export const Autobuyer = {
   timeDimension: TimeDimensionAutobuyerState.createAccessor(),
   timeTheorem: new TimeTheoremAutobuyerState(),
 
-  //MOD AUTO
+  // MOD AUTO
   T0AutoResearcher: new T0AutoResearcherState(),
   T1AutoResearcher: new T1AutoResearcherState(),
   T2AutoResearcher: new T2AutoResearcherState(),
@@ -102,7 +102,7 @@ export const Autobuyers = (function() {
   ];
 
   const others = [
-    //MOD AUTO
+    // MOD AUTO
     Autobuyer.T0AutoResearcher,
     Autobuyer.T1AutoResearcher,
     Autobuyer.T2AutoResearcher,
@@ -111,7 +111,7 @@ export const Autobuyers = (function() {
   ];
 
   const all = dimensions.concat(prestige, singleComplex, arrays, others);
-  
+
   const multiple = [
     Autobuyer.antimatterDimension,
     Autobuyer.infinityDimension,

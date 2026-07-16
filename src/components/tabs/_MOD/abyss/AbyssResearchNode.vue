@@ -100,9 +100,9 @@ export default {
     getRestrictionsTooltip() {
       let tooltipContent = "";
 
-      //#FFFFAF yellow
+      // #FFFFAF yellow
       tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br></span>`;
-      let restrictions = this.getNode.restrictions;
+      const restrictions = this.getNode.restrictions;
       for (let index = 0; index < restrictions.length; index++) {
         tooltipContent += `<br><span style="color:${this.restrictionStates[index] ? "lime" : "red"}">${restrictions[
           index
@@ -118,9 +118,9 @@ export default {
     getTipsTooltip() {
       let tooltipContent = "";
 
-      for (let tip of AbyssResearches[this.id].tooltipTags) {
+      for (const tip of AbyssResearches[this.id].tooltipTags) {
         if (player.abyssResearchTooltipsShown.has(tip)) continue;
-        tooltipContent += ``;
+        tooltipContent = String(tooltipContent);
         tooltipContent += `<span style="color:#bbffff"><br><br>----------Tip: ${tip}-----------<br>`;
         tooltipContent += extraAbyssResearchTooltips[tip];
         tooltipContent += `</span>`;
@@ -169,7 +169,7 @@ export default {
       };
     },
     getNodeClass() {
-      let style = {};
+      const style = {};
       style[`${this.getNodeType}`] = true;
       return style;
     },
@@ -229,8 +229,8 @@ export default {
     calcTimeToNext(researchSpeed) {
       return researchSpeed.gt(0)
         ? TimeSpan.fromSeconds(
-            this.getNode.cost.sub(this.getNode.progress).div(researchSpeed).toNumber()
-          ).toTimeEstimate()
+          this.getNode.cost.sub(this.getNode.progress).div(researchSpeed).toNumber()
+        ).toTimeEstimate()
         : "Forever";
     },
     update() {
@@ -266,22 +266,49 @@ export default {
 
 <template>
   <div
-    class="research-node"
-    :class="getNodeClass"
-    :style="getNodeStyle"
     v-tooltip="{
       content: getTooltip,
       classes: ['general-tooltip', 'abyss-research-tooltip'],
       hideOnTargetClick: false,
     }"
+    class="research-node"
+    :class="getNodeClass"
+    :style="getNodeStyle"
   >
-  <div v-if="permanent" class="permanent-mark">*</div>
-    <div class="research-node-container" @click="handleClick" :class="getContainerClass">
-      <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass"></div>
-      <div v-if="levelText" class="research-node-level" :style="getTextStyle">{{ levelText }}</div>
+    <div
+      v-if="permanent"
+      class="permanent-mark"
+    >
+      *
+    </div>
+    <div
+      class="research-node-container"
+      :class="getContainerClass"
+      @click="handleClick"
+    >
+      <div
+        v-if="hasProgress"
+        class="research-node-inner"
+        :style="getFillStyle"
+        :class="getFillClass"
+      />
+      <div
+        v-if="levelText"
+        class="research-node-level"
+        :style="getTextStyle"
+      >
+        {{ levelText }}
+      </div>
       <!-- For "Sink" type -->
-      <div v-if="type === 'sink'" class="sink-animation">
-        <div v-for="i in 3" :style="sinkAnimationStyle(i)" class="sink-animation-block"></div>
+      <div
+        v-if="type === 'sink'"
+        class="sink-animation"
+      >
+        <div
+          v-for="i in 3"
+          :style="sinkAnimationStyle(i)"
+          class="sink-animation-block"
+        />
       </div>
     </div>
   </div>

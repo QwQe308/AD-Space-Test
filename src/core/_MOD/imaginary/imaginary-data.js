@@ -1,4 +1,5 @@
-import { influence } from "./influence-config"
+import { influence } from "./influence-config";
+
 export const imaginary = {
-    influence,
-}
+  influence,
+};

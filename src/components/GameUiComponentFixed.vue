@@ -32,7 +32,7 @@ export default {
     SpectateGame,
     NewGame,
 
-    //Mod
+    // Mod
     AbyssOverlayModal,
   },
   data() {

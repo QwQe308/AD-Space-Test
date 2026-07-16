@@ -147,7 +147,7 @@ export const automator = {
         },
       ],
       examples: [
-        "unlock replicanti", //********
+        "unlock replicanti", //* *******
         "unlock dilation",
         "unlock ec7",
       ],
@@ -487,26 +487,26 @@ export const automator = {
           <b>pending ip</b> - IP gained on Infinity (0 if not available)<br>
           <b>pending ep</b> - EP gained on Eternity (0 if not available)<br>
           ${
-            PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
-              ? "<b>pending tp</b> - TP gained on exiting Dilation<br>"
-              : ""
-          }
+  PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
+    ? "<b>pending tp</b> - TP gained on exiting Dilation<br>"
+    : ""
+}
           ${PlayerProgress.realityUnlocked() ? "<b>pending rm</b> - RM gained on Reality (0 if not available)<br>" : ""}
           ${
-            PlayerProgress.realityUnlocked()
-              ? "<b>pending glyph level</b> - Glyph Level gained on Reality (0 if not available)<br>"
-              : ""
-          }
+  PlayerProgress.realityUnlocked()
+    ? "<b>pending glyph level</b> - Glyph Level gained on Reality (0 if not available)<br>"
+    : ""
+}
           ${
-            PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
-              ? "<b>dt</b> - Current Dilated Time amount <br>"
-              : ""
-          }
+  PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
+    ? "<b>dt</b> - Current Dilated Time amount <br>"
+    : ""
+}
           ${
-            PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
-              ? "<b>tp</b> - Current Tachyon Particle amount<br>"
-              : ""
-          }
+  PlayerProgress.realityUnlocked() || PlayerProgress.dilationUnlocked()
+    ? "<b>tp</b> - Current Tachyon Particle amount<br>"
+    : ""
+}
           <b>rg</b> - Current Replicanti Galaxy amount (does not use scientific)<br>
           <b>rp</b> - Current Replicanti amount <br>
           <b>tt</b> - Current Time Theorem amount <br>

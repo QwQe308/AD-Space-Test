@@ -42,7 +42,7 @@ export class Restriction extends GameMechanicState {
   }
 
   checkCompletionState(auto = false) {
-    let currentCompletion = this.config.requirement();
+    const currentCompletion = this.config.requirement();
     if (currentCompletion !== this.data.completion) this.onCompletionChange(currentCompletion);
   }
 
@@ -100,7 +100,7 @@ export class FailableRestriction extends Restriction {
   }
 
   checkCompletionState(auto = false) {
-    let completion = this.data.stillCompletable && this.config.requirement();
+    const completion = this.data.stillCompletable && this.config.requirement();
     if (completion !== this.completion) this.onCompletionChange(completion);
   }
 }

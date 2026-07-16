@@ -16,7 +16,10 @@ export default {
 
 <template>
   <div class="overlayClass">
-    <span v-html="text" class="textClass"></span>
+    <span
+      class="textClass"
+      v-html="text"
+    />
   </div>
 </template>
 

@@ -120,7 +120,11 @@ export default {
   <div class="c-automator__controls l-automator__controls">
     <div class="c-automator-control-row l-automator-button-row">
       <div class="c-button-group">
-        <AutomatorButton v-tooltip="'Rewind Automator to the first command'" class="fa-fast-backward" @click="rewind" />
+        <AutomatorButton
+          v-tooltip="'Rewind Automator to the first command'"
+          class="fa-fast-backward"
+          @click="rewind"
+        />
         <AutomatorButton
           v-tooltip="{
             content: playTooltip,
@@ -129,8 +133,16 @@ export default {
           :class="playButtonClass"
           @click="play"
         />
-        <AutomatorButton v-tooltip="'Stop Automator and reset position'" class="fa-stop" @click="stop" />
-        <AutomatorButton v-tooltip="'Step forward one line'" class="fa-step-forward" @click="step" />
+        <AutomatorButton
+          v-tooltip="'Stop Automator and reset position'"
+          class="fa-stop"
+          @click="stop"
+        />
+        <AutomatorButton
+          v-tooltip="'Step forward one line'"
+          class="fa-step-forward"
+          @click="step"
+        />
         <AutomatorButton
           v-tooltip="'Restart script automatically when it reaches the end'"
           class="fa-sync-alt"

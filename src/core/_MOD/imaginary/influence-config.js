@@ -3,7 +3,7 @@ export const influence = {
     id: "abyss",
     name: "Abyss",
     info() {
-      return `Disables Achievements, part of Time Studies, anddd$#∱?τ^%ɛ(@?`
+      return `Disables Achievements, part of Time Studies, anddd$#∱?τ^%ɛ(@?`;
     },
     influenceStat: 50,
     requirement() {

@@ -110,7 +110,7 @@ export const tabs = [
         symbol: "<i class='fas fa-calculator'></i>",
         component: "MultiplierBreakdownTab",
         // Enable at your own risk 0- the tab does not work and must be manually fixed by the modder.
-        condition: () => /* false &&  */PlayerProgress.infinityUnlocked(),
+        condition: () => /* False &&  */PlayerProgress.infinityUnlocked(),
         id: 3,
         hidable: true,
       },
@@ -230,7 +230,7 @@ export const tabs = [
         condition: () =>
           PlayerProgress.realityUnlocked() ||
           player.challenge.eternity.unlocked !== 0 ||
-          EternityChallenges.all.some((ec) => ec.completions > 0),
+          EternityChallenges.all.some(ec => ec.completions > 0),
         id: 2,
         hidable: true,
       },

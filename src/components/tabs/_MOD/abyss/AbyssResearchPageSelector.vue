@@ -14,12 +14,12 @@ export default {
   },
   computed: {
     unlockedDepthsList() {
-      return abyssDepths.filter((x) => this.depthUnlockStates[x[0]]).map((x) => x[0]);
+      return abyssDepths.filter(x => this.depthUnlockStates[x[0]]).map(x => x[0]);
     },
   },
   methods: {
     update() {
-      this.depthUnlockStates = abyssDepths.map((x) => x[1]());
+      this.depthUnlockStates = abyssDepths.map(x => x[1]());
     },
     changeTab(tabId) {
       if (player.abyssResearchCanvas.currentAbyssResearchDepth === tabId) return;
@@ -42,10 +42,14 @@ export default {
       @click="changeTab(depthID)"
     >
       <span class="research-tabs__label">{{ depthID }}</span>
-      <div class="research-tabs__indicator"></div>
+      <div class="research-tabs__indicator" />
     </div>
 
-    <div class="relocate-button" @click="relocate" v-tooltip="'Relocate'">
+    <div
+      v-tooltip="'Relocate'"
+      class="relocate-button"
+      @click="relocate"
+    >
       <span class="relocate-label">↻</span>
     </div>
   </div>

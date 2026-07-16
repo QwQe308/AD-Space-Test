@@ -137,17 +137,17 @@ export function buyStudiesUntil(id, ec = -1) {
 }
 
 export function respecTimeStudies(auto) {
-  let hasTS111 = false
+  let hasTS111 = false;
   for (const study of TimeStudy.boughtNormalTS()) {
-    if(study.id !== 111){
+    if (study.id !== 111) {
       study.refund();
-    }else{
-      hasTS111 = true
+    } else {
+      hasTS111 = true;
     }
   }
-  
-  if(!hasTS111) player.timestudy.studies = [];
-  else player.timestudy.studies = [111]
+
+  if (!hasTS111) player.timestudy.studies = [];
+  else player.timestudy.studies = [111];
   GameCache.timeStudies.invalidate();
   player.celestials.v.STSpent = 0;
   const ecStudy = TimeStudy.eternityChallenge.current();

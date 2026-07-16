@@ -65,9 +65,13 @@ export default {
 
 <template>
   <div class="l-spoon-btn-group">
-    <PrimaryButton :enabled="isAvailable" class="o-primary-btn--replicanti-galaxy" @click="handleClick">
+    <PrimaryButton
+      :enabled="isAvailable"
+      class="o-primary-btn--replicanti-galaxy"
+      @click="handleClick"
+    >
       {{ resetActionDisplay }} for a Replicanti Galaxy
-      <br />
+      <br>
       {{ galaxyCountDisplay }}
     </PrimaryButton>
     <PrimaryToggleButton

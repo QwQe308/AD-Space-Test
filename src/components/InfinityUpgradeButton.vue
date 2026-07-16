@@ -109,12 +109,21 @@ export default {
     <span :class="{ 'o-pelle-disabled': isUseless }">
       <DescriptionDisplay :config="config" />
       <span v-if="showWorstChallenge">
-        <br />
+        <br>
         {{ worstChallengeString }}
       </span>
-      <EffectDisplay v-if="!isDisabled" br :config="config" />
+      <EffectDisplay
+        v-if="!isDisabled"
+        br
+        :config="config"
+      />
     </span>
-    <CostDisplay v-if="!isBought" br :config="config" name="Infinity Point" />
+    <CostDisplay
+      v-if="!isBought"
+      br
+      :config="config"
+      name="Infinity Point"
+    />
     <slot />
   </button>
 </template>

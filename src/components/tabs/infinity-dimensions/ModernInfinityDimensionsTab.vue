@@ -42,7 +42,7 @@ export default {
     getFrozenClass() {
       return {
         "frozen-currency": this.frozen
-      }
+      };
     },
   },
   methods: {
@@ -73,8 +73,8 @@ export default {
       this.extraTesseracts.copyFrom(Tesseracts.extra);
       this.creditsClosed = GameEnd.creditsEverClosed;
 
-      this.unSoftCapped = InfinityDimensions.unSoftCapped
-      this.frozen = Currency.infinityPower.frozen
+      this.unSoftCapped = InfinityDimensions.unSoftCapped;
+      this.frozen = Currency.infinityPower.frozen;
     },
     maxAll() {
       InfinityDimensions.buyMax();
@@ -110,7 +110,10 @@ export default {
     <div>
       <p>
         You have
-        <span class="c-infinity-dim-description__accent" :class="getFrozenClass">{{ format(infinityPower, 2, 1) }}</span>
+        <span
+          class="c-infinity-dim-description__accent"
+          :class="getFrozenClass"
+        >{{ format(infinityPower, 2, 1) }}</span>
         Infinity Power,
         <br>
         <span v-if="!isEC9Running">

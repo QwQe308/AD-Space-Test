@@ -1,12 +1,19 @@
 <script>
-//This is a rewritten version of that code. Thats too junky.
+// This is a rewritten version of that code. Thats too junky.
 import { AbyssResearchHelperTools } from "../../../../core/globals";
+
 import AbyssResearchConnection from "./AbyssResearchConnection.vue";
 import AbyssResearchNode from "./AbyssResearchNode.vue";
 import AbyssResearchPageSelector from "./AbyssResearchPageSelector.vue";
 
 export default {
   name: "AbyssResearchTab",
+
+  components: {
+    AbyssResearchConnection,
+    AbyssResearchNode,
+    AbyssResearchPageSelector,
+  },
 
   data() {
     return {
@@ -27,22 +34,16 @@ export default {
     };
   },
 
-  components: {
-    AbyssResearchConnection,
-    AbyssResearchNode,
-    AbyssResearchPageSelector,
-  },
-
   computed: {
     getCurrentNodes() {
-      // only give keys
+      // Only give keys
       return Object.keys(AbyssResearchHelperTools.sortByDepth[this.depth]);
     },
     getConnections() {
       // [[x1,y1],[x2,y2],isResearching]
-      let connections = [];
-      for (let id of this.shownNodes) {
-        for (let id2 of AbyssResearches[id].next) {
+      const connections = [];
+      for (const id of this.shownNodes) {
+        for (const id2 of AbyssResearches[id].next) {
           if (this.shownNodes.includes(id2)) {
             connections.push([
               [AbyssResearches[id].x, AbyssResearches[id].y, AbyssResearches[id].id],
@@ -52,7 +53,7 @@ export default {
           }
         }
 
-        for (let id2 of AbyssResearches[id].previous) {
+        for (const id2 of AbyssResearches[id].previous) {
           if (this.shownNodes.includes(id2)) {
             connections.push([
               [AbyssResearches[id].x, AbyssResearches[id].y, AbyssResearches[id].id],
@@ -83,11 +84,15 @@ export default {
     },
   },
 
+  mounted() {
+    this.updateCanvasTransform();
+  },
+
   methods: {
     update() {
-      this.shownNodes = this.getCurrentNodes.filter((x) => player.abyssResearches[x].shown);
+      this.shownNodes = this.getCurrentNodes.filter(x => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
-      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth
+      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
     },
 
     updateCanvasTransform() {
@@ -102,9 +107,9 @@ export default {
       this.startOffset = this.offset.copy;
     },
     drag(event) {
-      //this.updateTooltipPosition(event);
+      // This.updateTooltipPosition(event);
       if (this.isDragging) {
-        let cursorPosition = new Vector(event.clientX, event.clientY);
+        const cursorPosition = new Vector(event.clientX, event.clientY);
         this.offset = this.startOffset.plus(cursorPosition).minus(this.dragStart);
       }
     },
@@ -136,73 +141,180 @@ export default {
       this.zoomLevel = 1;
     },
   },
-
-  mounted() {
-    this.updateCanvasTransform();
-  },
 };
 </script>
 
 <template>
   <div class="research-wrapper">
-    <div class="canvas-container" ref="canvasContainer">
+    <div
+      ref="canvasContainer"
+      class="canvas-container"
+    >
       <div
-        class="research-canvas"
         ref="canvas"
+        class="research-canvas"
         @mousedown="startDrag"
         @mousemove="drag"
         @mouseup="endDrag"
         @mouseleave="endDrag"
         @wheel.prevent="handleZoom"
       >
-        <AbyssResearchNode v-for="id in shownNodes" :key="id" :id="id"></AbyssResearchNode>
+        <AbyssResearchNode
+          v-for="id in shownNodes"
+          :id="id"
+          :key="id"
+        />
         <!-- lines -->
-        <svg class="connections-layer" width="100%" height="100%">
+        <svg
+          class="connections-layer"
+          width="100%"
+          height="100%"
+        >
           <defs>
-            <linearGradient id="linearGradient-rightwards" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-rightwards"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-leftwards" x1="100%" y1="0%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-leftwards"
+              x1="100%"
+              y1="0%"
+              x2="0%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-upwards" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-upwards"
+              x1="0%"
+              y1="100%"
+              x2="0%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-downwards" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-downwards"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
 
-            <linearGradient id="linearGradient-right-upwards" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-right-upwards"
+              x1="0%"
+              y1="100%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-left-upwards" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-left-upwards"
+              x1="100%"
+              y1="100%"
+              x2="0%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-right-downwards" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-right-downwards"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 1"
+              />
             </linearGradient>
-            <linearGradient id="linearGradient-left-downwards" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color: rgb(94, 214, 255); stop-opacity: 0" />
-              <stop offset="100%" style="stop-color: rgb(94, 214, 255, 1); stop-opacity: 1" />
+            <linearGradient
+              id="linearGradient-left-downwards"
+              x1="100%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: rgb(94, 214, 255); stop-opacity: 0"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: rgb(94, 214, 255, 1); stop-opacity: 1"
+              />
             </linearGradient>
           </defs>
 
           <AbyssResearchConnection
             v-for="(connection, index) in getConnections"
+            :id="'conn-' + index"
             :key="'conn-' + index"
             :data="connection"
-            :id="'conn-' + index"
           />
         </svg>
       </div>
-      <AbyssResearchPageSelector :depth="depth" @tab-change="handleTabChange" @relocate="relocate" />
+      <AbyssResearchPageSelector
+        :depth="depth"
+        @tab-change="handleTabChange"
+        @relocate="relocate"
+      />
     </div>
   </div>
 </template>

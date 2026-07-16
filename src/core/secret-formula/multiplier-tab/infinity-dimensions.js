@@ -96,8 +96,8 @@ export const ID = {
     },
     isActive: () => Tesseracts.bought.gt(0),
     icon: MultiplierTabIcons.PURCHASE("tesseractID"),
-  },/* 
-  infinityGlyphSacrifice: {
+  }, /*
+  InfinityGlyphSacrifice: {
     name: "Infinity Glyph sacrifice",
     multValue: () => (InfinityDimension(8).isProducing
       ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.div(10)))
@@ -121,14 +121,14 @@ export const ID = {
 
   lightYellow: {
     name: "Mirror - Yellow Light",
-    multValue: (dim) => Decimal.pow(light.yellow.effectValue(), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
+    multValue: dim => Decimal.pow(light.yellow.effectValue(), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
     isActive: () => light.yellow.amount().neq(0),
     icon: MultiplierTabIcons.LIGHT("yellow"),
   },
 
   AR: {
     name: "Abyss Researches (Static)",
-    multValue: (dim) => Decimal.pow(Effects.product(AbyssResearches.A20), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
+    multValue: dim => Decimal.pow(Effects.product(AbyssResearches.A20), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
     isActive: () => PlayerProgress.imaginaryUnlocked(),
     icon: MultiplierTabIcons.ABYSS_RESEARCH,
   },

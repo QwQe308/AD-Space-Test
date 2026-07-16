@@ -15,9 +15,9 @@ export default {
     return {
       isResearching: false,
       isActive: false,
-      animationSpeed: 1, // percentage / tick
-      animationLineLength: 20, //in percentage
-      positions: Array.range(0, 2).map((x) => [
+      animationSpeed: 1, // Percentage / tick
+      animationLineLength: 20, // In percentage
+      positions: Array.range(0, 2).map(x => [
         [-10000, -10000],
         [-10000, -10000],
       ]),
@@ -34,39 +34,39 @@ export default {
     },
 
     getDirection() {
-      let x1 = this.data[0][0];
-      let x2 = this.data[1][0];
-      let y1 = this.data[0][1];
-      let y2 = this.data[1][1];
+      const x1 = this.data[0][0];
+      const x2 = this.data[1][0];
+      const y1 = this.data[0][1];
+      const y2 = this.data[1][1];
 
       if (y2 === y1) {
         if (x2 > x1) {
           return "rightwards";
-        } else {
-          return "leftwards";
         }
+        return "leftwards";
+
       }
       if (x2 === x1) {
         if (y2 > y1) {
           return "downwards";
-        } else {
-          return "upwards";
         }
+        return "upwards";
+
       }
 
       if (x2 > x1) {
         if (y2 > y1) {
           return "right-downwards";
-        } else {
-          return "right-upwards";
         }
-      } else {
-        if (y2 > y1) {
-          return "left-downwards";
-        } else {
-          return "left-upwards";
-        }
+        return "right-upwards";
+
       }
+      if (y2 > y1) {
+        return "left-downwards";
+      }
+      return "left-upwards";
+
+
     },
   },
   methods: {
@@ -82,7 +82,7 @@ export default {
 
       if (!this.isResearching || !this.isActive) {
         this.animationPercentages = [-60, 0];
-        this.positions = Array.range(0, this.animationLines).map((x) => [
+        this.positions = Array.range(0, this.animationLines).map(x => [
           [-10000, -10000],
           [-10000, -10000],
         ]);
@@ -99,7 +99,7 @@ export default {
     },
 
     calcPosition(percentage) {
-      let positions = [
+      const positions = [
         [
           this.data[0][0] + ((this.data[1][0] - this.data[0][0]) * (percentage - this.animationLineLength)) / 100,
           this.data[0][1] + ((this.data[1][1] - this.data[0][1]) * (percentage - this.animationLineLength)) / 100,
@@ -133,7 +133,14 @@ export default {
 
 <template>
   <g>
-    <line v-if="!data[2]" :x1="data[0][0]" :y1="data[0][1]" :x2="data[1][0]" :y2="data[1][1]" :class="classObject" />
+    <line
+      v-if="!data[2]"
+      :x1="data[0][0]"
+      :y1="data[0][1]"
+      :x2="data[1][0]"
+      :y2="data[1][1]"
+      :class="classObject"
+    />
     <!--
       Svg linearGradient uses objectBoundingBox in its code
       and threfore it wont apply if it has no content size.

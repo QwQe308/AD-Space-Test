@@ -9,9 +9,6 @@ export default {
       required: true,
     },
   },
-  methods: {
-    update() {},
-  },
   computed: {
     data() {
       return PresentMirrorUpgrades[id];
@@ -20,15 +17,24 @@ export default {
       return this.data.level;
     },
   },
+  methods: {
+    update() {},
+  },
 };
 </script>
 
 <template>
   <div class="mirror-upgrade">
-    <div class="description">Level: {{ level }}</div>
+    <div class="description">
+      Level: {{ level }}
+    </div>
     <div class="toggler">
-      <div class="toggler sub">-</div>
-      <div class="toggler add">+</div>
+      <div class="toggler sub">
+        -
+      </div>
+      <div class="toggler add">
+        +
+      </div>
     </div>
   </div>
 </template>

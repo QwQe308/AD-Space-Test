@@ -20,7 +20,7 @@ export const eternityUpgrades = {
       const pow = Decimal.ln(eterPreCap.mul(4).add(1)).div(log4);
       const multPreCap = Decimal.pow(base, pow);
       const eterPostCap = Currency.eternities.value.sub(10000).max(0);
-      //after cap
+      // After cap
       const mult2 = eterPostCap.divide(250).plus(1);
       const pow2 = eterPostCap.plus(1).ln().div(log4).pow(0.5);
       const multPostCap = mult2.pow(pow2).clampMin(1);

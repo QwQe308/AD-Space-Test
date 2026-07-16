@@ -16,7 +16,7 @@ function walkSuggestion(suggestion, prefix, output) {
 CodeMirror.registerHelper("lint", "automato", (contents, _, editor) => {
   const doc = editor.getDoc();
   const errors = compile(contents, true).errors;
-  return errors.map((e) => ({
+  return errors.map(e => ({
     message: e.info,
     severity: "error",
     from: doc.posFromIndex(e.startOffset),
@@ -24,7 +24,7 @@ CodeMirror.registerHelper("lint", "automato", (contents, _, editor) => {
   }));
 });
 
-CodeMirror.registerHelper("hint", "anyword", (editor) => {
+CodeMirror.registerHelper("hint", "anyword", editor => {
   const cursor = editor.getDoc().getCursor();
   let start = cursor.ch;
   const end = cursor.ch;
@@ -160,7 +160,7 @@ CodeMirror.defineSimpleMode("automato", {
       regex:
         /(replicanti[ \t]+upgrades|break[ \t]+infinity[ \t]+upgrades|infinity[ \t]+upgrades|infinity[ \t]+dimensions)(\s|$)/iu,
       token: "variable-2",
-    }, //buy commands
+    }, // Buy commands
 
     { regex: /(eternity|reality|use)(\s|$)/iu, token: "variable-2" },
     { regex: /(antimatter|infinity|time)(\s|$|(?=,))/iu, token: "variable-2" },

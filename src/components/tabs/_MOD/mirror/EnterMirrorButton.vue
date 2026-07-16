@@ -24,7 +24,10 @@ export default {
 </script>
 
 <template>
-  <button :class="buttonClass()" onclick="reverseMirror()">
+  <button
+    :class="buttonClass()"
+    onclick="reverseMirror()"
+  >
     <span v-if="!inMirror"> Reverse The Mirror </span>
     <span v-else-if="canComplete"> Break The Mirror </span>
     <span v-else> Escape The Mirror </span>

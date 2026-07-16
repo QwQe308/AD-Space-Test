@@ -67,7 +67,7 @@ export default {
       if (this.isContinuumActive) return this.continuumString;
       const prefix = this.showCostTitle(this.buyUntil10 ? this.until10Cost : this.singleCost) ? "Cost: " : "";
       let suffix = this.isCostsAD ? this.costUnit : "AM";
-      if(isSCRunningOnTier(3, 1)) suffix = "Matter"
+      if (isSCRunningOnTier(3, 1)) suffix = "Matter";
       return `${prefix}${this.costDisplay} ${suffix}`;
     },
     hasLongText() {

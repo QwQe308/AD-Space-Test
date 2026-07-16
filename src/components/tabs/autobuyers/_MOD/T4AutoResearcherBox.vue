@@ -28,7 +28,11 @@ export default {
 </script>
 
 <template>
-  <AutobuyerBox :autobuyer="autobuyer" name="T4 Auto Researcher" :extraInfos="extraInfo"> </AutobuyerBox>
+  <AutobuyerBox
+    :autobuyer="autobuyer"
+    name="T4 Auto Researcher"
+    :extra-infos="extraInfo"
+  />
 </template>
 
 <style scoped></style>

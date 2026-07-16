@@ -3,7 +3,7 @@ import { DC } from "../../constants";
 let swapDelay = 1000;
 
 function waitForInterval() {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       Quote.advanceQueue();
       resolve();
@@ -12,7 +12,7 @@ function waitForInterval() {
 }
 
 function showText(info) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       ui.view.abyssTexts += info[0];
       if (info.length == 3) info[2]();
@@ -21,7 +21,7 @@ function showText(info) {
   });
 }
 
-let abyssTexts = [
+const abyssTexts = [
   [
     "<br>Uncaught out of memory",
     4000,
@@ -111,7 +111,7 @@ let abyssTexts = [
     () => {
       ui.view.abyssTexts = "";
     },
-  ], //clear all texts, they are going to get off-screen
+  ], // Clear all texts, they are going to get off-screen
   ["<br>Influence_Analyzer.exe successfully imported.", 2500],
   ["<br>Analyzing.", 2500],
   [".", 1000],
@@ -136,8 +136,8 @@ let abyssTexts = [
 
 export async function abyssAnimation() {
   EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_BEFORE);
-  for (let i in Quotes) {
-    Quotes[i].all.forEach((element) => {
+  for (const i in Quotes) {
+    Quotes[i].all.forEach(element => {
       element.present();
     });
   }
@@ -146,8 +146,8 @@ export async function abyssAnimation() {
     swapDelay /= 1.04;
     await waitForInterval();
   }
-  GameIntervals.stop(); //pauses the game
-  await new Promise((resolve) => {
+  GameIntervals.stop(); // Pauses the game
+  await new Promise(resolve => {
     setTimeout(() => {
       resolve();
     }, 5000);
@@ -155,7 +155,7 @@ export async function abyssAnimation() {
   swapDelay = 1000;
   ui.view.abyssTexts = "";
   Modal.abyssOverlay.show();
-  GameIntervals.start(); //resumes the game
+  GameIntervals.start(); // Resumes the game
   for (let i = 0; i < abyssTexts.length; i++) {
     await showText(abyssTexts[i]);
   }
@@ -163,7 +163,7 @@ export async function abyssAnimation() {
     autobuyer.isActive = false;
   }
   Laitela.setContinuum(false);
-  //reset values
+  // Reset values
   player.imaginaryInfluence.push("abyss");
   for (let i = 0; i < player.achievementBits.length; i++) {
     player.achievementBits[i] = 0;
@@ -188,27 +188,27 @@ export async function abyssAnimation() {
   player.challenge.eternity.current = 0;
   player.challenge.eternity.unlocked = 0;
   player.challenge.eternity.requirementBits = 0;
-  SpaceResearchTierDetail[4].forEach((x) => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[4].forEach(x => SpaceResearchRifts[x].reset());
   eternity(true, true);
   player.eternities = new Decimal(100);
-  AbyssResearch.A1.unlock()
-  AbyssResearch.A2.show()
-  AbyssResearch.A3.show()
+  AbyssResearch.A1.unlock();
+  AbyssResearch.A2.show();
+  AbyssResearch.A3.show();
   player.abyssResearches.A1.shown = true;
   player.infinityUpgrades = new Set();
   player.replicanti.unl = false;
-  bigCrunchReset(true)
-  player.amProc = DC.D0
-  player.space = DC.D0
-  player.records.thisReality.maxSpace = DC.D0
-  player.infinityPoints = DC.D0
-  player.eternityUpgrades = new Set()
-  player.epmultUpgrades = DC.D0
-  //end
+  bigCrunchReset(true);
+  player.amProc = DC.D0;
+  player.space = DC.D0;
+  player.records.thisReality.maxSpace = DC.D0;
+  player.infinityPoints = DC.D0;
+  player.eternityUpgrades = new Set();
+  player.epmultUpgrades = DC.D0;
+  // End
   AutomatorBackend.pause();
   Tab.imaginary.analyzer.show(false, true);
   for (const tab of Tabs.currentUIFormat) if (!tab.isHidden) tab.toggleVisibility();
   GameStorage.save(true);
   GameIntervals.stop();
-  //EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER); //no after lol
+  // EventHub.dispatch(GAME_EVENT.ABYSS_ANIMATION_AFTER); //no after lol
 }

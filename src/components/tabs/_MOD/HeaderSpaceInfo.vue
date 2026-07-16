@@ -40,7 +40,7 @@ export default {
 
 <template>
   <div>
-    <br />
+    <br>
     {{ effectDisplay }}
   </div>
 </template>

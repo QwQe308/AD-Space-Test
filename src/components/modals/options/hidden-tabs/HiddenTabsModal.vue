@@ -25,7 +25,7 @@ export default {
       this.isAlmostEnd = Pelle.hasGalaxyGenerator;
     },
     showAllTabs() {
-      if(imaginaryInfluences.abyss.isUnlocked) Laitela.setContinuum(true)
+      if (imaginaryInfluences.abyss.isUnlocked) Laitela.setContinuum(true);
       for (const tab of this.tabs) {
         tab.unhideTab();
         for (const subtab of tab.subtabs)

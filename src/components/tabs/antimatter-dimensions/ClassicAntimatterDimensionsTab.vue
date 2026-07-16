@@ -43,13 +43,13 @@ export default {
         : "";
       this.multiplierText = `Buy 10 Dimension purchase multiplier: ${formatX(this.buy10Mult, 2, 2)}`;
 
-      this.amMult.copyFrom(getAMMultiplier())
+      this.amMult.copyFrom(getAMMultiplier());
       if (this.amMult.neq(1)) {
-        const amMultText = ` | Direct Antimatter multiplier: ${formatMultiplier(this.amMult, 2, 2)}`
+        const amMultText = ` | Direct Antimatter multiplier: ${formatMultiplier(this.amMult, 2, 2)}`;
         this.multiplierText += amMultText;
       }
 
-      this.multiplierText += sacText
+      this.multiplierText += sacText;
     },
     quickReset() {
       softReset(-1, true, true);

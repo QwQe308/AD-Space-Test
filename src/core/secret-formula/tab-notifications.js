@@ -59,7 +59,7 @@ export const tabNotifications = {
     condition: () => !PlayerProgress.realityUnlocked() &&
       !PlayerProgress.eternityUnlocked()
   },
-  //extra
+  // Extra
   ID4Unlock: {
     id: 17,
     tabsToHighLight: [

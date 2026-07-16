@@ -106,7 +106,7 @@ class SpaceResearchRiftClass extends GameMechanicState {
   }
 
   get effect() {
-    let effect = this.config.effect(this.effectValue); //to change
+    const effect = this.config.effect(this.effectValue); // To change
     return effect;
   }
 
@@ -152,7 +152,7 @@ class SpaceResearchRiftClass extends GameMechanicState {
   }
 
   toggle() {
-    let active = SpaceResearchRifts.all.filter((r) => r.isActive).length;
+    const active = SpaceResearchRifts.all.filter(r => r.isActive).length;
     if (!this.isActive && active >= 2) GameUI.notify.error(`You can only have 2 researches active at the same time!`);
     else this.rift.active = !this.rift.active;
   }
@@ -171,10 +171,10 @@ class SpaceResearchRiftClass extends GameMechanicState {
   }
 
   fill(diff) {
-    let spd = this.trueFillSpeed;
+    const spd = this.trueFillSpeed;
 
-    if (isSCRunningOnTier(1, 1) && this.tier > 0) return; //sc1-1
-    if (isSCRunningOnTier(1, 2)) return; //sc1-2
+    if (isSCRunningOnTier(1, 1) && this.tier > 0) return; // Sc1-1
+    if (isSCRunningOnTier(1, 2)) return; // Sc1-2
 
     // The UI removes the fill button after 100%, so we need to turn it off here
     if (this.isActive && this.isMaxed) {
@@ -183,7 +183,7 @@ class SpaceResearchRiftClass extends GameMechanicState {
     }
     if (this.isMaxed || !this.unlocked) return;
 
-    let res = spd.mul(diff.div(1000));
+    const res = spd.mul(diff.div(1000));
 
     this.pendingProgress = this.pendingProgress.max(this.progress).add(res);
     if (this.resetsNothing) {
@@ -195,5 +195,5 @@ class SpaceResearchRiftClass extends GameMechanicState {
 
 export const SpaceResearchRifts = mapGameDataToObject(
   GameDatabase.space.spaceResearches,
-  (config) => new SpaceResearchRiftClass(config)
+  config => new SpaceResearchRiftClass(config)
 );

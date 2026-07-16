@@ -47,7 +47,7 @@ class SubtabState {
   }
 
   show(manual, force = false) {
-    if(isSCRunningOnTierOrHigher(6,1) && !force) return GameUI.notify.error("Tabs cannot be switched in SC6")
+    if (isSCRunningOnTierOrHigher(6, 1) && !force) return GameUI.notify.error("Tabs cannot be switched in SC6");
     this._parent.show(manual, this, force);
   }
 
@@ -139,7 +139,7 @@ class TabState {
   }
 
   show(manual, subtab = undefined, force = false) {
-    if(isSCRunningOnTierOrHigher(6,1) && !force) return GameUI.notify.error("Tabs cannot be switched in SC6")
+    if (isSCRunningOnTierOrHigher(6, 1) && !force) return GameUI.notify.error("Tabs cannot be switched in SC6");
     if (!force && !manual && !player.options.automaticTabSwitching || Quote.isOpen) return;
     if (subtab !== undefined) {
       if (!Enslaved.isRunning) subtab.unhideTab();
@@ -204,23 +204,23 @@ export const Tabs = (function() {
       Tab.achievements,
       Tab.automation,
       Tab.challenges,
-      Tab.space,//MOD
+      Tab.space, // MOD
       Tab.infinity,
       Tab.eternity,
       Tab.reality,
       Tab.celestials,
-      Tab.imaginary,//MOD
+      Tab.imaginary, // MOD
     ],
     newUI: [
       Tab.dimensions,
       Tab.automation,
       Tab.challenges,
-      Tab.space,//MOD
+      Tab.space, // MOD
       Tab.infinity,
       Tab.eternity,
       Tab.reality,
       Tab.celestials,
-      Tab.imaginary,//MOD
+      Tab.imaginary, // MOD
       Tab.achievements,
       Tab.statistics,
       Tab.options,

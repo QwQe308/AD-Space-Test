@@ -80,7 +80,7 @@ export class TimeStudyConnectionSetup {
    * @param {TimeStudySetup[]} studies
    */
   setPosition(studies, width, height) {
-    if(this.connection.isOverridden) return
+    if (this.connection.isOverridden) return;
     const from = studies.find(study => study.study === this.from);
     const to = studies.find(study => study.study === this.to);
     this.x1 = (from.left + from.width / 2) / width;

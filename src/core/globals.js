@@ -90,7 +90,7 @@ export * from "./speedrun";
 
 export * from "./automator/script-templates";
 
-//MOD
+// MOD
 
 export * from "./_MOD/space-researches/spaceResearches";
 export * from "./_MOD/space-researches/spaceResearchRift";
@@ -102,5 +102,9 @@ export * from "./_MOD/mirror/mirror.js";
 export * from "./_MOD/abyss/animation.js";
 export * from "./_MOD/abyss/abyss-researches/abyssResearch";
 export * from "./_MOD/abyss/abyss-researches/abyssResearchSpawner";
+
+export * from "./_MOD/empowers/present/presentEmpower";
+export * from "./_MOD/empowers/present/affix";
+export * from "./_MOD/empowers/present/pendingEvent";
 
 export * from "./_MOD/imaginary/influence";

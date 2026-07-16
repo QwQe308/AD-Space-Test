@@ -8,14 +8,14 @@ export const MultiplierTabHelper = {
         // Technically not 100% correct, but within EC7 any AD8 production is going to be irrelevant compared to AD7
         // and making the UI behave as if it's inactive produces a better look overall
         return Math.clamp(
-          AntimatterDimensions.all.filter((ad) => ad.isProducing).length,
+          AntimatterDimensions.all.filter(ad => ad.isProducing).length,
           1,
           EternityChallenge(7).isRunning ? 7 : 8
         );
       case "ID":
-        return InfinityDimensions.all.filter((id) => id.isProducing).length;
+        return InfinityDimensions.all.filter(id => id.isProducing).length;
       case "TD":
-        return TimeDimensions.all.filter((td) => td.isProducing).length;
+        return TimeDimensions.all.filter(td => td.isProducing).length;
       default:
         throw new Error("Unrecognized Dimension type in Multiplier tab GameDB entry");
     }
@@ -37,7 +37,7 @@ export const MultiplierTabHelper = {
     ).mul(Pelle.specialGlyphEffect.power);
   },
 
- // Helper method for galaxies and tickspeed, broken up as contributions of tickspeed*log(perGalaxy) and galaxyCount to
+  // Helper method for galaxies and tickspeed, broken up as contributions of tickspeed*log(perGalaxy) and galaxyCount to
   // their product, which is proportional to log(tickspeed)
   decomposeTickspeed() {
     let effectiveCount = effectiveBaseGalaxies();
@@ -90,8 +90,8 @@ export const MultiplierTabHelper = {
     let baseFrac = base.log10().div(Tickspeed.perSecond.log10());
 
     // We want to make sure to zero out components in some edge cases
-    if (base.eq(1)) baseFrac = DC.D0
-    if (effectiveCount.eq(0)) galFrac =  DC.D0;
+    if (base.eq(1)) baseFrac = DC.D0;
+    if (effectiveCount.eq(0)) galFrac = DC.D0;
 
     // Normalize the sum by splitting tickspeed and galaxies across what's leftover besides the base value. These three
     // values must be scaled so that they sum to 1 and none are negative
@@ -186,8 +186,8 @@ export const MultiplierTabHelper = {
 
   blackHoleSpeeds() {
     const currBH = BlackHoles.list
-      .filter((bh) => bh.isUnlocked)
-      .map((bh) => (bh.isActive ? bh.power : DC.D1))
+      .filter(bh => bh.isUnlocked)
+      .map(bh => (bh.isActive ? bh.power : DC.D1))
       .reduce((x, y) => Decimal.mul(x, y), DC.D1);
 
     // Calculate an average black hole speedup factor
@@ -211,11 +211,11 @@ export const MultiplierTabHelper = {
   // which set of Dimensions are actually producing within NC12 - in nearly every case, one of the odd/even sets will
   // produce significantly more than the other, so we simply assume the larger one is active and the other isn't
   evenDimNC12Production() {
-    const nc12Pow = (tier) => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
+    const nc12Pow = tier => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
     const maxTier = Math.clampMin(2 * Math.floor(MultiplierTabHelper.activeDimCount("AD") / 2), 2);
     return AntimatterDimensions.all
-      .filter((ad) => ad.isProducing && ad.tier % 2 === 0)
-      .map((ad) => ad.multiplier.times(ad.amount.pow(nc12Pow(ad.tier))))
+      .filter(ad => ad.isProducing && ad.tier % 2 === 0)
+      .map(ad => ad.multiplier.times(ad.amount.pow(nc12Pow(ad.tier))))
       .reduce((x, y) => x.times(y), DC.D1)
       .times(AntimatterDimension(maxTier).totalAmount);
   },
@@ -223,8 +223,8 @@ export const MultiplierTabHelper = {
   oddDimNC12Production() {
     const maxTier = Math.clampMin(2 * Math.floor(MultiplierTabHelper.activeDimCount("AD") / 2 - 0.5) + 1, 1);
     return AntimatterDimensions.all
-      .filter((ad) => ad.isProducing && ad.tier % 2 === 1)
-      .map((ad) => ad.multiplier)
+      .filter(ad => ad.isProducing && ad.tier % 2 === 1)
+      .map(ad => ad.multiplier)
       .reduce((x, y) => x.times(y), DC.D1)
       .times(AntimatterDimension(maxTier).totalAmount);
   },
@@ -234,7 +234,7 @@ export const MultiplierTabHelper = {
   },
 
   multInNC12(dim) {
-    const nc12Pow = (tier) => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
+    const nc12Pow = tier => ([2, 4, 6].includes(tier) ? 0.1 * (8 - tier) : 0);
     const ad = AntimatterDimension(dim);
     return ad.isProducing ? ad.multiplier.times(ad.totalAmount.pow(nc12Pow(dim))) : DC.D1;
   },

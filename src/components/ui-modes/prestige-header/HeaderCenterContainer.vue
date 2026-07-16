@@ -28,6 +28,13 @@ export default {
       antimatterFrozen: false,
     };
   },
+  computed: {
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.antimatterFrozen
+      };
+    },
+  },
   methods: {
     update() {
       this.shouldDisplay = player.break || !Player.canCrunch;
@@ -40,13 +47,6 @@ export default {
       this.hasRealityButton = PlayerProgress.realityUnlocked() || TimeStudy.reality.isBought;
       if (!this.hasRealityButton) this.antimatterPerSec.copyFrom(Currency.antimatter.productionPerSecond);
     },
-  },
-  computed: {
-    getFrozenClass() {
-      return {
-        "frozen-currency": this.antimatterFrozen
-      }
-    },
   }
 };
 </script>
@@ -56,7 +56,10 @@ export default {
     v-if="shouldDisplay"
     class="c-prestige-button-container"
   >
-    <span>You have <span class="c-game-header__antimatter" :class="getFrozenClass">{{ format(antimatter, 2, 1) }}</span> antimatter.</span>
+    <span>You have <span
+      class="c-game-header__antimatter"
+      :class="getFrozenClass"
+    >{{ format(antimatter, 2, 1) }}</span> antimatter.</span>
     <div
       v-if="hasRealityButton"
       class="c-reality-container"

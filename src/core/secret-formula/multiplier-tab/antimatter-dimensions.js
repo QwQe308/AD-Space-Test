@@ -261,7 +261,7 @@ export const AD = {
     name: dim => (dim ? `Time Studies (AD ${dim})` : "Time Studies"),
     multValue: dim => {
       const allMult = DC.D1.timesEffectsOf(
-        //TimeStudy(91),
+        // TimeStudy(91),
         TimeStudy(101),
         TimeStudy(161),
         TimeStudy(193),
@@ -472,7 +472,7 @@ export const AD = {
   nerfPelle: {
     name: "Doomed Reality",
     multValue: 0.1,
-    powValue: () => PelleStrikes.infinity.hasStrike ? 0.5 : 1,
+    powValue: () => (PelleStrikes.infinity.hasStrike ? 0.5 : 1),
     isActive: () => Pelle.isDoomed,
     icon: MultiplierTabIcons.PELLE,
   }

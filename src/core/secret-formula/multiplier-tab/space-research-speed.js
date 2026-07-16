@@ -14,9 +14,9 @@ export const RS = {
     name: "Base Research Speed",
     multValue: () => getBaseResearchSpeed(),
     isActive: () => true,
-    icon: MultiplierTabIcons.SPACE_RESEARCH(), //this spawns only a sigma symbol
+    icon: MultiplierTabIcons.SPACE_RESEARCH(), // This spawns only a sigma symbol
   },
-  //--these extends the base one
+  // --these extends the base one
   space: {
     name: "Space",
     multValue: () => DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1)),
@@ -36,7 +36,7 @@ export const RS = {
     isActive: () => PlayerProgress.imaginaryUnlocked(),
     icon: MultiplierTabIcons.IMAGINARY_INFLUENCE,
   },
-  //--ends
+  // --ends
   achievementMult: {
     name: "Achievement Multiplier",
     multValue: () => Achievements.power,
@@ -67,7 +67,7 @@ export const RS = {
     isActive: () => AbyssResearches.A1.canBeApplied,
     icon: MultiplierTabIcons.ABYSS_RESEARCH,
   },
-  
+
   SC51: {
     name: "Space Challenge 5",
     multValue: () => SpaceChallenge(5).effectValue.recip(),

@@ -14,15 +14,15 @@ NormalTimeStudies.pathList = [
 ];
 
 NormalTimeStudies.paths = NormalTimeStudies.pathList.mapToObject(
-  (e) => e.path,
-  (e) => e.studies
+  e => e.path,
+  e => e.studies
 );
 
 export class NormalTimeStudyState extends TimeStudyState {
   constructor(config) {
     const type = config.id > 300 ? TIME_STUDY_TYPE.TRIAD : TIME_STUDY_TYPE.NORMAL;
     super(config, type);
-    const path = NormalTimeStudies.pathList.find((p) => p.studies.includes(this.id));
+    const path = NormalTimeStudies.pathList.find(p => p.studies.includes(this.id));
     this._path = path?.path ?? TIME_STUDY_PATH.NONE;
   }
 
@@ -41,27 +41,27 @@ export class NormalTimeStudyState extends TimeStudyState {
   // The requiresST prop is an array containing IDs indicating other studies which, if ANY in the array are purchased,
   // will cause the study to also cost space theorems. This array is effectively assumed to be empty if not present.
   costsST() {
-    return this.config.requiresST && this.config.requiresST.some((s) => TimeStudy(s).isBought);
+    return this.config.requiresST && this.config.requiresST.some(s => TimeStudy(s).isBought);
   }
 
   checkRequirement() {
-    const check = (req) => (typeof req === "number" ? TimeStudy(req).isBought : req());
+    const check = req => (typeof req === "number" ? TimeStudy(req).isBought : req());
     const currTree = GameCache.currentStudyTree.value;
     switch (this.config.reqType) {
       case TS_REQUIREMENT_TYPE.AT_LEAST_ONE:
-        return this.config.requirement.some((r) => check(r));
+        return this.config.requirement.some(r => check(r));
       case TS_REQUIREMENT_TYPE.ALL:
-        return this.config.requirement.every((r) => check(r));
+        return this.config.requirement.every(r => check(r));
       case TS_REQUIREMENT_TYPE.DIMENSION_PATH:
         // In some cases of loading, sometimes the current tree might be undefined when this code is executed. The
         // exact situations seem unclear, but it may be an interaction between the automator and offline progress
         return (
-          this.config.requirement.every((r) => check(r)) &&
+          this.config.requirement.every(r => check(r)) &&
           currTree &&
           currTree.currDimPathCount < currTree.allowedDimPathCount
         );
       case TS_REQUIREMENT_TYPE.PLACE_HOLDER:
-        return player.options.breakPlaceHolder && this.config.requirement.some((r) => check(r));
+        return player.options.breakPlaceHolder && this.config.requirement.some(r => check(r));
       default:
         throw Error(`Unrecognized TS requirement type: ${this.reqType}`);
     }
@@ -116,10 +116,10 @@ export class NormalTimeStudyState extends TimeStudyState {
 
 NormalTimeStudyState.studies = mapGameData(
   GameDatabase.eternity.timeStudies.normal,
-  (config) => new NormalTimeStudyState(config)
+  config => new NormalTimeStudyState(config)
 );
 
-NormalTimeStudyState.all = NormalTimeStudyState.studies.filter((e) => e !== undefined);
+NormalTimeStudyState.all = NormalTimeStudyState.studies.filter(e => e !== undefined);
 
 /**
  * @returns {NormalTimeStudyState}
@@ -131,8 +131,8 @@ export function TimeStudy(id) {
 /**
  * @returns {NormalTimeStudyState[]}
  */
-TimeStudy.boughtNormalTS = function () {
-  return player.timestudy.studies.map((id) => TimeStudy(id))
+TimeStudy.boughtNormalTS = function() {
+  return player.timestudy.studies.map(id => TimeStudy(id));
 };
 
 TimeStudy.preferredPaths = {
@@ -142,10 +142,10 @@ TimeStudy.preferredPaths = {
     },
     set path(value) {
       const options = [1, 2, 3];
-      player.timestudy.preferredPaths[0] = value.filter((id) => options.includes(id));
+      player.timestudy.preferredPaths[0] = value.filter(id => options.includes(id));
     },
     get studies() {
-      return player.timestudy.preferredPaths[0].flatMap((path) => NormalTimeStudies.paths[path]);
+      return player.timestudy.preferredPaths[0].flatMap(path => NormalTimeStudies.paths[path]);
     },
     get usePriority() {
       return (

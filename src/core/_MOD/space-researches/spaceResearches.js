@@ -1,12 +1,12 @@
 import { DC } from "../../constants";
 
 export function updateSpaceResearches(diff) {
-  SpaceResearchRifts.all.forEach((r) => r.fill(diff));
+  SpaceResearchRifts.all.forEach(r => r.fill(diff));
 }
 
 export function getBaseResearchSpeed() {
-  let spaceFactor = DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1));
-  let dbFactor = DC.D2.pow(DimBoost.totalBoosts.pow(0.75));
+  const spaceFactor = DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1));
+  const dbFactor = DC.D2.pow(DimBoost.totalBoosts.pow(0.75));
 
   let baseResearchSpeed = spaceFactor.mul(dbFactor);
   if (PlayerProgress.imaginaryUnlocked()) baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9);
@@ -14,10 +14,10 @@ export function getBaseResearchSpeed() {
 }
 
 export function globalResearchSpeed() {
-  let baseResearchSpeed = getBaseResearchSpeed();
+  const baseResearchSpeed = getBaseResearchSpeed();
 
-  let researchFactor = SpaceResearchRifts.r21.effectValue[1]; //r21
-  let achievementFactor = Achievements.power;
+  const researchFactor = SpaceResearchRifts.r21.effectValue[1]; // R21
+  const achievementFactor = Achievements.power;
   let otherFactors = DC.D1.timesEffectsOf(
     InfinityUpgrade.totalTimeMult,
     TimeStudy(91),
@@ -51,7 +51,7 @@ export function tierBasedResearchSpeed(tier) {
 }
 
 export const spaceResearches = {
-  //AM - Tier 0
+  // AM - Tier 0
   r11: {
     key: "r11",
     name: "Antiparticle Analyzation",
@@ -64,12 +64,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.BEMAX,
       });
     },
-    effectValue: (level) => {
-      return level.pow_base(2);
-    },
-    effect: (value) => {
-      return `AM × ${format(value, 2)}`;
-    },
+    effectValue: level => level.pow_base(2),
+    effect: value => `AM × ${format(value, 2)}`,
   },
   r12: {
     key: "r12",
@@ -83,12 +79,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.BEMAX,
       });
     },
-    effectValue: (level) => {
-      return level.pow_base(10);
-    },
-    effect: (value) => {
-      return `AD cost / ${format(value, 2)}`;
-    },
+    effectValue: level => level.pow_base(10),
+    effect: value => `AD cost / ${format(value, 2)}`,
   },
   r13: {
     key: "r13",
@@ -102,15 +94,11 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(25),
       });
     },
-    effectValue: (level) => {
-      return level.mul(2);
-    },
-    effect: (value) => {
-      return `+ ${format(value, 2)} extra Tickspeed Upgrades`;
-    },
+    effectValue: level => level.mul(2),
+    effect: value => `+ ${format(value, 2)} extra Tickspeed Upgrades`,
   },
 
-  //DB - Tier 1
+  // DB - Tier 1
   r21: {
     key: "r21",
     name: "Dimensional Discovery",
@@ -123,12 +111,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.BEMAX,
       });
     },
-    effectValue: (level) => {
-      return [level, level.pow_base(1.6)];
-    },
-    effect: (value) => {
-      return `+ ${format(value[0], 2)} extra DB & × ${format(value[1], 2, 2)} Research Speed`;
-    },
+    effectValue: level => [level, level.pow_base(1.6)],
+    effect: value => `+ ${format(value[0], 2)} extra DB & × ${format(value[1], 2, 2)} Research Speed`,
   },
   r22: {
     key: "r22",
@@ -142,17 +126,15 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(0),
       });
     },
-    effectValue: (level) => {
-      if (level.gt(12)) level = level.pow(0.75).mul(12 ** 0.25); //softcaps :sad:
-      let baseEffect = level.pow_base(1.1);
+    effectValue: level => {
+      if (level.gt(12)) level = level.pow(0.75).mul(12 ** 0.25); // Softcaps :sad:
+      const baseEffect = level.pow_base(1.1);
       return baseEffect;
     },
-    effect: (value) => {
-      return `/ ${format(value, 2, 2)} space`;
-    },
+    effect: value => `/ ${format(value, 2, 2)} space`,
   },
 
-  //AG - Tier 2
+  // AG - Tier 2
   r31: {
     key: "r31",
     name: "Efficiency Expediency",
@@ -165,15 +147,11 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(2),
       });
     },
-    effectValue: (level) => {
-      return [level.pow_base(1.05), level.mul(0.005).add(1)];
-    },
-    effect: (value) => {
-      return `× ${format(value[0], 2, 3)} & ^ ${format(value[1], 2, 3)} Buy 10 AD mult`;
-    },
+    effectValue: level => [level.pow_base(1.05), level.mul(0.005).add(1)],
+    effect: value => `× ${format(value[0], 2, 3)} & ^ ${format(value[1], 2, 3)} Buy 10 AD mult`,
   },
 
-  //Inf - Tier 3
+  // Inf - Tier 3
   r41: {
     key: "r41",
     name: "Infinity Amplifier",
@@ -186,12 +164,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.BEMAX,
       });
     },
-    effectValue: (level) => {
-      return level.pow_base(2);
-    },
-    effect: (value) => {
-      return `× ${format(value, 2)} Infinity Points`;
-    },
+    effectValue: level => level.pow_base(2),
+    effect: value => `× ${format(value, 2)} Infinity Points`,
     levelUP: (lastLevel, newLevel) => {
       if (!TimeStudy(181).isBought) Autobuyer.bigCrunch.bumpAmount(newLevel.sub(lastLevel).pow_base(2));
     },
@@ -210,13 +184,11 @@ export const spaceResearches = {
       });
     },
     maxLevel: () => new Decimal(25),
-    effectValue: (level) => {
+    effectValue: level => {
       if (isSCRunningOnTier(3, 2)) return DC.D1;
       return level.pow_base(1.1);
     },
-    effect: (value) => {
-      return `× ${format(value, 2, 2)} Effective Space`;
-    },
+    effect: value => `× ${format(value, 2, 2)} Effective Space`,
   },
 
   r43: {
@@ -231,12 +203,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(0),
       });
     },
-    effectValue: (level) => {
-      return level.pow_base(1.33).mul(level.div(2).add(1).pow(2));
-    },
-    effect: (value) => {
-      return `× ${format(value, 2, 0)} Infinities`;
-    },
+    effectValue: level => level.pow_base(1.33).mul(level.div(2).add(1).pow(2)),
+    effect: value => `× ${format(value, 2, 0)} Infinities`,
   },
 
   r44: {
@@ -250,14 +218,12 @@ export const spaceResearches = {
     requirement(level) {
       return level.add(3).div(3).pow(3).pow_base(10).mul(1e23);
     },
-    effectValue: (level) => {
+    effectValue: level => {
       if (isSCRunningOnTier(3, 2)) return DC.D0;
-      //if (level.gte(15)) level = level.sub(15).pow(0.75).add(15)
+      // If (level.gte(15)) level = level.sub(15).pow(0.75).add(15)
       return level.mul(0.01);
     },
-    effect: (value) => {
-      return `+ ${format(value.mul(100), 2)}% Continuum`;
-    },
+    effect: value => `+ ${format(value.mul(100), 2)}% Continuum`,
     unlocked: () => isSCTierCompleted(1, 2),
     maxLevel: () => (TimeStudy(111).isBought ? false : new Decimal(15)),
   },
@@ -274,19 +240,17 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(0),
       });
     },
-    effectValue: (level) => {
+    effectValue: level => {
       if (isSCRunningOnTier(3, 2)) return DC.D0;
-      //if (level.gte(15)) level = level.sub(15).pow(0.75).add(15)
+      // If (level.gte(15)) level = level.sub(15).pow(0.75).add(15)
       return level.pow(0.75).mul(0.4);
     },
-    effect: (value) => {
-      return `+ ${format(value, 2, 2)} IPow conversion rate`;
-    },
+    effect: value => `+ ${format(value, 2, 2)} IPow conversion rate`,
     unlocked: () => PlayerProgress.IDUnlocked(1),
     maxLevel: () => (TimeStudy(111).isBought ? false : new Decimal(15)),
   },
 
-  //Eternity - Tier 4
+  // Eternity - Tier 4
   r51: {
     key: "r51",
     name: "Endless Amplifier",
@@ -299,12 +263,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.BEMAX,
       });
     },
-    effectValue: (level) => {
-      return level.pow_base(2);
-    },
-    effect: (value) => {
-      return `× ${format(value, 2)} EP`;
-    },
+    effectValue: level => level.pow_base(2),
+    effect: value => `× ${format(value, 2)} EP`,
     levelUP: (lastLevel, newLevel) => {
       Autobuyer.eternity.bumpAmount(newLevel.sub(lastLevel).pow_base(2));
     },
@@ -322,12 +282,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: DC.D0,
       });
     },
-    effectValue: (level) => {
-      return level.mul(0.25).add(1).mul(level.pow_base(1.1));
-    },
-    effect: (value) => {
-      return `× ${format(value, 2, 2)} Rep Speed`;
-    },
+    effectValue: level => level.mul(0.25).add(1).mul(level.pow_base(1.1)),
+    effect: value => `× ${format(value, 2, 2)} Rep Speed`,
   },
 
   r53: {
@@ -342,12 +298,8 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(0),
       });
     },
-    effectValue: (level) => {
-      return level.add(1).mul(level.pow_base(1.1));
-    },
-    effect: (value) => {
-      return `× ${format(value, 2, 0)} Eternities`;
-    },
+    effectValue: level => level.add(1).mul(level.pow_base(1.1)),
+    effect: value => `× ${format(value, 2, 0)} Eternities`,
   },
 
   r54: {
@@ -362,20 +314,16 @@ export const spaceResearches = {
         purchasesBeforeScaling: new Decimal(0),
       });
     },
-    effectValue: (level) => {
-      return level.mul(0.3).add(1).mul(level.pow(0.65).pow_base(2.25));
-    },
-    effect: (value) => {
-      return `× ${format(value, 2, 1)} DT`;
-    },
+    effectValue: level => level.mul(0.3).add(1).mul(level.pow(0.65).pow_base(2.25)),
+    effect: value => `× ${format(value, 2, 1)} DT`,
     unlocked: () => PlayerProgress.dilationUnlocked(),
   },
 };
 /*  */
 
 export const maxTier = 4;
-export const SpaceResearchTierDetail = Array.range(0, maxTier + 1).map((tier) =>
-  Object.keys(spaceResearches).filter((i) => spaceResearches[i].tier == tier)
+export const SpaceResearchTierDetail = Array.range(0, maxTier + 1).map(tier =>
+  Object.keys(spaceResearches).filter(i => spaceResearches[i].tier == tier)
 );
 export const SpaceResearchResetsNothing = [
   () => true,
@@ -386,7 +334,7 @@ export const SpaceResearchResetsNothing = [
 ];
 export function isSpaceResearchQuickResetAvailable(tier) {
   return (
-    SpaceResearchTierDetail[tier].filter((x) => SpaceResearchRifts[x].pendingLevel.gt(SpaceResearchRifts[x].level))
+    SpaceResearchTierDetail[tier].filter(x => SpaceResearchRifts[x].pendingLevel.gt(SpaceResearchRifts[x].level))
       .length > 0
   );
 }

@@ -12,7 +12,7 @@ export const MultiplierTabIcons = {
   LIGHT(color) {
     return {
       symbol: "<b>〖〗</b>",
-      color: color,
+      color,
     };
   },
   SPACE_RESEARCH(tier) {

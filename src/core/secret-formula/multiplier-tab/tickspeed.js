@@ -68,10 +68,9 @@ export const tickspeed = {
 };
 
 
-
-//to reuse a function more, it is here
-function getAbyssResearchTUs(){
-  return Effects.sum(AbyssResearches.A2, AbyssResearches.A11)
+// To reuse a function more, it is here
+function getAbyssResearchTUs() {
+  return Effects.sum(AbyssResearches.A2, AbyssResearches.A11);
 }
 
 export const tickspeedUpgrades = {
@@ -110,7 +109,7 @@ export const tickspeedUpgrades = {
   AR: {
     name: "Abyss Researches (Static)",
     displayOverride: () => formatInt(getAbyssResearchTUs()),
-    multValue: () => Decimal.pow10(getAbyssResearchTUs()),//see upper
+    multValue: () => Decimal.pow10(getAbyssResearchTUs()), // See upper
     isActive: () => PlayerProgress.imaginaryUnlocked(),
     icon: MultiplierTabIcons.ABYSS_RESEARCH,
   },

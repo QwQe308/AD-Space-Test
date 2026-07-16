@@ -100,7 +100,7 @@ export default {
       );
       this.uniqueNews = NewsHandler.uniqueTickersSeen;
       this.totalNews = player.news.totalSeen;
-      this.secretAchievementCount = SecretAchievements.all.filter((a) => a.isUnlocked).length;
+      this.secretAchievementCount = SecretAchievements.all.filter(a => a.isUnlocked).length;
       this.timeSinceCreation = Date.now() - player.records.gameCreatedTime;
 
       const progress = PlayerProgress.current;
@@ -188,8 +188,12 @@ export default {
 <template>
   <div class="c-stats-tab">
     <div>
-      <PrimaryButton onclick="Modal.catchup.show(0)"> View Content Summary </PrimaryButton>
-      <div class="c-stats-tab-title c-stats-tab-general">General</div>
+      <PrimaryButton onclick="Modal.catchup.show(0)">
+        View Content Summary
+      </PrimaryButton>
+      <div class="c-stats-tab-title c-stats-tab-general">
+        General
+      </div>
       <div class="c-stats-tab-general">
         <div>
           You have made a total of
@@ -200,44 +204,57 @@ export default {
           Your existence has spanned {{ reality.totalTimePlayed }} of time. (game time)
         </div>
         <div>Your save was created on {{ startDate }} ({{ saveAge }} ago)</div>
-        <br />
+        <br>
         <div>You have seen {{ quantifyInt("news message", totalNews) }} in total.</div>
         <div>You have seen {{ quantifyInt("unique news message", uniqueNews) }}.</div>
         <div>You have unlocked {{ quantifyInt("Secret Achievement", secretAchievementCount) }}.</div>
-        <div v-if="paperclips">You have {{ quantifyInt("useless paperclip", paperclips) }}.</div>
+        <div v-if="paperclips">
+          You have {{ quantifyInt("useless paperclip", paperclips) }}.
+        </div>
         <div v-if="fullGameCompletions">
-          <br />
+          <br>
           <b>
             You have completed the entire game {{ quantifyInt("time", fullGameCompletions) }}.
-            <br />
+            <br>
             You have played for {{ fullTimePlayed }} across all playthroughs.
           </b>
         </div>
       </div>
       <div>
-        <br />
+        <br>
         <div class="c-matter-scale-container c-stats-tab-general">
-          <div v-for="(line, i) in matterScale" :key="i">
+          <div
+            v-for="(line, i) in matterScale"
+            :key="i"
+          >
             {{ line }}
           </div>
-          <br v-if="matterScale.length < 2" />
-          <br v-if="matterScale.length < 3" />
+          <br v-if="matterScale.length < 2">
+          <br v-if="matterScale.length < 3">
         </div>
       </div>
-      <br />
+      <br>
     </div>
-    <div v-if="infinity.isUnlocked" class="c-stats-tab-subheader c-stats-tab-general">
-      <div class="c-stats-tab-title c-stats-tab-infinity">Infinity</div>
+    <div
+      v-if="infinity.isUnlocked"
+      class="c-stats-tab-subheader c-stats-tab-general"
+    >
+      <div class="c-stats-tab-title c-stats-tab-infinity">
+        Infinity
+      </div>
       <div>
-        You have <span :class="getISFrozenClass">{{ formatDecimalAmount(infinity.count.floor()) }}</span
-        > {{ pluralize("Infinity", infinity.count.floor()) }}<span v-if="eternity.isUnlocked"> this Eternity</span>.
+        You have <span :class="getISFrozenClass">{{ formatDecimalAmount(infinity.count.floor()) }}</span> {{ pluralize("Infinity", infinity.count.floor()) }}<span v-if="eternity.isUnlocked"> this Eternity</span>.
       </div>
       <div v-if="infinity.banked.gt(0)">
         You have <span :class="getISFrozenClass">{{ formatDecimalAmount(infinity.banked.floor()) }}</span>
         {{ pluralize("Banked Infinity", infinity.banked.floor()) }}.
       </div>
-      <div v-if="infinity.hasBest">Your fastest Infinity was {{ infinity.best.toStringShort() }}.</div>
-      <div v-else>You have no fastest Infinity<span v-if="eternity.isUnlocked"> this Eternity</span>.</div>
+      <div v-if="infinity.hasBest">
+        Your fastest Infinity was {{ infinity.best.toStringShort() }}.
+      </div>
+      <div v-else>
+        You have no fastest Infinity<span v-if="eternity.isUnlocked"> this Eternity</span>.
+      </div>
       <div>
         You have spent {{ infinity.this.toStringShort() }} in this Infinity.
         <span v-if="reality.isUnlocked"> ({{ infinity.thisReal.toStringShort() }} real time) </span>
@@ -247,10 +264,15 @@ export default {
         <span v-if="eternity.count.gt(0)">this Eternity </span>
         is {{ format(infinity.bestRate, 2, 2) }}.
       </div>
-      <br />
+      <br>
     </div>
-    <div v-if="eternity.isUnlocked" class="c-stats-tab-subheader c-stats-tab-general">
-      <div class="c-stats-tab-title c-stats-tab-eternity">Eternity</div>
+    <div
+      v-if="eternity.isUnlocked"
+      class="c-stats-tab-subheader c-stats-tab-general"
+    >
+      <div class="c-stats-tab-title c-stats-tab-eternity">
+        Eternity
+      </div>
       <div>You have {{ eternityCountString }}<span v-if="reality.isUnlocked"> this Reality</span>.</div>
       <div v-if="infinity.projectedBanked.gt(0)">
         You will gain {{ formatDecimalAmount(infinity.projectedBanked.floor()) }}
@@ -259,9 +281,15 @@ export default {
         }}
         per minute).
       </div>
-      <div v-else-if="infinity.banked.gt(0)">You will gain no Banked Infinities on Eternity.</div>
-      <div v-if="eternity.hasBest">Your fastest Eternity was {{ eternity.best.toStringShort() }}.</div>
-      <div v-else>You have no fastest Eternity<span v-if="reality.isUnlocked"> this Reality</span>.</div>
+      <div v-else-if="infinity.banked.gt(0)">
+        You will gain no Banked Infinities on Eternity.
+      </div>
+      <div v-if="eternity.hasBest">
+        Your fastest Eternity was {{ eternity.best.toStringShort() }}.
+      </div>
+      <div v-else>
+        You have no fastest Eternity<span v-if="reality.isUnlocked"> this Reality</span>.
+      </div>
       <div>
         You have spent {{ eternity.this.toStringShort() }} in this Eternity.
         <span v-if="reality.isUnlocked"> ({{ eternity.thisReal.toStringShort() }} real time) </span>
@@ -271,9 +299,12 @@ export default {
         <span v-if="reality.isUnlocked">this Reality </span>
         is {{ format(eternity.bestRate, 2, 2) }}.
       </div>
-      <br />
+      <br>
     </div>
-    <div v-if="reality.isUnlocked" class="c-stats-tab-subheader c-stats-tab-general">
+    <div
+      v-if="reality.isUnlocked"
+      class="c-stats-tab-subheader c-stats-tab-general"
+    >
       <div :class="realityClassObject()">
         {{ isDoomed ? "Doomed Reality" : "Reality" }}
       </div>
@@ -286,12 +317,15 @@ export default {
         }}
         real time)
       </div>
-      <div v-if="isDoomed" class="c-stats-tab-doomed">
+      <div
+        v-if="isDoomed"
+        class="c-stats-tab-doomed"
+      >
         You have been Doomed for {{ realTimeDoomed.toStringShort() }}, real time.
       </div>
       <div>Your best Reality Machines per minute is {{ format(reality.bestRate, 2, 2) }}.</div>
       <div>Your best Glyph rarity is {{ formatRarity(reality.bestRarity) }}.</div>
-      <br />
+      <br>
     </div>
   </div>
 </template>

@@ -162,7 +162,7 @@ export const TimeTheorems = {
       totalCost = totalCost.add(ecStudy.cost);
     }
     if (Enslaved.isRunning && player.celestials.enslaved.hasSecretStudy) totalCost = totalCost.sub(100);
-    if(TimeStudy(111).isBought) totalCost = totalCost.sub(30)
+    if (TimeStudy(111).isBought) totalCost = totalCost.sub(30);
     return totalCost;
   }
 };

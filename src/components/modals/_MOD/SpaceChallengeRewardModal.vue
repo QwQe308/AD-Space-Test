@@ -10,11 +10,9 @@ export default {
   },
   computed: {
     rewards() {
-      return SpaceChallenges.all.map(x=>
-        x.config.data.map((y,index)=>{
-          return {rew:y.reward+` [SC${x.id}, Tier ${index+1}]`,ind:y.rewardDisplayOrder};
-        }).slice(0,x.completions)
-      ).reduce((x,y)=>x.concat(y),[]).sort((x,y)=>x.ind-y.ind).map(x=>x.rew);
+      return SpaceChallenges.all.map(x =>
+        x.config.data.map((y, index) => ({ rew: `${y.reward} [SC${x.id}, Tier ${index + 1}]`, ind: y.rewardDisplayOrder })).slice(0, x.completions)
+      ).reduce((x, y) => x.concat(y), []).sort((x, y) => x.ind - y.ind).map(x => x.rew);
     }
   }
 };

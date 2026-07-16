@@ -236,8 +236,8 @@ export const AutomatorData = {
   totalScriptCharacters() {
     return (
       Object.values(player.reality.automator.scripts)
-        .filter((s) => s.id !== this.scriptIndex())
-        .map((s) => s.content.length)
+        .filter(s => s.id !== this.scriptIndex())
+        .map(s => s.content.length)
         .reduce((sum, len) => sum + len, 0) + this.singleScriptCharacters()
     );
   },
@@ -417,7 +417,7 @@ export const AutomatorBackend = {
 
   findRawScriptObject(id) {
     const scripts = player.reality.automator.scripts;
-    const index = Object.values(scripts).findIndex((s) => s.id === id);
+    const index = Object.values(scripts).findIndex(s => s.id === id);
     return scripts[parseInt(Object.keys(scripts)[index], 10)];
   },
 
@@ -434,8 +434,8 @@ export const AutomatorBackend = {
   },
 
   hasDuplicateName(name) {
-    const nameArray = Object.values(player.reality.automator.scripts).map((s) => s.name);
-    return nameArray.filter((n) => n === name).length > 1;
+    const nameArray = Object.values(player.reality.automator.scripts).map(s => s.name);
+    return nameArray.filter(n => n === name).length > 1;
   },
 
   // Scripts are internally stored and run as text, but block mode has a different layout for loops that
@@ -476,7 +476,7 @@ export const AutomatorBackend = {
       const matchPresetName = rawLine.match(/studies( nowait)? load name (\S+)/iu);
       if (matchPresetName) {
         // A script might pass the regex match, but actually be referencing a preset which doesn't exist by name
-        const presetID = player.timestudy.presets.findIndex((p) => p.name === matchPresetName[2]);
+        const presetID = player.timestudy.presets.findIndex(p => p.name === matchPresetName[2]);
         if (presetID !== -1) foundPresets.add(presetID);
       }
     }
@@ -546,7 +546,7 @@ export const AutomatorBackend = {
   // All numerical values are assumed to be exactly 5 characters long for consistency and since the script length limit
   // is 5 digits long.
   serializeAutomatorData(dataArray) {
-    const paddedNumber = (num) => `0000${num}`.slice(-5);
+    const paddedNumber = num => `0000${num}`.slice(-5);
     const segments = [];
     for (const data of dataArray) {
       segments.push(`${paddedNumber(data.length)}${data}`);
@@ -623,7 +623,7 @@ export const AutomatorBackend = {
       const matchPresetName = rawLine.match(/studies( nowait)? load name (\S+)/iu);
       if (matchPresetName) {
         // A script might pass the regex match, but actually be referencing a preset which doesn't exist by name
-        const presetID = player.timestudy.presets.findIndex((p) => p.name === matchPresetName[2]);
+        const presetID = player.timestudy.presets.findIndex(p => p.name === matchPresetName[2]);
         if (presetID !== -1) foundPresets.add(presetID);
       }
       const availableConstants = Object.keys(player.reality.automator.constants);
@@ -718,7 +718,7 @@ export const AutomatorBackend = {
 
   update(diff) {
     if (!this.isOn) return;
-    if (!Player.automatorUnlocked) return this.stop();//blocks players who didn't completed SC6
+    if (!Player.automatorUnlocked) return this.stop();// Blocks players who didn't completed SC6
     let stack;
     switch (this.mode) {
       case AUTOMATOR_MODE.PAUSE:
@@ -851,7 +851,7 @@ export const AutomatorBackend = {
   },
 
   findScript(id) {
-    return this._scripts.find((e) => e.id === id);
+    return this._scripts.find(e => e.id === id);
   },
 
   _createDefaultScript() {
@@ -862,11 +862,11 @@ export const AutomatorBackend = {
   },
 
   initializeFromSave() {
-    const scriptIds = Object.keys(player.reality.automator.scripts).map((id) => parseInt(id, 10));
+    const scriptIds = Object.keys(player.reality.automator.scripts).map(id => parseInt(id, 10));
     if (scriptIds.length === 0) {
       scriptIds.push(this._createDefaultScript());
     } else {
-      this._scripts = scriptIds.map((s) => new AutomatorScript(s));
+      this._scripts = scriptIds.map(s => new AutomatorScript(s));
     }
     if (!scriptIds.includes(this.state.topLevelScript)) this.state.topLevelScript = scriptIds[0];
     const currentScript = this.findScript(this.state.topLevelScript);
@@ -897,7 +897,7 @@ export const AutomatorBackend = {
 
   newScript() {
     // Make sure the new script has a unique name
-    const scriptNames = AutomatorBackend._scripts.map((s) => s.name);
+    const scriptNames = AutomatorBackend._scripts.map(s => s.name);
     let newScript;
     if (scriptNames.includes("New Script")) {
       let newIndex = 2;
@@ -915,9 +915,9 @@ export const AutomatorBackend = {
   // dynamically re-indexed while the automator is running without causing a stutter from recompiling scripts.
   deleteScript(id) {
     // We need to delete scripts from two places - in the savefile and compiled AutomatorScript Objects
-    const saveId = Object.values(player.reality.automator.scripts).findIndex((s) => s.id === id);
+    const saveId = Object.values(player.reality.automator.scripts).findIndex(s => s.id === id);
     delete player.reality.automator.scripts[parseInt(Object.keys(player.reality.automator.scripts)[saveId], 10)];
-    const idx = this._scripts.findIndex((e) => e.id === id);
+    const idx = this._scripts.findIndex(e => e.id === id);
     this._scripts.splice(idx, 1);
     if (this._scripts.length === 0) {
       this._createDefaultScript();
@@ -1041,7 +1041,7 @@ export const AutomatorBackend = {
         const playerEntry = playerStack[depth];
         const newEntry = new AutomatorStackEntry(depth);
         newEntry.commands = currentCommands;
-        const foundIndex = currentCommands.findIndex((e) => e.lineNumber === playerEntry.lineNumber);
+        const foundIndex = currentCommands.findIndex(e => e.lineNumber === playerEntry.lineNumber);
         if (foundIndex === -1) {
           // Could not match stack state to script, have to reset automato
           return false;

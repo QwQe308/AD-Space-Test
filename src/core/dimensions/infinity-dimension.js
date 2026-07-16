@@ -66,6 +66,7 @@ class InfinityDimensionState extends DimensionState {
   get cost() {
     return this.data.cost;
   }
+
   /** @param {Decimal} value */
   set cost(value) {
     this.data.cost = value;
@@ -121,8 +122,8 @@ class InfinityDimensionState extends DimensionState {
     if (tier === 8) {
       // We need a extra 10x here (since ID8 production is per-second and
       // other ID production is per-10-seconds).
-      EternityChallenge(7).reward.applyEffect((v) => (toGain = v.times(10)));
-      if (EternityChallenge(7).isRunning) EternityChallenge(7).applyEffect((v) => (toGain = v.times(10)));
+      EternityChallenge(7).reward.applyEffect(v => (toGain = v.times(10)));
+      if (EternityChallenge(7).isRunning) EternityChallenge(7).applyEffect(v => (toGain = v.times(10)));
     } else {
       toGain = InfinityDimension(tier + 1).productionPerSecond;
     }
@@ -204,7 +205,7 @@ class InfinityDimensionState extends DimensionState {
 
   get costMultiplier() {
     let costMult = new Decimal(this._costMultiplier);
-    EternityChallenge(12).reward.applyEffect((v) => (costMult = Decimal.pow(costMult, v)));
+    EternityChallenge(12).reward.applyEffect(v => (costMult = Decimal.pow(costMult, v)));
     return costMult;
   }
 
@@ -303,7 +304,7 @@ class InfinityDimensionState extends DimensionState {
       return false;
     }
 
-    let purchasesUntilSoftcap = this.purchaseSoftcap.sub(this.purchases);
+    const purchasesUntilSoftcap = this.purchaseSoftcap.sub(this.purchases);
     let purchasesUntilHardcap = this.purchaseCap;
     if (EternityChallenge(8).isRunning) {
       purchasesUntilHardcap = Decimal.clampMax(purchasesUntilHardcap, player.eterc8ids);
@@ -314,7 +315,7 @@ class InfinityDimensionState extends DimensionState {
       this.purchases.lt(this.purchaseSoftcap) &&
       Currency.infinityPoints.value.lte(this.costMultiplier.pow(this.purchaseSoftcap).mul(this.baseCost).mul(1e256))
     ) {
-      //cannot afford the first after cost jump
+      // Cannot afford the first after cost jump
       costScaling = new LinearCostScaling(
         Currency.infinityPoints.value,
         this.baseCost.mul(this.costMultiplier.pow(this.purchases)),
@@ -324,7 +325,7 @@ class InfinityDimensionState extends DimensionState {
     } else {
       costScaling = new LinearCostScaling(
         Currency.infinityPoints.value,
-        this.baseCost.mul(this.costMultiplier.pow(this.purchases)).mul(1e256), //I know if tiggered earlier will spend a little more IP but whoever cares
+        this.baseCost.mul(this.costMultiplier.pow(this.purchases)).mul(1e256), // I know if tiggered earlier will spend a little more IP but whoever cares
         this.costMultiplier,
         purchasesUntilHardcap
       );
@@ -368,7 +369,7 @@ export const InfinityDimensions = {
 
   next() {
     if (InfinityDimension(8).isUnlocked) throw "All Infinity Dimensions are unlocked";
-    return this.all.first((dim) => !dim.isUnlocked);
+    return this.all.first(dim => !dim.isUnlocked);
   },
 
   resetAmount() {
@@ -394,7 +395,7 @@ export const InfinityDimensions = {
   },
 
   get unSoftCapped() {
-    //All unsoftcappers works here
+    // All unsoftcappers works here
     return TimeStudy(42).isBought;
   },
 
@@ -439,24 +440,24 @@ export const InfinityDimensions = {
   // Called from "Max All" UI buttons and nowhere else
   buyMax() {
     // Try to unlock dimensions
-    const unlockedDimensions = this.all.filter((dimension) => dimension.unlock());
+    const unlockedDimensions = this.all.filter(dimension => dimension.unlock());
 
     // Try to buy single from the highest affordable new dimensions
     unlockedDimensions
       .slice()
       .reverse()
-      .forEach((dimension) => {
+      .forEach(dimension => {
         if (dimension.purchases === 0) dimension.buySingle();
       });
 
     // Try to buy max from the lowest dimension (since lower dimensions have bigger multiplier per purchase)
-    unlockedDimensions.forEach((dimension) => dimension.buyMax(false));
+    unlockedDimensions.forEach(dimension => dimension.buyMax(false));
   },
 
   get powerConversionRate() {
     let base = getAdjustedGlyphEffect("infinityrate").add(7).add(PelleUpgrade.infConversion.effectOrDefault(0));
     base = base.add(SpaceResearchRifts.r45.effectValue);
-    let multiplier = PelleRifts.paradox.milestones[2].effectOrDefault(1);
+    const multiplier = PelleRifts.paradox.milestones[2].effectOrDefault(1);
     return base.mul(multiplier);
   },
 };

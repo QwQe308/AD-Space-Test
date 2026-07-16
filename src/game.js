@@ -65,12 +65,12 @@ export function playerInfinityUpgradesOnReset() {
   ]);
 
   if (PelleUpgrade.keepBreakInfinityUpgrades.canBeApplied) {
-    player.infinityUpgrades = new Set([...player.infinityUpgrades].filter((u) => breakInfinityUpgrades.has(u)));
+    player.infinityUpgrades = new Set([...player.infinityUpgrades].filter(u => breakInfinityUpgrades.has(u)));
     return;
   }
 
   if (PelleUpgrade.keepInfinityUpgrades.canBeApplied) {
-    player.infinityUpgrades = new Set([...player.infinityUpgrades].filter((u) => infinityUpgrades.has(u)));
+    player.infinityUpgrades = new Set([...player.infinityUpgrades].filter(u => infinityUpgrades.has(u)));
     player.infinityRebuyables = [0, 0, 0];
     GameCache.tickSpeedMultDecrease.invalidate();
     GameCache.dimensionMultDecrease.invalidate();
@@ -145,11 +145,11 @@ export function gainedInfinityPoints() {
 
 function totalEPMult() {
   if (Pelle.isDisabled("EPMults")) return Pelle.specialGlyphEffect.time.timesEffectOf(PelleRifts.vacuum.milestones[2]);
-  let epMult = getAdjustedGlyphEffect("cursedEP").timesEffectsOf(
+  const epMult = getAdjustedGlyphEffect("cursedEP").timesEffectsOf(
     EternityUpgrade.epMult,
     TimeStudy(61),
     TimeStudy(93),
-    //TimeStudy(103),
+    // TimeStudy(103),
     TimeStudy(122),
     TimeStudy(121),
     TimeStudy(123),
@@ -186,7 +186,7 @@ export function gainedEternityPoints() {
 }
 
 export function requiredIPForEP(epAmount) {
-  //y=1e308^(log5(x)+1)
+  // Y=1e308^(log5(x)+1)
   return Decimal.div(epAmount, totalEPMult())
     .log(5)
     .add(0.7)
@@ -323,7 +323,7 @@ export function addRealityTime(trueTime, time, realTime, rm, level, realities, a
   ]);
 }
 
-//-- Infinities mult here --
+// -- Infinities mult here --
 export function gainedInfinities() {
   if (isSCRunningOnTier(5, 1) || EternityChallenge(4).isRunning || Pelle.isDisabled("InfinitiedMults")) return DC.D1;
   let infGain = DC.D1;
@@ -718,27 +718,27 @@ export function gameLoop(passedDiff, options = {}) {
     Enslaved.boostReality = false;
   }
 
-  //MOD update related
+  // MOD update related
   updateSpaceItems(diff);
   AbyssResearchHelperTools.update(diff);
-  PastEmpower.updateSimulationAfterTick(diff, trueDiff)
+  PastEmpower.updateSimulationAfterTick(diff, trueDiff);
 
   // Stopping these checks after CREDITS_START reduces lag and allows for the glyph customization modal to appear
   if (GameEnd.endState < END_STATE_MARKERS.CREDITS_START) {
     if (Tabs.current.isPermanentlyHidden) {
-      const tab = Tabs.all.reverse().find((t) => !t.isPermanentlyHidden && t.id !== 10);
+      const tab = Tabs.all.reverse().find(t => !t.isPermanentlyHidden && t.id !== 10);
       if (tab) tab.show(true);
       else
         [...Tab.dimensions.subtabs]
           .reverse()
-          .find((t) => !t.isPermanentlyHidden)
+          .find(t => !t.isPermanentlyHidden)
           .show(true);
     }
 
-    if (Tabs.current.subtabs.find((t) => t.isOpen).isPermanentlyHidden) {
+    if (Tabs.current.subtabs.find(t => t.isOpen).isPermanentlyHidden) {
       [...Tab.dimensions.subtabs]
         .reverse()
-        .find((t) => !t.isPermanentlyHidden)
+        .find(t => !t.isPermanentlyHidden)
         .show(true);
     }
   }
@@ -867,7 +867,7 @@ function laitelaRealityTick(realDiff) {
         ${destabilising ? "Destabilized" : TimeSpan.fromSeconds(laitelaInfo.fastestCompletion).toStringShort()}
         <br>Highest Active Dimension: ${destabilising ? `${formatInt(8 - oldInfo.difficultyTier)} ➜` : ""}
         ${formatInt(8 - laitelaInfo.difficultyTier)}`;
-      player.records.bestReality.laitelaSet = Glyphs.copyForRecords(Glyphs.active.filter((g) => g !== null));
+      player.records.bestReality.laitelaSet = Glyphs.copyForRecords(Glyphs.active.filter(g => g !== null));
     } else {
       completionText += ` You need to destabilize in faster than
         ${TimeSpan.fromSeconds(laitelaInfo.fastestCompletion).toStringShort()} to improve your multiplier.`;
@@ -1057,7 +1057,7 @@ export function simulateTime(seconds, real, fast) {
   // (1000 of 2000 ticks). Short of some sort of magic user prediction to figure out
   // whether the user *will* press "Speed up" at some point, dividing remaining time
   // by remaining ticks seems like the best thing to do.
-  let loopFn = (i) => {
+  let loopFn = i => {
     const diff = remainingRealSeconds / i;
     gameLoop(1000 * diff);
     remainingRealSeconds -= diff;
@@ -1068,7 +1068,7 @@ export function simulateTime(seconds, real, fast) {
   // Black hole auto-pausing is entirely handled by the black hole phase advancement code (for actually pausing)
   // and calculateOfflineTick (for time calculation).
   if (BlackHoles.areUnlocked && !BlackHoles.arePaused) {
-    loopFn = (i) => {
+    loopFn = i => {
       const [realTickTime, blackHoleSpeedup] = BlackHoles.calculateOfflineTick(remainingRealSeconds, i, 0.0001);
       remainingRealSeconds -= realTickTime;
       gameLoop(1000 * realTickTime, { blackHoleSpeedup });
@@ -1096,7 +1096,7 @@ export function simulateTime(seconds, real, fast) {
       batchSize: 1,
       maxTime: 60,
       sleepTime: 1,
-      asyncEntry: (doneSoFar) => {
+      asyncEntry: doneSoFar => {
         GameIntervals.stop();
         ui.$viewModel.modal.progressBar = {
           label: "Offline Progress Simulation",
@@ -1138,7 +1138,7 @@ export function simulateTime(seconds, real, fast) {
           ],
         };
       },
-      asyncProgress: (doneSoFar) => {
+      asyncProgress: doneSoFar => {
         ui.$viewModel.modal.progressBar.current = doneSoFar;
       },
       asyncExit: () => {
@@ -1154,7 +1154,7 @@ export function simulateTime(seconds, real, fast) {
   }
 }
 
-window.onload = function () {
+window.onload = function() {
   const supportedBrowser = browserCheck();
   GameUI.initialized = supportedBrowser;
   ui.view.initialized = supportedBrowser;
@@ -1169,11 +1169,11 @@ window.onload = function () {
   }
 };
 
-window.onfocus = function () {
+window.onfocus = function() {
   setShiftKey(false);
 };
 
-window.onblur = function () {
+window.onblur = function() {
   GameKeyboard.stopSpins();
 };
 
@@ -1200,7 +1200,7 @@ export function init() {
   SteamRuntime.initialize();
   Cloud.init();
   GameStorage.load();
-  Tabs.all.find((t) => t.config.id === player.options.lastOpenTab).show(true, undefined, true);
+  Tabs.all.find(t => t.config.id === player.options.lastOpenTab).show(true, undefined, true);
 }
 
 window.tweenTime = 0;

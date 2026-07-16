@@ -36,20 +36,20 @@ export class DimBoost {
         GlyphEffect.dimBoostPower,
         PelleRifts.recursion.milestones[0]
       )
-      .mul(light.green.effectValue())//green light
+      .mul(light.green.effectValue())// Green light
       .powEffectsOf(
         InfinityUpgrade.dimboostMult.chargedEffect,
         TimeStudy(211)
-        );
+      );
     if (GlyphAlteration.isAdded("effarig")) boost = boost.pow(getSecondaryGlyphEffect("effarigforgotten"));
     return boost;
   }
 
   static multiplierToNDTier(tier) {
-    if(isSCRunningOnTier(4, 1)) tier = 8
+    if (isSCRunningOnTier(4, 1)) tier = 8;
     const normalBoostMult = DimBoost.power.pow(
-      this.purchasedBoosts.min(isSCRunningOnTier(4, 2)? 8 : DC.BEMAX).add(1).sub(tier)
-      ).clampMin(1);
+      this.purchasedBoosts.min(isSCRunningOnTier(4, 2) ? 8 : DC.BEMAX).add(1).sub(tier)
+    ).clampMin(1);
     const imaginaryBoostMult = DimBoost.power.times(ImaginaryUpgrade(24).effectOrDefault(1))
       .pow(this.imaginaryBoosts).clampMin(1);
     return normalBoostMult.times(imaginaryBoostMult);
@@ -112,11 +112,11 @@ export class DimBoost {
     const targetResets = DimBoost.purchasedBoosts.add(bulk);
     const tier = Decimal.min(targetResets.add(3), this.maxDimensionsUnlockable).toNumber();
     let amount = DC.D20;
-    /* const discount = Effects.sum(
-      TimeStudy(211),
-      TimeStudy(222)
-    ); */
-    if (tier === 4 && (isSCRunningOnTier(2, 1) || isSCRunningOnTier(2, 2))){
+    // Const discount = Effects.sum(
+    // TimeStudy(211),
+    // TimeStudy(222)
+    // );
+    if (tier === 4 && (isSCRunningOnTier(2, 1) || isSCRunningOnTier(2, 2))) {
       amount = amount.add(targetResets.sub(5).mul(DC.D15/* .sub(discount) */).round());
     }
     if (tier === 6 && NormalChallenge(10).isRunning) {
@@ -172,12 +172,12 @@ export class DimBoost {
   }
 
   static get imaginaryBoosts() {
-    let imaginaryBoosts = ImaginaryUpgrade(12).effectOrDefault(DC.D0)
-    imaginaryBoosts = imaginaryBoosts.add(SpaceResearchRifts.r21.effectValue[0])
+    let imaginaryBoosts = ImaginaryUpgrade(12).effectOrDefault(DC.D0);
+    imaginaryBoosts = imaginaryBoosts.add(SpaceResearchRifts.r21.effectValue[0]);
     imaginaryBoosts = imaginaryBoosts.plusEffectsOf(
       AbyssResearches.A8
-    )
-    let multiplier = ImaginaryUpgrade(23).effectOrDefault(DC.D1)
+    );
+    const multiplier = ImaginaryUpgrade(23).effectOrDefault(DC.D1);
     return Ra.isRunning
       ? DC.D0
       : imaginaryBoosts.mul(multiplier);
@@ -221,11 +221,11 @@ export function softReset(tempBulk, forcedADReset = false, forcedAMReset = false
     Currency.antimatter.reset();
   }
   EventHub.dispatch(GAME_EVENT.DIMBOOST_AFTER, bulk);
-  
-  //MOD
+
+  // MOD
   player.space = new Decimal(0);
-  SpaceResearchTierDetail[0].forEach((x) => SpaceResearchRifts[x].reset());
-  SpaceResearchTierDetail[1].forEach((x) => SpaceResearchRifts[x].refresh());
+  SpaceResearchTierDetail[0].forEach(x => SpaceResearchRifts[x].reset());
+  SpaceResearchTierDetail[1].forEach(x => SpaceResearchRifts[x].refresh());
 }
 
 export function skipResetsIfPossible(enteringAntimatterChallenge) {
@@ -273,15 +273,15 @@ function maxBuyDimBoosts() {
 
   const tier = DimBoost.maxDimensionsUnlockable;
   let amount = DC.D20;
-  /* const discount = Effects.sum(
-    TimeStudy(211),
-    TimeStudy(222)
-  ); */
+  // Const discount = Effects.sum(
+  // TimeStudy(211),
+  // TimeStudy(222)
+  // );
   let multiplierPerDB;
   if (tier === 6) {
-    multiplierPerDB = DC.D20/*.sub(discount)*/;
+    multiplierPerDB = DC.D20/* .sub(discount)*/;
   } else {
-    multiplierPerDB = DC.D15/*.sub(discount)*/;
+    multiplierPerDB = DC.D15/* .sub(discount)*/;
   }
 
   amount = amount.sub(Effects.sum(InfinityUpgrade.resetBoost));
@@ -299,7 +299,7 @@ function maxBuyDimBoosts() {
     calcBoosts = decimalCubicSolution(DC.D1, DC.D1.neg(), multiplierPerDB.add(2), ad.add(18).neg());
   }
 
-  if(! (isSCRunningOnTier(2,1)||isSCRunningOnTier(2,2)) ) calcBoosts = calcBoosts.add(NormalChallenge(10).isRunning ? 2 : 4);
+  if (! (isSCRunningOnTier(2, 1) || isSCRunningOnTier(2, 2))) calcBoosts = calcBoosts.add(NormalChallenge(10).isRunning ? 2 : 4);
   // Dimension boosts 1-4 dont use 8th dims, 1-2 dont use 6th dims, so add those extras afterwards.
 
   // Add one cause (x-b)/i is off by one otherwise

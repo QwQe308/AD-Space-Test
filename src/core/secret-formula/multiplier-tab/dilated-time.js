@@ -18,7 +18,7 @@ export const DT = {
     dilationEffect: () => (Enslaved.isRunning ? 0.85 : 1),
     isDilated: true,
     overlay: ["Ψ"],
-  },/* i dont use it why i fix it
+  }, /* I dont use it why i fix it
   achievement: {
     name: "Achievements",
     multValue: () => Achievement(132).effectOrDefault(new Decimal(1)) * Achievement(137).effectOrDefault(1),

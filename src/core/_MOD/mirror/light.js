@@ -8,7 +8,7 @@ function calcComplexLight(light1, light2, light3 = null) {
   return light[light1].amount().min(light[light2].amount()).min(light[light3].amount());
 }
 function calcFunctioningPercentage(percentage) {
-  return percentage * calcPercentMultplier(); //total percent of colors cannot go beyond prisms
+  return percentage * calcPercentMultplier(); // Total percent of colors cannot go beyond prisms
 }
 
 export function calcPercentMultplier() {
@@ -24,61 +24,61 @@ export const light = {
   red: {
     amount: () => calcBaseLight(player.light.redPercent),
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).pow_base(1e6);
+      const eff = amount.mul(4).pow(0.9).pow_base(1e6);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `AM multiplier ${formatMultiplier(eff, 2)}`,
+    effect: eff => `AM multiplier ${formatMultiplier(eff, 2)}`,
   },
   green: {
     amount: () => calcBaseLight(player.light.greenPercent),
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).pow_base(1.01);
+      const eff = amount.mul(4).pow(0.9).pow_base(1.01);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Dimension Boost base ${formatMultiplier(eff, 2, 2)}`,
+    effect: eff => `Dimension Boost base ${formatMultiplier(eff, 2, 2)}`,
   },
   blue: {
     amount: () => calcBaseLight(player.light.bluePercent),
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).pow_base(1.3);
+      const eff = amount.mul(4).pow(0.9).pow_base(1.3);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Pre-Inf Research Speed ${formatMultiplier(eff, 2)}`,
+    effect: eff => `Pre-Inf Research Speed ${formatMultiplier(eff, 2)}`,
   },
 
-  //complex colors
+  // Complex colors
   yellow: {
     amount: () => calcComplexLight("red", "green"), // Yellow = Red + Green
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).pow_base(1.05);
+      const eff = amount.mul(4).pow(0.9).pow_base(1.05);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Infinity Dimensions ${formatMultiplier(eff, 2, 2)}`,
+    effect: eff => `Infinity Dimensions ${formatMultiplier(eff, 2, 2)}`,
   },
   purple: {
     amount: () => calcComplexLight("red", "blue"), // Purple = Red + Blue
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).div(3);
+      const eff = amount.mul(4).pow(0.9).div(3);
       return player.light.inMirror ? eff.neg() : eff;
     },
-    effect: (eff) => `Free Tickspeed Upgrades ${formatAdd(eff, 2, 2)}`,
+    effect: eff => `Free Tickspeed Upgrades ${formatAdd(eff, 2, 2)}`,
   },
   cyan: {
     amount: () => calcComplexLight("blue", "green"), // Cyan = Blue + Green
     effectValue(amount = this.amount()) {
-      let eff = amount.mul(4).pow(0.9).pow_base(1.006);
+      const eff = amount.mul(4).pow(0.9).pow_base(1.006);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Effective Space ${formatMultiplier(eff, 2, 2)}`,
+    effect: eff => `Effective Space ${formatMultiplier(eff, 2, 2)}`,
   },
-  //Final color
+  // Final color
   white: {
     amount: () => calcComplexLight("red", "blue", "green").min(100), // White = Red + Blue + Green
     effectValue(amount = this.amount()) {
       if (!player.light.inMirror) amount = amount.sub(Math.max(player.light.prisms - 200, 0)).max(0);
-      let eff = amount.mul(4).pow(0.9).pow_base(1.006);
+      const eff = amount.mul(4).pow(0.9).pow_base(1.006);
       return player.light.inMirror ? eff.recip() : eff;
     },
-    effect: (eff) => `Space ${formatMultiplier(eff, 2, 2)}`,
+    effect: eff => `Space ${formatMultiplier(eff, 2, 2)}`,
   },
 };

@@ -195,10 +195,10 @@ class TimeModal extends Modal {
 
 // If a new modal which can be shown in the same queue multiple times needs to be added
 // Additional code needs to be written to account for that
-//MOD Modal
+// MOD Modal
 Modal.startSpaceChallenge = new ChallengeConfirmationModal(SpaceChallengeStartModal);
 Modal.spaceChallengeReward = new Modal(SpaceChallengeRewardModal);
-Modal.abyssOverlay = new Modal(AbyssOverlayModal, -2, GAME_EVENT.ABYSS_ANIMATION_AFTER);//this is not a typical modal but whoever cares XD
+Modal.abyssOverlay = new Modal(AbyssOverlayModal, -2, GAME_EVENT.ABYSS_ANIMATION_AFTER);// This is not a typical modal but whoever cares XD
 
 
 Modal.startEternityChallenge = new ChallengeConfirmationModal(EternityChallengeStartModal);

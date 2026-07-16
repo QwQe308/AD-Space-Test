@@ -1,5 +1,5 @@
 <script>
-import Influence from './Influence.vue';
+import Influence from "./Influence.vue";
 
 export default {
   name: "InfluenceAnalyzerTab",
@@ -14,9 +14,9 @@ export default {
   },
   methods: {
     update() {
-      this.influences = cloneDeep(player.imaginaryInfluence)
+      this.influences = cloneDeep(player.imaginaryInfluence);
       let sum = 0;
-      this.influences.forEach((element) => {
+      this.influences.forEach(element => {
         sum += imaginaryInfluences[element].influenceStat;
       });
       this.totalInfluence = sum;
@@ -30,10 +30,14 @@ export default {
     <div>
       You have <span class="influence-description">{{ totalInfluence }}</span> Influence Stats in total.<br>
     </div>
-    <br />
+    <br>
     <span style="color:#888888">...Help us...</span>
-    <br /><br />
-    <Influence v-for="item in influences" :id = item :key = item></Influence>
+    <br><br>
+    <Influence
+      v-for="item in influences"
+      :id="item"
+      :key="item/"
+    />
   </div>
 </template>
 
