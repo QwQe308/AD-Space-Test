@@ -1,0 +1,7 @@
+.frozen-currency {
+  color: rgb(156, 230, 255) !important;
+}
+
+.frozen-currency::before{
+  content:"❄";
+}
