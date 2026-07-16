@@ -76,8 +76,7 @@ window.player = {
       simulationTickThisReset: 0,
     },
     present:{
-      spells: [],
-      mana: DC.D0,
+      mirrorUpgrades: [],
     },
   },
   //abyss

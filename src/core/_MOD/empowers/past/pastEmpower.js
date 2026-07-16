@@ -91,6 +91,7 @@ class PastEmpowerClass {
     if (CurrentSimulationConfig.checkSuccess()) {
       if (fakeSimulationTime < 2000) {
         this.simulationSpeed = this.simulationSpeed.mul(2000 / fakeSimulationTime).min(this.simulationMaxSpeed);
+        if(this.simulationSpeed.eq(this.simulationMaxSpeed)) return console.log(fakeSimulationTime)
       }
       CurrentSimulationConfig.giveRewards(this.simulationSpeed, this.data.simulationTimeThisReset.div(1000));
       CurrentSimulationConfig.reset();

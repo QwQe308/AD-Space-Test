@@ -365,6 +365,14 @@ export const tabs = [
         hidable: true,
       },
       {
+        key: "present",
+        name: "Present",
+        symbol: "<i class='fas fa-pause'></i>",
+        component: "PresentEmpowerTab",
+        id: 4,
+        hidable: true,
+      },
+      {
         key: "dilation",
         name: "Time Dilation",
         symbol: "Ψ",

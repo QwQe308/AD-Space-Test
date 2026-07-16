@@ -1,149 +1,191 @@
-class PresentEmpowerClass {
-  constructor() {}
+import { GameMechanicState } from "../../../game-mechanics";
+import { light } from "../../mirror/light";
+import { getSpaceNerf } from "../../space";
+
+class MirrorUpgrade extends GameMechanicState {
+  constructor(config) {
+    super(config);
+  }
+
+  get name() {
+    return this._config.name;
+  }
 
   get data() {
-    return player.empowers.present;
+    return player.empowers.present.mirrorUpgrades[this.id];
   }
 
-  get mana() {
-    return this.data.mana;
+  get level() {
+    return this.data.level;
   }
 
-  set mana(newVal) {
-    this.data.mana = newVal;
-  }
-}
-
-class Affix {
-  constructor({
-    description = () => {
-      throw Error("No Description Function Defined!");
-    },
-    process = () => {
-      throw Error("No Process Function Defined!");
-    },
-    effect = null,
-    cost,
-    unlocked = () => true,
-  }) {
-    this._description = description;
-    this._process = process;
-    this._effect = effect;
-    this._cost = cost;
-    this._unlocked = unlocked;
+  set level(newLevel) {
+    this.data.level = newLevel;
   }
 
-  get cost() {
-    return this.cost;
+  get absLevel() {
+    return Math.abs(this.level);
   }
 
-  effect(data) {
-    return this._effect(data);
+  get pendingLevel() {
+    return this.data.pendingLevel;
   }
 
-  description(data) {
-    let effect = this._effect(data);
-    let description = this._description(data, effect).replaceAll(
-      "[T]",
-      data.target ? `<i>${data.target}</i>` : `<i>[Spell Target]</i>`
-    );
-    return description;
-  }
-}
-
-class pendingEvent {
-  constructor({ func: func, delay: delay, extras = extras, data: data, baseSpellPower: baseSpellPower = DC.D0 }) {
-    this.func = func;
-    this.delay = delay;
-    this.extras = extras;
-    this.data = data;
-
-    this.baseSpellPower = baseSpellPower ?? new Decimal(data.spellPower);
+  set pendingLevel(newLevel) {
+    this.data.pendingLevel = newLevel;
   }
 
-  process() {
-    this.func({ extras: this.extras, data: this.data, event: this });
+  set level(newLevel) {
+    this.data.level = newLevel;
   }
 
-  count() {
-    this.delay--;
-    if (this.delay === 0) {
-      this.process();
-      this.unmount();
-    } else if (this.delay < 0) {
-      this.unmount();
-    }
+  upgrade() {
+    this.pendingLevel = this.pendingLevel + 1;
   }
 
-  mount() {
-    this.data.pending.add(this);
+  downgrade() {
+    this.pendingLevel = this.pendingLevel - 1;
   }
 
-  unmount() {
-    this.data.pending.delete(this);
+  update() {
+    this.lastLevel = this.level;
+    this.level = this.pendingLevel;
+  }
+
+  rewind() {
+    this.level = this.lastLevel;
+  }
+
+  toggle() {
+    this.level = -this.level;
+  }
+
+  get reverted() {
+    return (this.level < 0) ^ player.light.inMirror;
+  }
+
+  levelConfig(level) {
+    return this._config.levels[level - 1];
+  }
+
+  reachedLevel(level) {
+    return this.level > level;
+  }
+
+  effect(level) {
+    return this.levelConfig(level).effect(this.reverted);
+  }
+
+  description(level) {
+    return this.levelConfig(level).description(this.effect(level));
+  }
+
+  color(type) {
+    return this._config.color[type];
   }
 }
 
-const baseData = {
-  spellPower: DC.D1,
-  multiplier: DC.D1,
-  directMultilpier: DC.D1,
+export const presentMirrorUpgradeConfig = {
+  white: {
+    id: "white",
+    color: [75, 75, 75],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `All light is ${formatX(effect, 1, 1)} more powerful in base effect.`;
+        },
+        effect: (reverted) => Decimal.pow(1.1, reverted),
+      },
+    ],
+  },
+
+  purple: {
+    id: "purple",
+    color: [75, 0, 75],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `${formatAdd(
+            effect,
+            1,
+            1
+          )} extra galaxies, equal to ± purple light / 50.<br>(cannot let total galaxies fall below 0)`;
+        },
+        effect: (reverted) => Decimal.div(light.purple.amount(), 50 * reverted).floor(),
+      },
+    ],
+  },
+  yellow: {
+    id: "yellow",
+    color: [75, 75, 0],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `Yellow light also affects 1st Time Dimension.<br>(${formatX(effect, 2, 2)})`;
+        },
+        effect: (reverted) => light.yellow.effectValue().abs().pow(reverted),
+      },
+    ],
+  },
+  cyan: {
+    id: "cyan",
+    color: [0, 75, 75],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `Cyan light also affects Replicanti. (${formatX(effect, 2, 2)})`;
+        },
+        effect: (reverted) => light.cyan.effectValue().abs().pow(reverted),
+      },
+    ],
+  },
+
+  red: {
+    id: "red",
+    color: [100, 50, 50],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `Red light's effect is raised by space nerf. (${formatPow(effect, 2, 2)})`;
+        },
+        effect: (reverted) => getSpaceNerf().pow(reverted),
+      },
+    ],
+  },
+  green: {
+    id: "green",
+    color: [50, 100, 50],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `Green light also affects infinities gain. (${formatX(effect, 2, 2)})`;
+        },
+        effect: (reverted) => light.green.effectValue().abs().pow(reverted),
+      },
+    ],
+  },
+  blue: {
+    id: "blue",
+    color: [50, 50, 100],
+    levels: [
+      {
+        // Level 1
+        description(effect) {
+          return `Blue light affects T3 Space Researches. (${formatX(effect, 2, 2)})`;
+        },
+        effect: (reverted) => light.blue.effectValue().abs().pow(reverted),
+      },
+    ],
+  },
 };
 
-function fakeData(data, power) {
-  let result = {};
-  result.assign(result, data);
-  result.spellPower = power;
-  return result;
-}
-
-const AffixBaseConfig = {
-  simple: {
-    description: (data, effect) => `<b>Double</b> [T]'s gain multiplier. 5[M] (${formatMultiplier(effect, 2, 2)})`,
-    effect: (data) => DC.D2.pow(data.spellPower),
-    process: (data) => (data.multiplier = data.multiplier.mul(this.effect(data))),
-    cost: 5,
-  },
-  direct: {
-    description: (data, effect) => `Instantly <b>Triple</b> [T]. (x${format(effect, 2, 2)})`,
-    effect: (data) => DC.D3.pow(data.spellPower),
-    process: (data) => (data.directMultilpier = data.directMultilpier.mul(this.effect(data))),
-    cost: 10,
-  },
-  twin: {
-    description: (data, effect) => `. (x${format(effect, 2, 2)})`,
-    effect: (data) => DC.E1.pow(data.spellPower),
-    process: (data) => (data.directMultilpier = data.directMultilpier.mul(this.effect(data))),
-    cost: 15,
-  },
-  accelerating: {
-    description: (data, effect) =>
-      `After each next affix, spell power <b>+0.1</b>. (+${format(effect, 2, 2)}, excluding this)`,
-    effect: (data) => DC.E1.pow(data.spellPower),
-    process: (data) => data.pending.push([this.pending, data.spellPower, 1, 1]),
-    pending: (data, baseSpellPower, extras) => {
-      data.spellPower += 0.1 * baseSpellPower * extras;
-      data.pending.push([this.pending, data.spellPower, 1, extras + 1]);
-    },
-    cost: 15,
-  },
-};
-
-const SpellConfig = {
-  power: {
-    description: () => `Spell target is set to Infinity Power. Spell power *2.`,
-    process(data) {
-      data.target = "IPow";
-      data.spellPower = data.spellPower.mul(2);
-    },
-    cost: 10,
-  },
-  loop: {
-    description: () =>
-      `Spell target is set to Eternity Points. On next eternity, EP will be set to ([EP before using this skill] + Gained EP).`,
-    process(data) {
-      data.target = "EP";
-    },
-    cost: 25,
-  },
-};
+export const PresentMirrorUpgrades = mapGameDataToObject(
+  presentMirrorUpgradeConfig,
+  (config) => new MirrorUpgrade(config)
+);
