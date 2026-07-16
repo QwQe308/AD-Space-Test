@@ -11,6 +11,7 @@ export default {
       spells: [],
       selectedAffixes: [],
       affixList: [],
+      Affixes,
     };
   },
   computed: {
@@ -382,13 +383,15 @@ export default {
 
 /* ===== Spells Grid ===== */
 .spells-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   gap: 0.4rem;
 }
 
 .spell-slot {
-  aspect-ratio: 1;
+  width: 3.5rem;
+  height: 3.5rem;
 }
 
 .spell-slot--empty {
