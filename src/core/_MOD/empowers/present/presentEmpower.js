@@ -6,8 +6,9 @@ export class SpellData {
   constructor() {
     this.spellPower = DC.D1;
     this.tempSpellPower = DC.D0;
-    this.multiplier = DC.D1;
-    this.directMultiplier = DC.D1;
+    this.tempCostModifier = 0;
+
+    this.epMultiplier = DC.D1;
 
     this.instantGalaxies = DC.D0;
     this.warpTime = DC.D0;
@@ -61,7 +62,8 @@ export class PresentEmpowerClass {
    * @param {string} affixName
    */
   selectAffix(affixName) {
-    if (this.selectedAffixes.length >= 8) return;
+    if (this.selectedAffixes.length >= 13) return;
+    if (this.selectedAffixes.includes(affixName)) return;
     const affix = Affixes[affixName];
     if (!affix || !affix.unlocked) return;
     this.selectedAffixes.push(affixName);
@@ -89,32 +91,81 @@ export class PresentEmpowerClass {
    */
   clearSelection() {
     this.selectedAffixes.length = 0;
+    this.data.editingSpellIndex = -1;
   }
 
   /**
-   * Create a spell from currently selected affixes and add it to the spells list.
+   * Create a spell from currently selected affixes and add it to the spells list,
+   * or replace an existing spell if editing.
    * @returns {SpellData|null}
    */
   createSpell() {
     if (this.selectedAffixes.length === 0) return null;
-    if (this.spells.length >= 8) return null;
-    if (this.selectedAffixes.length > 8) return null;
+    if (this.selectedAffixes.length > 13) return null;
+
+    const editingIdx = this.data.editingSpellIndex;
+    const isEditing = editingIdx >= 0 && editingIdx < this.spells.length;
+
+    if (!isEditing && this.spells.length >= 13) return null;
 
     const spellData = runSpell(this.selectedAffixes, DC.D1);
-    if (spellData.manaCost > this.mana) {
+    if (spellData.manaCost < 10) {
       this.clearSelection();
       return null;
     }
 
-    this.mana -= spellData.manaCost;
-    // Clear pending Set before storing — PendingEvent objects must not enter player state
     spellData.pending.clear();
-    this.spells.push({
+
+    const name = isEditing ? this.spells[editingIdx].name : `Spell ${this.spells.length + 1}`;
+
+    const spell = {
+      name,
       affixes: [...this.selectedAffixes],
       data: spellData,
-    });
+    };
+
+    if (isEditing) {
+      this.spells.splice(editingIdx, 1, spell);
+    } else {
+      this.spells.push(spell);
+    }
     this.clearSelection();
     return spellData;
+  }
+
+  /**
+   * Remove a spell at the given index.
+   * @param {number} index
+   */
+  deleteSpell(index) {
+    if (index >= 0 && index < this.spells.length) {
+      this.spells.splice(index, 1);
+    }
+  }
+
+  /**
+   * Rename a spell. Name is clamped to 8 characters.
+   * @param {number} index
+   * @param {string} newName
+   */
+  renameSpell(index, newName) {
+    if (index >= 0 && index < this.spells.length) {
+      this.spells[index].name = newName.slice(0, 8);
+    }
+  }
+
+  /**
+   * Load a spell's affixes into the assembly for editing.
+   * @param {number} index
+   */
+  loadSpellToAssembly(index) {
+    if (index < 0 || index >= this.spells.length) return;
+    this.clearSelection();
+    const spell = this.spells[index];
+    this.data.editingSpellIndex = index;
+    for (const name of spell.affixes) {
+      this.selectedAffixes.push(name);
+    }
   }
 }
 
@@ -130,7 +181,7 @@ const AffixBaseConfig = {
       return DC.E1.pow(data.totalSpellPower);
     },
     process(data) {
-      data.multiplier = data.multiplier.mul(this.effect(data));
+      data.epMultiplier = data.epMultiplier.mul(this.effect(data));
     },
     cost: 10,
   },
@@ -176,8 +227,9 @@ const AffixBaseConfig = {
         delay: 1,
         extras: true,
         data,
+        baseEffect: this.effect(data),
         process(obj) {
-          obj.data.tempSpellPower = obj.data.tempSpellPower.add(obj.extras ? 0.2 : -0.2);
+          obj.data.tempSpellPower = obj.data.tempSpellPower.add(obj.extras ? obj.baseEffect : obj.baseEffect.neg());
           obj.event.mount();
           return !obj.extras;
         },
@@ -185,13 +237,13 @@ const AffixBaseConfig = {
     },
     cost: 10,
   },
-  accelerating: {
-    name: "accelerating",
+  accel: {
+    name: "accel",
     description(data, effect) {
-      return `+20% spell power for the following consecutive affixes with increasing costs. The next one is always affected. [Ep+]`;
+      return `+25% spell power for the following consecutive affixes with increasing costs. The next one is always affected. [Ep+]`;
     },
     effect(data) {
-      return new Decimal(0.2).mul(data.totalSpellPower);
+      return new Decimal(0.25).mul(data.totalSpellPower);
     },
     process(data) {
       this.pending(data).mount();
@@ -201,15 +253,16 @@ const AffixBaseConfig = {
         delay: 1,
         extras: -1,
         data,
+        baseEffect: this.effect(data),
         process(obj) {
           if (obj.currentAffix.cost <= this.extras) return;
-          obj.data.tempSpellPower = obj.data.tempSpellPower.add(0.2);
+          obj.data.tempSpellPower = obj.data.tempSpellPower.add(obj.baseEffect);
           obj.event.mount();
           return obj.currentAffix.cost;
         },
       });
     },
-    cost: 15,
+    cost: 10,
   },
   cursing: {
     name: "cursing",
@@ -219,7 +272,7 @@ const AffixBaseConfig = {
     noSpellPower: true,
     debuff: true,
     effect(data) {
-      return new Decimal(-1);
+      return new Decimal(-2);
     },
     process(data) {
       this.pending(data).mount();
@@ -229,14 +282,15 @@ const AffixBaseConfig = {
         delay: 1,
         extras: true,
         data,
+        baseEffect: this.effect(data),
         process(obj) {
-          obj.data.tempSpellPower = obj.data.totalSpellPower.mul(-2);
-          obj.data.nextCostModifier = obj.currentAffix.cost * -2;
-          obj.event.mount();
+          if (obj.currentAffix.noSpellPower) return;
+          obj.data.tempSpellPower = obj.data.totalSpellPower.mul(obj.baseEffect);
+          obj.data.tempCostModifier = obj.currentAffix.cost * obj.baseEffect.toNumber();
         },
       });
     },
-    cost: 0,
+    cost: 5,
   },
 };
 
@@ -257,6 +311,7 @@ export function runSpell(affixNames, baseSpellPower = DC.D1) {
 
   for (const name of affixNames) {
     data.tempSpellPower = DC.D0;
+    data.tempCostModifier = 0;
 
     // Count down pending events before processing this affix
     for (const event of [...data.pending]) {
@@ -266,8 +321,9 @@ export function runSpell(affixNames, baseSpellPower = DC.D1) {
     const affix = Affixes[name];
     if (!affix || !affix.unlocked) continue;
 
-    // Accumulate mana cost
-    data.manaCost += affix.cost;
+    // Accumulate mana cost (with modifier from pending events)
+    const actualCost = affix.cost + data.tempCostModifier;
+    data.manaCost += actualCost;
 
     // Apply the affix's effect to the spell data
     affix.process(data);
@@ -292,6 +348,7 @@ export function simulateSpellData(affixNames, targetIndex, baseSpellPower = DC.D
   for (let i = 0; i < Math.min(targetIndex + 1, affixNames.length); i++) {
     const name = affixNames[i];
     data.tempSpellPower = DC.D0;
+    data.tempCostModifier = 0;
 
     // Count down pending events before this affix
     for (const event of [...data.pending]) {
@@ -304,9 +361,30 @@ export function simulateSpellData(affixNames, targetIndex, baseSpellPower = DC.D
     const affix = Affixes[name];
     if (!affix || !affix.unlocked) continue;
 
-    data.manaCost += affix.cost;
+    const actualCost = affix.cost + data.tempCostModifier;
+    data.manaCost += actualCost;
     affix.process(data);
   }
 
   return data;
+}
+
+/**
+ * Build an array of human-readable effect summary lines from a SpellData.
+ * @param {SpellData} data
+ * @returns {string[]}
+ */
+export function spellEffectSummary(data) {
+  const lines = [];
+  const epMult = data.epMultiplier;
+  if (epMult && epMult.neq && epMult.neq(DC.D1)) {
+    lines.push(`EP & Eternities: ${formatX(epMult, 2, 2)}`);
+  }
+  if (data.instantGalaxies?.gt && data.instantGalaxies.gt(0)) {
+    lines.push(`Instant Galaxies: ${formatAdd(data.instantGalaxies)}`);
+  }
+  if (data.warpTime?.gt && data.warpTime.gt(0)) {
+    lines.push(`Warp Time: ${TimeSpan.fromSeconds(data.warpTime.toNumber()).toStringShort()}`);
+  }
+  return lines;
 }

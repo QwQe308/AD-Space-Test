@@ -1,5 +1,5 @@
 <script>
-import { Affixes, PresentEmpower, simulateSpellData } from "../../../../../core/_MOD/empowers/present/presentEmpower";
+import { Affixes, PresentEmpower, simulateSpellData, spellEffectSummary } from "../../../../../core/_MOD/empowers/present/presentEmpower";
 
 export default {
   name: "PresentEmpowerTab",
@@ -11,6 +11,9 @@ export default {
       selectedAffixes: [],
       affixList: [],
       Affixes,
+      editMode: false,
+      deleteMode: false,
+      editingSpellIndex: -1,
     };
   },
   computed: {
@@ -23,15 +26,37 @@ export default {
       };
     },
     selectedTotalCost() {
-      return this.selectedAffixes.reduce((sum, name) => {
+      return this.selectedAffixes.reduce((sum, name, i) => {
         const affix = Affixes[name];
-        return sum + (affix ? affix.cost : 0);
+        const base = affix ? affix.cost : 0;
+        if (i === 0) return sum + base;
+        const data = simulateSpellData(this.selectedAffixes, i);
+        return sum + base + data.tempCostModifier;
       }, 0);
+    },
+    /**
+     * Array of actual costs for each assembly affix (with tempCostModifier).
+     * Returns { base: number, actual: number } pairs.
+     */
+    assemblyCosts() {
+      return this.selectedAffixes.map((name, i) => {
+        const affix = Affixes[name];
+        const base = affix ? affix.cost : 0;
+        if (i === 0) return { base, actual: base };
+        const data = simulateSpellData(this.selectedAffixes, i);
+        return { base, actual: base + data.tempCostModifier };
+      });
     },
     canCreateSpell() {
       return this.selectedAffixes.length > 0 &&
-        this.selectedTotalCost <= this.mana &&
-        this.spells.length < 8;
+        this.selectedTotalCost >= 10 &&
+        this.spells.length < 13;
+    },
+    createSpellTooltip() {
+      if (this.selectedAffixes.length === 0) return "No affixes selected";
+      if (this.selectedTotalCost < 10) return `Total cost must be at least 10 mana (currently ${this.selectedTotalCost})`;
+      if (this.spells.length >= 13) return "Maximum spells reached";
+      return "Create Spell";
     },
   },
   methods: {
@@ -41,20 +66,32 @@ export default {
       this.spells = this.copySpells();
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
+      this.editingSpellIndex = PresentEmpower.data.editingSpellIndex;
     },
-    assemblyDescription(index) {
+    assemblyTooltip(index) {
       const name = this.selectedAffixes[index];
       const affix = Affixes[name];
       if (!affix) return "";
       const data = simulateSpellData(this.selectedAffixes, index);
-      return affix.description(data);
+      const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
+      return `${this.cap(name)} (${spDisplay})<br>--------------------<br>${affix.description(data)}`;
     },
-    affixNextDescription(affix) {
+    affixNextTooltip(affix) {
       if (!affix) return "";
       const names = [...this.selectedAffixes, affix.name];
       const data = simulateSpellData(names, this.selectedAffixes.length);
-      console.log(data)
-      return affix.description(data);
+      const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
+      return `${this.cap(affix.name)} (${spDisplay})<br>--------------------<br>${affix.description(data)}`;
+    },
+    affixNextCost(affix) {
+      if (!affix) return { base: 0, actual: 0 };
+      const names = [...this.selectedAffixes, affix.name];
+      const data = simulateSpellData(names, this.selectedAffixes.length);
+      return { base: affix.cost, actual: affix.cost + data.tempCostModifier };
+    },
+    costDisplay(base, actual) {
+      if (actual === base) return `Cost: ${base}`;
+      return `Cost: ${actual} [${base}]`;
     },
     selectAffix(name) {
       PresentEmpower.selectAffix(name);
@@ -69,18 +106,56 @@ export default {
       this.mana = PresentEmpower.mana;
       this.spells = this.copySpells();
       this.selectedAffixes = [];
+      this.editMode = false;
+      this.editingSpellIndex = -1;
     },
     copySpells() {
       return PresentEmpower.spells.map(s => ({
+        name: s.name,
         affixes: [...s.affixes],
         manaCost: s.data.manaCost,
+        effects: spellEffectSummary(s.data),
       }));
+    },
+    renameSpell(index, e) {
+      PresentEmpower.renameSpell(index, e.target.value);
+      this.spells = this.copySpells();
     },
     spellSummary(spell) {
       return spell.affixes.map(name => {
         const a = Affixes[name];
         return a ? name.charAt(0).toUpperCase() : name;
       }).join(" → ");
+    },
+    toggleEditMode() {
+      this.editMode = !this.editMode;
+      if (this.editMode) {
+        this.deleteMode = false;
+      } else {
+        // Manual close: clear assembly
+        PresentEmpower.clearSelection();
+        this.selectedAffixes = [];
+      }
+    },
+    toggleDeleteMode() {
+      this.deleteMode = !this.deleteMode;
+      if (this.deleteMode) this.editMode = false;
+    },
+    spellClick(index) {
+      if (this.deleteMode) {
+        PresentEmpower.deleteSpell(index);
+        this.spells = this.copySpells();
+        this.deleteMode = false;
+        return;
+      }
+      if (this.editMode) {
+        PresentEmpower.loadSpellToAssembly(index);
+        this.selectedAffixes = [...PresentEmpower.selectedAffixes];
+        this.editingSpellIndex = index;
+      }
+    },
+    cap(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
     },
   },
 };
@@ -116,7 +191,7 @@ export default {
             class="affix-slot"
           >
             <button
-              v-tooltip="assemblyDescription(index)"
+              v-tooltip="assemblyTooltip(index)"
               class="affix-btn"
               :class="{ 'affix-btn--debuff': Affixes[name] && Affixes[name].debuff }"
               @click="removeAffixAt(index)"
@@ -126,7 +201,7 @@ export default {
                   {{ name }}
                 </div>
                 <div class="affix-btn-cost">
-                  Cost: {{ Affixes[name] ? Affixes[name].cost : 0 }}
+                  {{ costDisplay(assemblyCosts[index].base, assemblyCosts[index].actual) }}
                 </div>
               </div>
             </button>
@@ -137,14 +212,9 @@ export default {
               →
             </div>
           </div>
-          <div
-            v-if="selectedAffixes.length === 0"
-            class="empty-hint"
-          >
-            Select affixes below to assemble a spell
-          </div>
         </div>
         <button
+          v-tooltip="createSpellTooltip"
           class="create-spell-btn"
           :class="{ 'create-spell-btn--disabled': !canCreateSpell }"
           :disabled="!canCreateSpell"
@@ -152,29 +222,67 @@ export default {
         >
           &gt;
         </button>
+        <div
+          v-if="selectedAffixes.length === 0"
+          class="empty-hint"
+        >
+          Select affixes below to assemble a spell
+        </div>
       </div>
       <div class="assembly-cost">
-        Total Cost: {{ selectedTotalCost }} / {{ formatInt(mana) }} Mana
+        Total Cost: {{ selectedTotalCost }} Mana
       </div>
     </div>
 
     <!-- Spells -->
     <div class="spells-panel">
-      <div class="panel-title">
-        Spells ({{ spells.length }} / 8)
+      <div class="panel-title panel-title--with-actions">
+        Spells ({{ spells.length }} / 13)
+        <div class="spells-actions">
+          <button
+            v-tooltip="'Edit Mode'"
+            class="mode-btn"
+            :class="{ 'mode-btn--active': editMode }"
+            @click="toggleEditMode"
+          >
+            <i class="fas fa-pen" />
+          </button>
+          <button
+            v-tooltip="'Delete Mode'"
+            class="mode-btn mode-btn--delete"
+            :class="{ 'mode-btn--active': deleteMode }"
+            @click="toggleDeleteMode"
+          >
+            <i class="fas fa-trash" />
+          </button>
+        </div>
       </div>
       <hr class="panel-division">
       <div class="spells-grid">
         <div
           v-for="(spell, index) in spells"
           :key="index"
-          v-tooltip="spellSummary(spell) + ' — ' + spell.manaCost + ' mana'"
+          v-tooltip="spell.name + '<br>' + spellSummary(spell) + '<br>--------------------<br>' + spell.effects.join('<br>') + (spell.effects.length ? '<br>--------------------<br>' : '') + spell.manaCost + ' mana'"
           class="spell-slot affix-btn"
+          :class="{
+            'affix-btn--debuff': editingSpellIndex === index,
+            'mode-btn--active': deleteMode || editMode && editingSpellIndex !== index
+          }"
+          @click="spellClick(index)"
         >
           <div class="affix-btn-inner">
-            <div class="affix-btn-name">
-              Spell {{ index + 1 }}
-            </div>
+            <input
+              v-if="editingSpellIndex === index"
+              class="spell-name-input c-modal-input"
+              :value="spell.name || ' '"
+              maxlength="8"
+              @input="renameSpell(index, $event)"
+              @click.stop
+            >
+            <span
+              v-else
+              class="affix-btn-name"
+            >{{ spell.name || " " }}</span>
             <div class="affix-btn-cost">
               {{ spell.manaCost }} mana
             </div>
@@ -193,9 +301,13 @@ export default {
         <button
           v-for="item in affixList"
           :key="item.name || item.cost"
-          v-tooltip="affixNextDescription(item)"
+          v-tooltip="affixNextTooltip(item)"
           class="affix-btn"
-          :class="{ 'affix-btn--debuff': item.debuff }"
+          :class="{
+            'affix-btn--debuff': item.debuff,
+            'affix-btn--used': selectedAffixes.includes(item.name)
+          }"
+          :disabled="selectedAffixes.includes(item.name)"
           @click="selectAffix(item.name)"
         >
           <div class="affix-btn-inner">
@@ -203,7 +315,7 @@ export default {
               {{ item.name }}
             </div>
             <div class="affix-btn-cost">
-              Cost: {{ item.cost }}
+              {{ costDisplay(item.cost, affixNextCost(item).actual) }}
             </div>
           </div>
         </button>
@@ -301,6 +413,7 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
+  position: relative;
   gap: 0.8rem;
 }
 
@@ -310,7 +423,7 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   flex-grow: 1;
-  min-height: 3.5rem;
+  min-height: 8rem;
 }
 
 .selected-affixes .affix-btn {
@@ -332,8 +445,14 @@ export default {
 }
 
 .empty-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: #888;
   font-style: italic;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .assembly-cost {
@@ -365,6 +484,57 @@ export default {
 .create-spell-btn--disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ===== Spells Header ===== */
+.panel-title--with-actions {
+  position: relative;
+}
+
+.spells-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 0.4rem;
+}
+
+.mode-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0.2rem solid var(--color-text);
+  border-radius: var(--var-border-radius, 0.3rem);
+  background-color: var(--color-base);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-btn:hover {
+  background-color: var(--color-text);
+  color: var(--color-base);
+}
+
+.mode-btn--active {
+  background-color: var(--color-text);
+  color: var(--color-base);
+  box-shadow: 0 0 0.6rem rgba(91, 127, 255, 0.5);
+}
+
+.mode-btn--active:hover {
+  border-color: #5b7fff;
+}
+
+.mode-btn--delete.mode-btn--active {
+  background-color: #b55b5b;
+  border-color: #b55b5b;
+  box-shadow: 0 0 0.6rem rgba(181, 91, 91, 0.5);
 }
 
 /* ===== Spells ===== */
@@ -420,6 +590,18 @@ export default {
   box-shadow: 0 0 1.2rem 0.2rem rgba(181, 91, 127, 0.7);
 }
 
+.affix-btn--used {
+  background-color: #3a3a4a;
+  box-shadow: 0 0 0.4rem 0.1rem rgba(58, 58, 74, 0.3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.affix-btn--used:hover {
+  transform: none;
+  box-shadow: 0 0 0.4rem 0.1rem rgba(58, 58, 74, 0.3);
+}
+
 .affix-btn-inner {
   width: calc(100% - 0.3rem);
   height: calc(100% - 0.3rem);
@@ -437,6 +619,16 @@ export default {
 .affix-btn-name {
   font-size: 1.2rem;
   text-transform: capitalize;
+}
+
+.spell-name-input {
+  width: calc(100% - 0.4rem);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.spell-name-input:focus {
+  outline: none;
 }
 
 .affix-btn-cost {

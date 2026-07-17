@@ -81,6 +81,7 @@ window.player = {
       maxMana: 100,
       spells: [],
       selectedAffixes: [],
+      editingSpellIndex: -1,
     },
   },
   // Abyss

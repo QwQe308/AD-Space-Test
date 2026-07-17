@@ -27,6 +27,7 @@ export class PendingEvent {
     extras = extras,
     data: data,
     baseSpellPower: baseSpellPower = undefined,
+    baseEffect: baseEffect = undefined,
   }) {
     this._process = process;
     this.delay = delay;
@@ -35,6 +36,7 @@ export class PendingEvent {
     this.data = data;
 
     this.baseSpellPower = baseSpellPower ?? new Decimal(data.spellPower);
+    this.baseEffect = baseEffect;
   }
 
   process(currentAffix) {
@@ -43,6 +45,7 @@ export class PendingEvent {
       data: this.data,
       event: this,
       baseSpellPower: this.baseSpellPower,
+      baseEffect: this.baseEffect,
       occured: this.occured,
       currentAffix,
     });
@@ -53,7 +56,9 @@ export class PendingEvent {
     this.delay--;
     if (this.delay === 0) {
       this.process(currentAffix);
-      this.unmount();
+      // Only unmount if the event did NOT re-mount itself during process()
+      // (mount() resets this.delay to a positive value)
+      if (this.delay <= 0) this.unmount();
     } else if (this.delay < 0) {
       this.unmount();
     }
