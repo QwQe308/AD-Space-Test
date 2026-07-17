@@ -15,6 +15,7 @@ export default {
       deleteMode: false,
       editingSpellIndex: -1,
       _prevSpellCount: -1,
+      ripples: [],
     };
   },
   computed: {
@@ -153,6 +154,14 @@ export default {
       if (this.deleteMode) this.editMode = false;
     },
     spellClick(index) {
+      // Ripple animation
+      const id = Date.now() + Math.random();
+      this.ripples.push({ spellIndex: index, id });
+      setTimeout(() => {
+        const idx = this.ripples.findIndex(r => r.id === id);
+        if (idx >= 0) this.ripples.splice(idx, 1);
+      }, 600);
+
       if (this.deleteMode) {
         PresentEmpower.deleteSpell(index);
         this.spells = this.copySpells();
@@ -301,6 +310,11 @@ export default {
               {{ spell.manaCost }} mana
             </div>
           </div>
+          <span
+            v-for="r in ripples.filter(r => r.spellIndex === index)"
+            :key="r.id"
+            class="spell-ripple"
+          />
         </div>
       </div>
     </div>
@@ -562,6 +576,32 @@ export default {
 
 .spell-slot {
   width: 8rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Spell Ripple ===== */
+@keyframes spell-ripple-anim {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.spell-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 0.3rem solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: spell-ripple-anim 0.6s ease-out forwards;
 }
 
 /* ===== Affix Section ===== */
