@@ -1,6 +1,5 @@
 <script>
-import { Affixes, PresentEmpower } from "../../../../../core/_MOD/empowers/present/presentEmpower";
-import { DC } from "../../../../../core/constants";
+import { Affixes, PresentEmpower, SpellData, runSpell } from "../../../../../core/_MOD/empowers/present/presentEmpower";
 
 export default {
   name: "PresentEmpowerTab",
@@ -12,6 +11,10 @@ export default {
       selectedAffixes: [],
       affixList: [],
       Affixes,
+      // Cache for assembly position previews
+      _assemblyDataCache: [],
+      // Cache for next-affix previews per affix name
+      _affixNextDataCache: {},
     };
   },
   computed: {
@@ -42,46 +45,83 @@ export default {
       this.spells = this.copySpells();
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
+      // Invalidate caches
+      this._assemblyDataCache = [];
+      this._affixNextDataCache = {};
+    },
+    /**
+     * Get the SpellData context just before the affix at the given assembly index
+     * would process. This is the result of running all affixes before this one.
+     */
+    assemblyPrevData(index) {
+      if (index <= 0) return new SpellData();
+      if (this._assemblyDataCache[index]) return this._assemblyDataCache[index];
+      const data = runSpell(this.selectedAffixes.slice(0, index));
+      console.log(data)
+      this._assemblyDataCache[index] = data;
+      return data;
+    },
+    /**
+     * Get the description for an affix at position i in the assembly,
+     * showing what it will do based on the actual spell state before it runs.
+     */
+    assemblyDescription(index) {
+      const name = this.selectedAffixes[index];
+      const affix = Affixes[name];
+      if (!affix) return "";
+      const data = this.assemblyPrevData(index);
+      return affix.description(data);
+    },
+    /**
+     * Get the SpellData context if the given affix were added as the next one.
+     */
+    affixNextData(name) {
+      if (this._affixNextDataCache[name]) return this._affixNextDataCache[name];
+      const names = [...this.selectedAffixes, name];
+      const data = runSpell(names);
+      this._affixNextDataCache[name] = data;
+      return data;
+    },
+    /**
+     * Get the description for a candidate affix showing what it would do
+     * if added as the next affix in the assembly.
+     */
+    affixNextDescription(affix) {
+      if (!affix) return "";
+      const data = this.affixNextData(affix.name);
+      return affix.description(data);
     },
     selectAffix(name) {
       PresentEmpower.selectAffix(name);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
+      this._affixNextDataCache = {};
+      this._assemblyDataCache = [];
     },
     removeAffixAt(index) {
       PresentEmpower.removeAffixAt(index);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
+      this._affixNextDataCache = {};
+      this._assemblyDataCache = [];
     },
     createSpell() {
       PresentEmpower.createSpell();
       this.mana = PresentEmpower.mana;
       this.spells = this.copySpells();
       this.selectedAffixes = [];
+      this._affixNextDataCache = {};
+      this._assemblyDataCache = [];
     },
-    /**
-     * Deep-copy spells from player into lightweight display-only objects.
-     * This prevents Vue from making the original SpellData (with Decimals) reactive.
-     */
     copySpells() {
       return PresentEmpower.spells.map(s => ({
         affixes: [...s.affixes],
         manaCost: s.data.manaCost,
       }));
     },
-    /**
-     * Build a short description string for a stored spell showing its affix chain.
-     */
     spellSummary(spell) {
       return spell.affixes.map(name => {
         const a = Affixes[name];
         return a ? name.charAt(0).toUpperCase() : name;
       }).join(" → ");
-    },
-    /**
-     * Dummy data for rendering affix tooltip descriptions in template.
-     * DC is on window but not in Vue template scope.
-     */
-    tooltipData() {
-      return { spellPower: DC.D1, tempSpellPower: DC.D0 };
     },
   },
 };
@@ -117,7 +157,7 @@ export default {
             class="affix-slot"
           >
             <button
-              v-tooltip="Affixes[name] ? Affixes[name].description(tooltipData()) : ''"
+              v-tooltip="assemblyDescription(index)"
               class="affix-btn"
               :class="{ 'affix-btn--debuff': Affixes[name] && Affixes[name].debuff }"
               @click="removeAffixAt(index)"
@@ -194,7 +234,7 @@ export default {
         <button
           v-for="item in affixList"
           :key="item.name || item.cost"
-          v-tooltip="item.description(tooltipData())"
+          v-tooltip="affixNextDescription(item)"
           class="affix-btn"
           :class="{ 'affix-btn--debuff': item.debuff }"
           @click="selectAffix(item.name)"

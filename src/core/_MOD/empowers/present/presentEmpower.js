@@ -127,7 +127,7 @@ const AffixBaseConfig = {
       return `<b>x10</b> EP & Eternities gain multiplier. [Ex]`;
     },
     effect(data) {
-      return DC.E1.pow(data.spellPower);
+      return DC.E1.pow(data.totalSpellPower);
     },
     process(data) {
       data.multiplier = data.multiplier.mul(this.effect(data));
@@ -140,7 +140,7 @@ const AffixBaseConfig = {
       return `Instantly gain an Antimatter Galaxy. This effect is floored after applying spell power. [E+]`;
     },
     effect(data) {
-      return data.spellPower.floor();
+      return data.totalSpellPower.floor();
     },
     process(data) {
       data.instantGalaxies = data.instantGalaxies.add(1);
@@ -153,7 +153,7 @@ const AffixBaseConfig = {
       return `Instantly warp 10 minute for Space Researches and Replicanti. [Et]`;
     },
     effect(data) {
-      return new Decimal(600).mul(data.spellPower);
+      return new Decimal(600).mul(data.totalSpellPower);
     },
     process(data) {
       data.warpTime = data.warpTime.add(this.effect(data));
@@ -166,7 +166,7 @@ const AffixBaseConfig = {
       return `+20% spell power for the next affix, then -20% for the next after that, then repeat. [Ep+]`;
     },
     effect(data) {
-      return new Decimal(0.2).mul(data.spellPower);
+      return new Decimal(0.2).mul(data.totalSpellPower);
     },
     process(data) {
       this.pending(data).mount();
@@ -191,7 +191,7 @@ const AffixBaseConfig = {
       return `+20% spell power for the following consecutive affixes with increasing costs. The next one is always affected. [Ep+]`;
     },
     effect(data) {
-      return new Decimal(0.2).mul(data.spellPower);
+      return new Decimal(0.2).mul(data.totalSpellPower);
     },
     process(data) {
       this.pending(data).mount();
@@ -205,7 +205,7 @@ const AffixBaseConfig = {
           if (obj.currentAffix.cost <= this.extras) return;
           obj.data.tempSpellPower = obj.data.tempSpellPower.add(0.2);
           obj.event.mount();
-          return obj.extras++;
+          return obj.currentAffix.cost;
         },
       });
     },
@@ -230,9 +230,9 @@ const AffixBaseConfig = {
         extras: true,
         data,
         process(obj) {
-          obj.data.tempSpellPower = obj.data.tempSpellPower.add(obj.extras ? 0.2 : -0.2);
+          obj.data.tempSpellPower = obj.data.totalSpellPower.mul(-2);
+          obj.data.nextCostModifier = obj.currentAffix.cost * -2;
           obj.event.mount();
-          return !obj.extras;
         },
       });
     },
@@ -256,6 +256,8 @@ export function runSpell(affixNames, baseSpellPower = DC.D1) {
   data.spellPower = new Decimal(baseSpellPower);
 
   for (const name of affixNames) {
+    data.tempSpellPower = DC.D0
+
     // Count down pending events before processing this affix
     for (const event of [...data.pending]) {
       event.count(Affixes[name]);
