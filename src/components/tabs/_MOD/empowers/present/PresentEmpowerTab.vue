@@ -14,6 +14,7 @@ export default {
       editMode: false,
       deleteMode: false,
       editingSpellIndex: -1,
+      _prevSpellCount: -1,
     };
   },
   computed: {
@@ -50,12 +51,12 @@ export default {
     canCreateSpell() {
       return this.selectedAffixes.length > 0 &&
         this.selectedTotalCost >= 10 &&
-        this.spells.length < 13;
+        this.spells.length <= 13;
     },
     createSpellTooltip() {
       if (this.selectedAffixes.length === 0) return "No affixes selected";
       if (this.selectedTotalCost < 10) return `Total cost must be at least 10 mana (currently ${this.selectedTotalCost})`;
-      if (this.spells.length >= 13) return "Maximum spells reached";
+      if (this.spells.length > 13) return "Maximum affixes reached";
       return "Create Spell";
     },
   },
@@ -63,7 +64,11 @@ export default {
     update() {
       this.mana = PresentEmpower.mana;
       this.maxMana = PresentEmpower.maxMana;
-      this.spells = this.copySpells();
+      const count = PresentEmpower.spells.length;
+      if (this._prevSpellCount !== count) {
+        this._prevSpellCount = count;
+        this.spells = this.copySpells();
+      }
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
       this.editingSpellIndex = PresentEmpower.data.editingSpellIndex;
@@ -121,11 +126,17 @@ export default {
       PresentEmpower.renameSpell(index, e.target.value);
       this.spells = this.copySpells();
     },
-    spellSummary(spell) {
-      return spell.affixes.map(name => {
+    spellTooltip(spell) {
+      const chain = spell.affixes.map(name => {
         const a = Affixes[name];
         return a ? name.charAt(0).toUpperCase() : name;
       }).join(" → ");
+      const parts = [spell.name, chain];
+      if (spell.effects.length) {
+        parts.push("--------------------", ...spell.effects);
+      }
+      parts.push("--------------------", `${spell.manaCost} mana`);
+      return parts.join("<br>");
     },
     toggleEditMode() {
       this.editMode = !this.editMode;
@@ -262,7 +273,10 @@ export default {
         <div
           v-for="(spell, index) in spells"
           :key="index"
-          v-tooltip="spell.name + '<br>' + spellSummary(spell) + '<br>--------------------<br>' + spell.effects.join('<br>') + (spell.effects.length ? '<br>--------------------<br>' : '') + spell.manaCost + ' mana'"
+          v-tooltip="{
+            content: spellTooltip(spell),
+            classes: ['general-tooltip', 'present-spell-tooltip'],
+          }"
           class="spell-slot affix-btn"
           :class="{
             'affix-btn--debuff': editingSpellIndex === index,

@@ -22,6 +22,14 @@ export class SpellData {
   }
 }
 
+export class SpellEffectData {
+  constructor() {
+    this.epMultiplier = DC.D1;
+    this.instantGalaxies = DC.D0;
+    this.warpTime = DC.D0;
+  }
+}
+
 export class PresentEmpowerClass {
   constructor() {}
 
@@ -108,7 +116,7 @@ export class PresentEmpowerClass {
 
     if (!isEditing && this.spells.length >= 13) return null;
 
-    const spellData = runSpell(this.selectedAffixes, DC.D1);
+    const spellData = simulateSpellData(this.selectedAffixes, this.selectedAffixes.length, DC.D1);
     if (spellData.manaCost < 10) {
       this.clearSelection();
       return null;
@@ -376,15 +384,17 @@ export function simulateSpellData(affixNames, targetIndex, baseSpellPower = DC.D
  */
 export function spellEffectSummary(data) {
   const lines = [];
-  const epMult = data.epMultiplier;
-  if (epMult && epMult.neq && epMult.neq(DC.D1)) {
+  const epMult = new Decimal(data.epMultiplier ?? 1);
+  if (epMult.neq(1)) {
     lines.push(`EP & Eternities: ${formatX(epMult, 2, 2)}`);
   }
-  if (data.instantGalaxies?.gt && data.instantGalaxies.gt(0)) {
-    lines.push(`Instant Galaxies: ${formatAdd(data.instantGalaxies)}`);
+  const galaxies = new Decimal(data.instantGalaxies ?? 0);
+  if (galaxies.gt(0)) {
+    lines.push(`Instant Galaxies: ${formatAdd(galaxies)}`);
   }
-  if (data.warpTime?.gt && data.warpTime.gt(0)) {
-    lines.push(`Warp Time: ${TimeSpan.fromSeconds(data.warpTime.toNumber()).toStringShort()}`);
+  const warp = new Decimal(data.warpTime ?? 0);
+  if (warp.gt(0)) {
+    lines.push(`Warp Time: ${TimeSpan.fromSeconds(warp.toNumber()).toStringShort()}`);
   }
   return lines;
 }

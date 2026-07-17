@@ -379,6 +379,11 @@ button:focus {
   max-width: 50rem !important;
 }
 
+present-spell-tooltip.tooltip-inner{
+  width: auto !important;
+  max-width: 30rem !important;
+}
+
 .c-tooltip-content,
 .c-tooltip-arrow {
   visibility: hidden;
