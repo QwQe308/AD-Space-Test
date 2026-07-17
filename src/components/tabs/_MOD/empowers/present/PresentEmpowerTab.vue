@@ -39,7 +39,7 @@ export default {
     update() {
       this.mana = PresentEmpower.mana;
       this.maxMana = PresentEmpower.maxMana;
-      this.spells = [...PresentEmpower.spells];
+      this.spells = this.copySpells();
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
     },
@@ -47,15 +47,25 @@ export default {
       PresentEmpower.selectAffix(name);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
     },
-    deselectLast() {
-      PresentEmpower.deselectLast();
+    removeAffixAt(index) {
+      PresentEmpower.removeAffixAt(index);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
     },
     createSpell() {
       PresentEmpower.createSpell();
       this.mana = PresentEmpower.mana;
-      this.spells = [...PresentEmpower.spells];
+      this.spells = this.copySpells();
       this.selectedAffixes = [];
+    },
+    /**
+     * Deep-copy spells from player into lightweight display-only objects.
+     * This prevents Vue from making the original SpellData (with Decimals) reactive.
+     */
+    copySpells() {
+      return PresentEmpower.spells.map(s => ({
+        affixes: [...s.affixes],
+        manaCost: s.data.manaCost,
+      }));
     },
     /**
      * Build a short description string for a stored spell showing its affix chain.
@@ -106,15 +116,21 @@ export default {
             :key="index"
             class="affix-slot"
           >
-            <div
+            <button
               v-tooltip="Affixes[name] ? Affixes[name].description(tooltipData()) : ''"
-              class="affix-square"
-              :class="{ 'affix-square--debuff': Affixes[name] && Affixes[name].debuff }"
+              class="affix-btn"
+              :class="{ 'affix-btn--debuff': Affixes[name] && Affixes[name].debuff }"
+              @click="removeAffixAt(index)"
             >
-              <div class="affix-square-inner">
-                {{ name }}
+              <div class="affix-btn-inner">
+                <div class="affix-btn-name">
+                  {{ name }}
+                </div>
+                <div class="affix-btn-cost">
+                  Cost: {{ Affixes[name] ? Affixes[name].cost : 0 }}
+                </div>
               </div>
-            </div>
+            </button>
             <div
               v-if="index < selectedAffixes.length - 1"
               class="affix-arrow"
@@ -153,27 +169,18 @@ export default {
         <div
           v-for="(spell, index) in spells"
           :key="index"
-          class="spell-slot"
+          v-tooltip="spellSummary(spell) + ' — ' + spell.manaCost + ' mana'"
+          class="spell-slot affix-btn"
         >
-          <div
-            v-tooltip="spellSummary(spell) + ' — ' + spell.data.manaCost + ' mana'"
-            class="spell-square"
-          >
-            <div class="spell-square-inner">
-              <div class="spell-name">
-                Spell {{ index + 1 }}
-              </div>
-              <div class="spell-cost">
-                {{ spell.data.manaCost }} mana
-              </div>
+          <div class="affix-btn-inner">
+            <div class="affix-btn-name">
+              Spell {{ index + 1 }}
+            </div>
+            <div class="affix-btn-cost">
+              {{ spell.manaCost }} mana
             </div>
           </div>
         </div>
-        <div
-          v-for="n in (8 - spells.length)"
-          :key="'empty-' + n"
-          class="spell-slot spell-slot--empty"
-        />
       </div>
     </div>
 
@@ -275,6 +282,11 @@ export default {
   border-radius: var(--var-border-radius, 0.5rem);
 }
 
+.assembly-panel,
+.spells-panel {
+  flex-shrink: 0;
+}
+
 .panel-title {
   font-size: 1.3rem;
   font-weight: bold;
@@ -302,6 +314,11 @@ export default {
   min-height: 3.5rem;
 }
 
+.selected-affixes .affix-btn {
+  width: 8rem;
+  flex-shrink: 0;
+}
+
 .affix-slot {
   display: flex;
   flex-direction: row;
@@ -324,36 +341,6 @@ export default {
   margin-top: 0.8rem;
   font-size: 1.1rem;
   color: #aaa;
-}
-
-/* ===== Affix Square (glyph-style) ===== */
-.affix-square {
-  width: 3.5rem;
-  height: 3.5rem;
-  background-color: #5b7fff;
-  box-shadow: 0 0 0.6rem 0.1rem rgba(91, 127, 255, 0.5);
-  cursor: default;
-  user-select: none;
-}
-
-.affix-square--debuff {
-  background-color: #b55b7f;
-  box-shadow: 0 0 0.6rem 0.1rem rgba(181, 91, 127, 0.5);
-}
-
-.affix-square-inner {
-  width: calc(100% - 0.3rem);
-  height: calc(100% - 0.3rem);
-  margin: 0.15rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #1a1a3e;
-  font-family: Typewriter, serif;
-  font-size: 0.9rem;
-  font-weight: bold;
-  text-transform: capitalize;
-  color: #c8d6ff;
 }
 
 /* ===== Create Spell Button ===== */
@@ -381,54 +368,17 @@ export default {
   cursor: not-allowed;
 }
 
-/* ===== Spells Grid ===== */
+/* ===== Spells ===== */
 .spells-grid {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.8rem;
 }
 
 .spell-slot {
-  width: 3.5rem;
-  height: 3.5rem;
-}
-
-.spell-slot--empty {
-  border: 0.1rem dashed rgba(255, 255, 255, 0.12);
-  border-radius: var(--var-border-radius, 0.3rem);
-}
-
-.spell-square {
-  width: 100%;
-  height: 100%;
-  background-color: #3a5fc8;
-  box-shadow: 0 0 0.4rem 0.05rem rgba(58, 95, 200, 0.4);
-  cursor: default;
-}
-
-.spell-square-inner {
-  width: calc(100% - 0.25rem);
-  height: calc(100% - 0.25rem);
-  margin: 0.125rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #141428;
-  font-family: Typewriter, serif;
-  color: #c8d6ff;
-  text-align: center;
-}
-
-.spell-name {
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.spell-cost {
-  font-size: 0.7rem;
-  color: #8899cc;
+  width: 8rem;
 }
 
 /* ===== Affix Section ===== */

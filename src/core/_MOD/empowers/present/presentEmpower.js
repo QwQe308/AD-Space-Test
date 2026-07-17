@@ -64,8 +64,6 @@ export class PresentEmpowerClass {
     if (this.selectedAffixes.length >= 8) return;
     const affix = Affixes[affixName];
     if (!affix || !affix.unlocked) return;
-    const totalCost = this.selectedAffixes.reduce((sum, name) => sum + Affixes[name].cost, 0) + affix.cost;
-    if (totalCost > this.mana) return;
     this.selectedAffixes.push(affixName);
   }
 
@@ -74,6 +72,16 @@ export class PresentEmpowerClass {
    */
   deselectLast() {
     this.selectedAffixes.pop();
+  }
+
+  /**
+   * Remove the affix at the given index from the assembly list.
+   * @param {number} index
+   */
+  removeAffixAt(index) {
+    if (index >= 0 && index < this.selectedAffixes.length) {
+      this.selectedAffixes.splice(index, 1);
+    }
   }
 
   /**
