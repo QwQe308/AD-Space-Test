@@ -256,7 +256,7 @@ export function runSpell(affixNames, baseSpellPower = DC.D1) {
   data.spellPower = new Decimal(baseSpellPower);
 
   for (const name of affixNames) {
-    data.tempSpellPower = DC.D0
+    data.tempSpellPower = DC.D0;
 
     // Count down pending events before processing this affix
     for (const event of [...data.pending]) {
@@ -270,6 +270,41 @@ export function runSpell(affixNames, baseSpellPower = DC.D1) {
     data.manaCost += affix.cost;
 
     // Apply the affix's effect to the spell data
+    affix.process(data);
+  }
+
+  return data;
+}
+
+/**
+ * Simulate the SpellData context just before the affix at targetIndex would process.
+ * Used for tooltip descriptions to show accurate effect values.
+ * Processes all affixes before targetIndex and applies pending events for targetIndex.
+ * @param {string[]} affixNames
+ * @param {number} targetIndex
+ * @param {Decimal|number} [baseSpellPower=DC.D1]
+ * @returns {SpellData}
+ */
+export function simulateSpellData(affixNames, targetIndex, baseSpellPower = DC.D1) {
+  const data = new SpellData();
+  data.spellPower = new Decimal(baseSpellPower);
+
+  for (let i = 0; i < Math.min(targetIndex + 1, affixNames.length); i++) {
+    const name = affixNames[i];
+    data.tempSpellPower = DC.D0;
+
+    // Count down pending events before this affix
+    for (const event of [...data.pending]) {
+      event.count(Affixes[name]);
+    }
+
+    // Stop before processing the target affix — we only want pending effects
+    if (i === targetIndex) break;
+
+    const affix = Affixes[name];
+    if (!affix || !affix.unlocked) continue;
+
+    data.manaCost += affix.cost;
     affix.process(data);
   }
 

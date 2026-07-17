@@ -1,5 +1,5 @@
 <script>
-import { Affixes, PresentEmpower, SpellData, runSpell } from "../../../../../core/_MOD/empowers/present/presentEmpower";
+import { Affixes, PresentEmpower, simulateSpellData } from "../../../../../core/_MOD/empowers/present/presentEmpower";
 
 export default {
   name: "PresentEmpowerTab",
@@ -11,10 +11,6 @@ export default {
       selectedAffixes: [],
       affixList: [],
       Affixes,
-      // Cache for assembly position previews
-      _assemblyDataCache: [],
-      // Cache for next-affix previews per affix name
-      _affixNextDataCache: {},
     };
   },
   computed: {
@@ -45,71 +41,34 @@ export default {
       this.spells = this.copySpells();
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
-      // Invalidate caches
-      this._assemblyDataCache = [];
-      this._affixNextDataCache = {};
     },
-    /**
-     * Get the SpellData context just before the affix at the given assembly index
-     * would process. This is the result of running all affixes before this one.
-     */
-    assemblyPrevData(index) {
-      if (index <= 0) return new SpellData();
-      if (this._assemblyDataCache[index]) return this._assemblyDataCache[index];
-      const data = runSpell(this.selectedAffixes.slice(0, index));
-      console.log(data)
-      this._assemblyDataCache[index] = data;
-      return data;
-    },
-    /**
-     * Get the description for an affix at position i in the assembly,
-     * showing what it will do based on the actual spell state before it runs.
-     */
     assemblyDescription(index) {
       const name = this.selectedAffixes[index];
       const affix = Affixes[name];
       if (!affix) return "";
-      const data = this.assemblyPrevData(index);
+      const data = simulateSpellData(this.selectedAffixes, index);
       return affix.description(data);
     },
-    /**
-     * Get the SpellData context if the given affix were added as the next one.
-     */
-    affixNextData(name) {
-      if (this._affixNextDataCache[name]) return this._affixNextDataCache[name];
-      const names = [...this.selectedAffixes, name];
-      const data = runSpell(names);
-      this._affixNextDataCache[name] = data;
-      return data;
-    },
-    /**
-     * Get the description for a candidate affix showing what it would do
-     * if added as the next affix in the assembly.
-     */
     affixNextDescription(affix) {
       if (!affix) return "";
-      const data = this.affixNextData(affix.name);
+      const names = [...this.selectedAffixes, affix.name];
+      const data = simulateSpellData(names, this.selectedAffixes.length);
+      console.log(data)
       return affix.description(data);
     },
     selectAffix(name) {
       PresentEmpower.selectAffix(name);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
-      this._affixNextDataCache = {};
-      this._assemblyDataCache = [];
     },
     removeAffixAt(index) {
       PresentEmpower.removeAffixAt(index);
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
-      this._affixNextDataCache = {};
-      this._assemblyDataCache = [];
     },
     createSpell() {
       PresentEmpower.createSpell();
       this.mana = PresentEmpower.mana;
       this.spells = this.copySpells();
       this.selectedAffixes = [];
-      this._affixNextDataCache = {};
-      this._assemblyDataCache = [];
     },
     copySpells() {
       return PresentEmpower.spells.map(s => ({
