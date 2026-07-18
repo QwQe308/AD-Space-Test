@@ -279,7 +279,7 @@ export default {
       </div>
       <hr class="panel-division">
       <div class="spells-grid">
-        <div
+        <button
           v-for="(spell, index) in spells"
           :key="index"
           v-tooltip="{
@@ -315,7 +315,7 @@ export default {
             :key="r.id"
             class="spell-ripple"
           />
-        </div>
+        </button>
       </div>
     </div>
 
@@ -559,12 +559,6 @@ export default {
   border-color: #5b7fff;
 }
 
-.mode-btn--delete.mode-btn--active {
-  background-color: #b55b5b;
-  border-color: #b55b5b;
-  box-shadow: 0 0 0.6rem rgba(181, 91, 91, 0.5);
-}
-
 /* ===== Spells ===== */
 .spells-grid {
   display: flex;
@@ -633,6 +627,11 @@ export default {
 .affix-btn:hover {
   transform: scale(1.04);
   box-shadow: 0 0 1.2rem 0.2rem rgba(91, 127, 255, 0.7);
+}
+
+.affix-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 0.4rem 0.05rem rgba(91, 127, 255, 0.3);
 }
 
 .affix-btn--debuff {
