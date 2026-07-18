@@ -46,11 +46,7 @@ export class PresentEmpowerClass {
   }
 
   get maxMana() {
-    return this.data.maxMana;
-  }
-
-  set maxMana(newVal) {
-    this.data.maxMana = newVal;
+    return 100; // TODO: scale based on game progress
   }
 
   get spells() {
@@ -173,6 +169,55 @@ export class PresentEmpowerClass {
     this.data.editingSpellIndex = index;
     for (const name of spell.affixes) {
       this.selectedAffixes.push(name);
+    }
+  }
+
+  /**
+   * Cast a spell: deduct mana and apply its effects to the total effects pool.
+   * @param {number} index
+   * @returns {boolean} Whether the cast was successful
+   */
+  castSpell(index) {
+    if (index < 0 || index >= this.spells.length) return false;
+    const spell = this.spells[index];
+    if (spell.data.manaCost > this.mana) return false;
+
+    this.mana -= spell.data.manaCost;
+    this.applyEffects(spell.data);
+    return true;
+  }
+
+  /**
+   * Merge a SpellData's effects into the player's totalEffects.
+   * @param {SpellData} spellData
+   */
+  applyEffects(spellData) {
+    const total = this.totalEffects;
+    total.epMultiplier = new Decimal(total.epMultiplier).mul(spellData.epMultiplier);
+    total.instantGalaxies = new Decimal(total.instantGalaxies).add(spellData.instantGalaxies);
+    total.warpTime = new Decimal(total.warpTime).add(spellData.warpTime);
+  }
+
+  /**
+   * Returns the cumulative total effects from all spells cast so far.
+   * @returns {SpellEffectData}
+   */
+  get totalEffects() {
+    return this.data.totalEffects;
+  }
+
+  get _defaultEffects() {
+    return new SpellEffectData();
+  }
+
+  /**
+   * Reset all cumulative effects back to their initial values.
+   */
+  resetEffects() {
+    const def = this._defaultEffects;
+    const total = this.data.totalEffects;
+    for (const key of Object.keys(def)) {
+      total[key] = def[key];
     }
   }
 }

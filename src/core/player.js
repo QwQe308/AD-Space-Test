@@ -76,12 +76,15 @@ window.player = {
       simulationTickThisReset: 0,
     },
     present: {
-      mirrorUpgrades: [],
       mana: 0,
-      maxMana: 100,
       spells: [],
       selectedAffixes: [],
       editingSpellIndex: -1,
+      totalEffects: {
+        epMultiplier: DC.D1,
+        instantGalaxies: DC.D0,
+        warpTime: DC.D0,
+      },
     },
   },
   // Abyss

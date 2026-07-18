@@ -3,6 +3,7 @@ import { DEV } from "../env";
 import { GameMechanicState, SetPurchasableMechanicState } from "./game-mechanics";
 import { DC } from "./constants";
 import FullScreenAnimationHandler from "./full-screen-animation-handler";
+import { PresentEmpower } from "./globals";
 
 function giveEternityRewards(auto) {
   player.records.bestEternity.time = Decimal.min(player.records.thisEternity.time, player.records.bestEternity.time);
@@ -236,6 +237,9 @@ export function initializeResourcesAfterEternity() {
 
   player.space = new Decimal(0);
   Currency.antimatter.reset();
+
+  PresentEmpower.resetEffects();
+  PresentEmpower.mana = PresentEmpower.maxMana
 
   if (!EternityMilestone.autobuyerEternity.isReached) {
     player.light.prisms = 0;

@@ -6,7 +6,7 @@ export default {
   data() {
     return {
       mana: 0,
-      maxMana: 100,
+      maxMana: 0,
       spells: [],
       selectedAffixes: [],
       affixList: [],
@@ -70,6 +70,10 @@ export default {
         this._prevSpellCount = count;
         this.spells = this.copySpells();
       }
+      // Keep canAfford reactive on mana changes
+      for (const spell of this.spells) {
+        spell.canAfford = this.mana >= spell.manaCost;
+      }
       this.selectedAffixes = [...PresentEmpower.selectedAffixes];
       this.affixList = Affixes.all;
       this.editingSpellIndex = PresentEmpower.data.editingSpellIndex;
@@ -121,6 +125,7 @@ export default {
         affixes: [...s.affixes],
         manaCost: s.data.manaCost,
         effects: spellEffectSummary(s.data),
+        canAfford: this.mana >= s.data.manaCost,
       }));
     },
     renameSpell(index, e) {
@@ -154,14 +159,6 @@ export default {
       if (this.deleteMode) this.editMode = false;
     },
     spellClick(index) {
-      // Ripple animation
-      const id = Date.now() + Math.random();
-      this.ripples.push({ spellIndex: index, id });
-      setTimeout(() => {
-        const idx = this.ripples.findIndex(r => r.id === id);
-        if (idx >= 0) this.ripples.splice(idx, 1);
-      }, 600);
-
       if (this.deleteMode) {
         PresentEmpower.deleteSpell(index);
         this.spells = this.copySpells();
@@ -172,6 +169,20 @@ export default {
         PresentEmpower.loadSpellToAssembly(index);
         this.selectedAffixes = [...PresentEmpower.selectedAffixes];
         this.editingSpellIndex = index;
+        return;
+      }
+      // Normal mode: cast spell if affordable
+      if (this.spells[index].canAfford) {
+        PresentEmpower.castSpell(index);
+        this.mana = PresentEmpower.mana;
+        this.spells = this.copySpells();
+        // Ripple animation only on successful cast
+        const id = Date.now() + Math.random();
+        this.ripples.push({ spellIndex: index, id });
+        setTimeout(() => {
+          const idx = this.ripples.findIndex(r => r.id === id);
+          if (idx >= 0) this.ripples.splice(idx, 1);
+        }, 600);
       }
     },
     cap(str) {
@@ -288,8 +299,8 @@ export default {
           }"
           class="spell-slot affix-btn"
           :class="{
-            'affix-btn--debuff': editingSpellIndex === index,
-            'mode-btn--active': deleteMode || editMode && editingSpellIndex !== index
+            'affix-btn--debuff': editMode || deleteMode,
+            'affix-btn--used': !spell.canAfford && !editMode && !deleteMode
           }"
           @click="spellClick(index)"
         >

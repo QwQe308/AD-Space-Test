@@ -229,8 +229,8 @@ export default {
     calcTimeToNext(researchSpeed) {
       return researchSpeed.gt(0)
         ? TimeSpan.fromSeconds(
-          this.getNode.cost.sub(this.getNode.progress).div(researchSpeed).toNumber()
-        ).toTimeEstimate()
+            this.getNode.cost.sub(this.getNode.progress).div(researchSpeed).toNumber()
+          ).toTimeEstimate()
         : "Forever";
     },
     update() {
@@ -275,40 +275,15 @@ export default {
     :class="getNodeClass"
     :style="getNodeStyle"
   >
-    <div
-      v-if="permanent"
-      class="permanent-mark"
-    >
-      *
-    </div>
-    <div
-      class="research-node-container"
-      :class="getContainerClass"
-      @click="handleClick"
-    >
-      <div
-        v-if="hasProgress"
-        class="research-node-inner"
-        :style="getFillStyle"
-        :class="getFillClass"
-      />
-      <div
-        v-if="levelText"
-        class="research-node-level"
-        :style="getTextStyle"
-      >
+    <div v-if="permanent" class="permanent-mark">*</div>
+    <div class="research-node-container" :class="getContainerClass" @click="handleClick">
+      <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass" />
+      <div v-if="levelText" class="research-node-level" :style="getTextStyle">
         {{ levelText }}
       </div>
       <!-- For "Sink" type -->
-      <div
-        v-if="type === 'sink'"
-        class="sink-animation"
-      >
-        <div
-          v-for="i in 3"
-          :style="sinkAnimationStyle(i)"
-          class="sink-animation-block"
-        />
+      <div v-if="type === 'sink'" class="sink-animation">
+        <div v-for="i in 3" :style="sinkAnimationStyle(i)" class="sink-animation-block" />
       </div>
     </div>
   </div>
