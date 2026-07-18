@@ -191,17 +191,17 @@ export default {
       v-if="!isUnlocked && !normalUnlock"
       class="prismNerf"
     >
-      Your replicanti speed is divided due to lack of prisms.
-      <br>
       Note that replicanti is not essential for progress of mirror until e140 IP.
       <br>
-      You may not want to unlock it if you are going to challenge yourself. It's not that hard.
+      You may not want to unlock it if you are going to challenge yourself.
+      <br>
+      Else, if you do not like strategic things, you may want to unlock this.
     </div>
     <PrimaryButton
       v-if="!isUnlocked"
       :enabled="isUnlockAffordable"
       class="o-primary-btn--replicanti-unlock"
-      onclick="Replicanti.unlock();"
+      onclick="Replicanti.requestUnlock();"
     >
       Unlock Replicanti
       <br>

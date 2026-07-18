@@ -247,9 +247,9 @@ const AffixBaseConfig = {
       return data.totalSpellPower.floor();
     },
     process(data) {
-      data.instantGalaxies = data.instantGalaxies.add(1);
+      data.instantGalaxies = data.instantGalaxies.add(this.effect(data));
     },
-    cost: 10,
+    cost: 15,
   },
   warping: {
     name: "warping",

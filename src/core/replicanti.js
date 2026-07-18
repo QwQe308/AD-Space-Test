@@ -178,7 +178,7 @@ export function totalReplicantiSpeedMult(overCap) {
   }
   totalMult = totalMult.timesEffectsOf(AlchemyResource.replication, Ra.unlocks.continuousTTBoost.effects.replicanti);
 
-  return totalMult.clampMin(1);
+  return totalMult;
 }
 
 export function replicantiCap() {
@@ -690,6 +690,13 @@ export const Replicanti = {
     let baseCost = DC.E55;
     if (PlayerProgress.imaginaryUnlocked()) baseCost = DC.E140;
     return baseCost.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1]);
+  },
+  requestUnlock() {
+    if (!PlayerProgress.imaginaryUnlocked() && player.infinityPoints.lt(DC.E140)) {
+      Modal.imaginaryReplicantiUnlock.show();
+      return;
+    }
+    this.unlock();
   },
   unlock(freeUnlock = false) {
     const cost = this.unlockCost;

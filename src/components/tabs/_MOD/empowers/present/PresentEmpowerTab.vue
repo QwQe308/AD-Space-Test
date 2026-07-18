@@ -315,7 +315,7 @@ export default {
             >
             <span
               v-else
-              class="affix-btn-name"
+              class="affix-btn-name spell-btn-name"
             >{{ spell.name || " " }}</span>
             <div class="affix-btn-cost">
               {{ spell.manaCost }} mana
@@ -406,7 +406,7 @@ export default {
   top: 0;
   left: 0;
   z-index: 0;
-  background: linear-gradient(90deg, #2e4db5, #5b7fff);
+  background: #5b7fff;
   transition: width 0.3s ease;
 }
 
@@ -577,6 +577,7 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.8rem;
+  min-height: 8rem;
 }
 
 .spell-slot {
@@ -685,9 +686,14 @@ export default {
   text-transform: capitalize;
 }
 
+.spell-btn-name {
+  text-transform: none;
+}
+
 .spell-name-input {
   width: calc(100% - 0.4rem);
-  font-size: 1rem;
+  letter-spacing: 1px;
+  font-size: 1.2rem;
   margin: 0;
 }
 

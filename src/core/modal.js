@@ -79,9 +79,10 @@ import UpgradeMechanicLockModal from "@/components/modals/UpgradeMechanicLockMod
 
 import S12GamesModal from "@/components/modals/secret-themes/S12GamesModal";
 
-import SpaceChallengeStartModal from "@/components/modals/_MOD/SpaceChallengeStartModal";
-import SpaceChallengeRewardModal from "@/components/modals/_MOD/SpaceChallengeRewardModal";
 import AbyssOverlayModal from "@/components/modals/_MOD/AbyssOverlayModal";
+import ReplicantiUnlockModal from "@/components/modals/_MOD/ReplicantiUnlockModal";
+import SpaceChallengeRewardModal from "@/components/modals/_MOD/SpaceChallengeRewardModal";
+import SpaceChallengeStartModal from "@/components/modals/_MOD/SpaceChallengeStartModal";
 
 let nextModalID = 0;
 export class Modal {
@@ -199,6 +200,7 @@ class TimeModal extends Modal {
 Modal.startSpaceChallenge = new ChallengeConfirmationModal(SpaceChallengeStartModal);
 Modal.spaceChallengeReward = new Modal(SpaceChallengeRewardModal);
 Modal.abyssOverlay = new Modal(AbyssOverlayModal, -2, GAME_EVENT.ABYSS_ANIMATION_AFTER);// This is not a typical modal but whoever cares XD
+Modal.imaginaryReplicantiUnlock = new Modal(ReplicantiUnlockModal);
 
 
 Modal.startEternityChallenge = new ChallengeConfirmationModal(EternityChallengeStartModal);
