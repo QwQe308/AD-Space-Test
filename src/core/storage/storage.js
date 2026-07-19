@@ -89,21 +89,77 @@ export const GameStorage = {
   },
 
   get localStorageKey() {
-    return DEV ? "dimensionTestSave" : "dimensionSpaceSave";
+    return DEV ? "dimensionSpaceTestSave" : "dimensionSpaceSave";
+  },
+
+  get localStorageKeyOld() {
+    return DEV ? "dimensionTestSave" : "dimensionSave";
   },
 
   backupDataKey(saveSlot, backupSlot) {
     return DEV ? `backupTestSpaceSave-${saveSlot}-${backupSlot}` : `backupSpaceSave-${saveSlot}-${backupSlot}`;
   },
 
+  backupDataKeyOld(saveSlot, backupSlot) {
+    return DEV ? `backupTestSave-${saveSlot}-${backupSlot}` : `backupSave-${saveSlot}-${backupSlot}`;
+  },
+
   backupTimeKey(saveSlot) {
     return DEV ? `backupTestSpaceTimes-${saveSlot}` : `backupSpaceTimes-${saveSlot}`;
   },
 
-  load() {
-    const save = localStorage.getItem(this.localStorageKey);
-    const root = GameSaveSerializer.deserialize(save);
+  backupTimeKeyOld(saveSlot) {
+    return DEV ? `backupTestTimes-${saveSlot}` : `backupTimes-${saveSlot}`;
+  },
 
+  isModSave(save) {
+    return save && save.space !== undefined;
+  },
+
+  tryMigrateOldSave() {
+    // Migrate main save
+    const oldSave = localStorage.getItem(this.localStorageKeyOld);
+    if (oldSave !== null) {
+      localStorage.setItem(this.localStorageKey, oldSave);
+      localStorage.removeItem(this.localStorageKeyOld);
+    }
+    // Migrate backup saves for all slots (0, 1, 2)
+    for (let slot = 0; slot < 3; slot++) {
+      for (const backupInfo of AutoBackupSlots) {
+        const oldBackupKey = this.backupDataKeyOld(slot, backupInfo.id);
+        const oldBackup = localStorage.getItem(oldBackupKey);
+        if (oldBackup !== null) {
+          localStorage.setItem(this.backupDataKey(slot, backupInfo.id), oldBackup);
+          localStorage.removeItem(oldBackupKey);
+        }
+      }
+      // Migrate backup times
+      const oldTimeKey = this.backupTimeKeyOld(slot);
+      const oldTimes = localStorage.getItem(oldTimeKey);
+      if (oldTimes !== null) {
+        localStorage.setItem(this.backupTimeKey(slot), oldTimes);
+        localStorage.removeItem(oldTimeKey);
+      }
+    }
+  },
+
+  load() {
+    let save = localStorage.getItem(this.localStorageKey);
+
+    // If new key has no save, try migrating from old key (only if it's a mod save)
+    if (save === null) {
+      const oldSave = localStorage.getItem(this.localStorageKeyOld);
+      if (oldSave !== null) {
+        const oldRoot = GameSaveSerializer.deserialize(oldSave);
+        const oldPlayer = oldRoot?.saves ? oldRoot.saves[oldRoot.current ?? 0] : oldRoot;
+        if (this.isModSave(oldPlayer)) {
+          this.tryMigrateOldSave();
+          save = localStorage.getItem(this.localStorageKey);
+        }
+      }
+    }
+
+    const root = GameSaveSerializer.deserialize(save);
     this.loadRoot(root);
     Achievements.updateSteamStatus();
   },

@@ -320,7 +320,7 @@ const AffixBaseConfig = {
   cursing: {
     name: "cursing",
     description(data, effect) {
-      return `The spell power and cost of the next affix is multiplied by -1. Useless if the next one is not affected by spell power. [En]`;
+      return `The spell power of the next affix is multiplied by -1, and its cost is set to 0. Useless if the next one is not affected by spell power. [En]`;
     },
     noSpellPower: true,
     debuff: true,
@@ -338,8 +338,8 @@ const AffixBaseConfig = {
         baseEffect: this.effect(data),
         process(obj) {
           if (obj.currentAffix.noSpellPower) return;
-          obj.data.tempSpellPower = obj.data.totalSpellPower.mul(obj.baseEffect);
-          obj.data.tempCostModifier = obj.currentAffix.cost * obj.baseEffect.toNumber();
+          obj.data.tempSpellPower = obj.data.totalSpellPower.mul(-2);
+          obj.data.tempCostModifier = obj.currentAffix.cost * -2;
         },
       });
     },
