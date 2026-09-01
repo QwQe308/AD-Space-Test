@@ -1213,6 +1213,13 @@ hr {
   margin: 0 0 20px;
 }
 
+hr.center-margin {
+  height: 1px;
+  background: #e5e5e5;
+  border: 0;
+  margin: 5px 0;
+}
+
 footer {
   float: left;
   width: 270px;

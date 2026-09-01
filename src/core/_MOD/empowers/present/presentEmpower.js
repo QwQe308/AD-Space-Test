@@ -105,12 +105,12 @@ export class PresentEmpowerClass {
    */
   createSpell() {
     if (this.selectedAffixes.length === 0) return null;
-    if (this.selectedAffixes.length > 13) return null;
+    if (this.selectedAffixes.length > 10) return null;
 
     const editingIdx = this.data.editingSpellIndex;
     const isEditing = editingIdx >= 0 && editingIdx < this.spells.length;
 
-    if (!isEditing && this.spells.length >= 13) return null;
+    if (!isEditing && this.spells.length > 10) return null;
 
     const spellData = simulateSpellData(this.selectedAffixes, this.selectedAffixes.length, DC.D1);
     if (spellData.manaCost < 10) {

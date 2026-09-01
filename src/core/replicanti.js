@@ -692,10 +692,6 @@ export const Replicanti = {
     return baseCost.dividedByEffectsOf(TimeStudy(22), PelleRifts.vacuum.milestones[1]);
   },
   requestUnlock() {
-    if (!PlayerProgress.imaginaryUnlocked() && player.infinityPoints.lt(DC.E140)) {
-      Modal.imaginaryReplicantiUnlock.show();
-      return;
-    }
     this.unlock();
   },
   unlock(freeUnlock = false) {

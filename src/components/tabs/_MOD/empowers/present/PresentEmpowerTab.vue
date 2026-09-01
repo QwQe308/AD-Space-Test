@@ -52,12 +52,12 @@ export default {
     canCreateSpell() {
       return this.selectedAffixes.length > 0 &&
         this.selectedTotalCost >= 10 &&
-        this.spells.length <= 13;
+        this.spells.length <= 10;
     },
     createSpellTooltip() {
       if (this.selectedAffixes.length === 0) return "No affixes selected";
       if (this.selectedTotalCost < 10) return `Total cost must be at least 10 mana (currently ${this.selectedTotalCost})`;
-      if (this.spells.length > 13) return "Maximum affixes reached";
+      if (this.spells.length > 10) return "Maximum(10) affixes reached";
       return "Create Spell";
     },
   },
@@ -84,14 +84,14 @@ export default {
       if (!affix) return "";
       const data = simulateSpellData(this.selectedAffixes, index);
       const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
-      return `${this.cap(name)} (${spDisplay})<br>--------------------<br>${affix.description(data)}`;
+      return `${this.cap(name)} (${spDisplay})<br><hr class="center-margin"><br>${affix.description(data)}`;
     },
     affixNextTooltip(affix) {
       if (!affix) return "";
       const names = [...this.selectedAffixes, affix.name];
       const data = simulateSpellData(names, this.selectedAffixes.length);
       const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
-      return `${this.cap(affix.name)} (${spDisplay})<br>--------------------<br>${affix.description(data)}`;
+      return `${this.cap(affix.name)} (${spDisplay})<br><hr class="center-margin"><br>${affix.description(data)}`;
     },
     affixNextCost(affix) {
       if (!affix) return { base: 0, actual: 0 };
@@ -139,9 +139,9 @@ export default {
       }).join(" → ");
       const parts = [spell.name, chain];
       if (spell.effects.length) {
-        parts.push("--------------------", ...spell.effects);
+        parts.push("<hr class='center-margin'>", ...spell.effects);
       }
-      parts.push("--------------------", `${spell.manaCost} mana`);
+      parts.push("<hr class='center-margin'>", `${spell.manaCost} mana`);
       return parts.join("<br>");
     },
     toggleEditMode() {
@@ -268,7 +268,7 @@ export default {
     <!-- Spells -->
     <div class="spells-panel">
       <div class="panel-title panel-title--with-actions">
-        Spells ({{ spells.length }} / 13)
+        Spells ({{ spells.length }} / 10)
         <div class="spells-actions">
           <button
             v-tooltip="'Edit Mode'"
@@ -444,7 +444,7 @@ export default {
 
 .panel-division {
   color: var(--color-text);
-  margin: 0.6rem 0;
+  margin: 0.6rem 0 0.2rem;
 }
 
 /* ===== Assembly Content ===== */
