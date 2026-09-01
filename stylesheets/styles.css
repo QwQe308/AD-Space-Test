@@ -379,6 +379,11 @@ button:focus {
   max-width: 50rem !important;
 }
 
+present-spell-tooltip.tooltip-inner{
+  width: auto !important;
+  max-width: 30rem !important;
+}
+
 .c-tooltip-content,
 .c-tooltip-arrow {
   visibility: hidden;
@@ -1206,6 +1211,13 @@ hr {
   background: #e5e5e5;
   border: 0;
   margin: 0 0 20px;
+}
+
+hr.center-margin {
+  height: 1px;
+  background: #e5e5e5;
+  border: 0;
+  margin: 5px 0;
 }
 
 footer {
