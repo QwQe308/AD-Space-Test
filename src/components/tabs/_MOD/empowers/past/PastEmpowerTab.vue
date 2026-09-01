@@ -20,7 +20,7 @@ export default {
         { id: "antimatter", symbol: "AM", name: "Antimatter" },
         { id: "infinityPoints", symbol: "IP", name: "Infinity Points" },
         { id: "infinities", symbol: "IS", name: "Infinity Stats" },
-        { id: "infinityPower", symbol: "Pow", name: "Infinity Power" },
+        { id: "replicanti", symbol: "Rep", name: "Replicanti" },
         { id: "eternityPoints", symbol: "EP", name: "Eternity Points" },
         { id: "timeShards", symbol: "TSd", name: "Time Shards" },
       ],

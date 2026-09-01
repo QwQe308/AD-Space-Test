@@ -346,12 +346,7 @@ Currency.infinityPoints = new class extends DecimalCurrency {
 Currency.infinityPower = new class extends DecimalCurrency {
   get value() { return player.infinityPower; }
   set value(value) {
-    if (this.frozen) return;
     player.infinityPower = value;
-  }
-
-  get frozen() {
-    return PastEmpower.freezing === "infinityPower";
   }
 }();
 
@@ -551,7 +546,14 @@ Currency.realityShards = new class extends DecimalCurrency {
 
 Currency.replicanti = new class extends DecimalCurrency {
   get value() { return player.replicanti.amount; }
-  set value(value) { player.replicanti.amount = value; }
+  set value(value) {
+    if(this.frozen) return;
+    player.replicanti.amount = value;
+  }
+
+  get frozen() {
+    return PastEmpower.freezing === "replicanti";
+  }
 }();
 
 Currency.galaxyGeneratorGalaxies = new class extends DecimalCurrency {
