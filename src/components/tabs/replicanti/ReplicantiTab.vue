@@ -8,6 +8,7 @@ import PrimaryButton from "@/components/PrimaryButton";
 import ReplicantiGainText from "./ReplicantiGainText";
 
 import ReplicantiGalaxyButton from "./ReplicantiGalaxyButton";
+import { PastEmpower } from "../../../core/_MOD/empowers/past/pastEmpower";
 
 export default {
   name: "ReplicantiTab",
@@ -46,6 +47,7 @@ export default {
       estimateToMax: 0,
       prismNerf: new Decimal(1),
       normalUnlock: false,
+      replicantiFrozen: false,
     };
   },
   computed: {
@@ -122,11 +124,17 @@ export default {
         ? "Currently Increasing"
         : TimeSpan.fromSeconds(this.estimateToMax).toStringShort();
     },
+    getFrozenClass() {
+      return {
+        "frozen-currency": this.replicantiFrozen
+      };
+    },
   },
   methods: {
     update() {
       this.isUnlocked = Replicanti.areUnlocked;
       this.unlockCost = Replicanti.unlockCost;
+      this.replicantiFrozen = PastEmpower.freezing === "replicanti";
       this.normalUnlock = PlayerProgress.eternityUnlocked() || player.infinityPoints.gte(1e140);
       if (this.isDoomed) this.scrambledText = this.vacuumText();
       if (!this.isUnlocked) {
@@ -235,7 +243,7 @@ export default {
       </div>
       <p class="c-replicanti-description">
         You have
-        <span class="c-replicanti-description__accent">{{ format(amount, 2, 0) }}</span>
+        <span class="c-replicanti-description__accent" :class="getFrozenClass">{{ format(amount, 2, 0) }}</span>
         Replicanti, translated to
         <br>
         <span v-html="boostText" />

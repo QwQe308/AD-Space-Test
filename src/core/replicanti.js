@@ -1,3 +1,4 @@
+import { PastEmpower } from "./_MOD/empowers/past/pastEmpower";
 import { DC } from "./constants";
 import { TimeStudy } from "./time-studies/normal-time-study";
 
@@ -709,7 +710,11 @@ export const Replicanti = {
     return Decimal.fromDecimal(player.replicanti.amount);
   },
   set amount(value) {
+    if(this.frozen) return
     player.replicanti.amount = value;
+  },
+  get frozen(){
+    return PastEmpower.freezing === "replicanti"
   },
   get chance() {
     return ReplicantiUpgrade.chance.value;
