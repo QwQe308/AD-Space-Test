@@ -42,7 +42,7 @@ class Influence extends GameMechanicState {
 
   unlock() {
     if (this.isUnlocked) return;
-    if (this.config.tigger) this.config.tigger();
+    if (this.config.trigger) this.config.trigger();
     if (!this.config.noImmediatePush) player.imaginaryInfluence.push(this.id);
     EventHub.dispatch(GAME_EVENT.INFLUENCE_TIGGERED);
   }

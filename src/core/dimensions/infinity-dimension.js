@@ -325,7 +325,7 @@ class InfinityDimensionState extends DimensionState {
     } else {
       costScaling = new LinearCostScaling(
         Currency.infinityPoints.value,
-        this.baseCost.mul(this.costMultiplier.pow(this.purchases)).mul(1e256), // I know if tiggered earlier will spend a little more IP but whoever cares
+        this.baseCost.mul(this.costMultiplier.pow(this.purchases)).mul(1e256), // I know if triggered earlier will spend a little more IP but whoever cares
         this.costMultiplier,
         purchasesUntilHardcap
       );

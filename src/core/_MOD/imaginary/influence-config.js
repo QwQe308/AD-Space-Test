@@ -9,7 +9,7 @@ export const influence = {
     requirement() {
       return TimeStudy(111).isBought;
     },
-    tigger() {
+    trigger() {
       abyssAnimation();
     },
     noImmediatePush: true,
