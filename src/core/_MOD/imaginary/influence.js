@@ -41,6 +41,7 @@ class Influence extends GameMechanicState {
   }
 
   unlock() {
+    console.log(1)
     if (this.isUnlocked) return;
     if (this.config.trigger) this.config.trigger();
     if (!this.config.noImmediatePush) player.imaginaryInfluence.push(this.id);
