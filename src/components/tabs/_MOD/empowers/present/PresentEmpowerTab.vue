@@ -366,6 +366,15 @@ export default {
 <style scoped>
 /* ===== Layout ===== */
 .present-tab {
+  --present-surface: #181b34;
+  --present-surface-active: #252e50;
+  --present-accent-rgb: 102, 126, 207;
+  --present-accent: rgb(var(--present-accent-rgb));
+  --present-negative-rgb: 170, 100, 135;
+  --present-negative: rgb(var(--present-negative-rgb));
+  --present-text: #c7d2f1;
+  --present-text-muted: #95a5d2;
+  --present-disabled: #3a3d4c;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -394,8 +403,8 @@ export default {
   height: 2.5rem;
   margin: 0 auto;
   position: relative;
-  background: linear-gradient(45deg, #1a1a2e, #16213e);
-  border: 0.2rem solid #5b7fff;
+  background: var(--present-surface);
+  border: 0.2rem solid var(--present-accent);
   border-radius: var(--var-border-radius, 0.5rem);
   overflow: hidden;
 }
@@ -406,7 +415,7 @@ export default {
   top: 0;
   left: 0;
   z-index: 0;
-  background: #5b7fff;
+  background: var(--present-accent);
   transition: width 0.3s ease;
 }
 
@@ -506,9 +515,9 @@ export default {
   height: 3.5rem;
   font-size: 1.8rem;
   font-weight: bold;
-  background-color: #2e4db5;
+  background-color: var(--present-surface);
   color: var(--color-text);
-  border: 0.2rem solid #5b7fff;
+  border: 0.2rem solid var(--present-accent);
   border-radius: var(--var-border-radius, 0.3rem);
   cursor: pointer;
   transition: all 0.15s;
@@ -516,8 +525,8 @@ export default {
 }
 
 .create-spell-btn:hover:not(:disabled) {
-  background-color: #5b7fff;
-  box-shadow: 0 0 1rem rgba(91, 127, 255, 0.6);
+  background-color: var(--present-surface-active);
+  box-shadow: 0 0 0.6rem rgba(var(--present-accent-rgb), 0.2);
 }
 
 .create-spell-btn--disabled {
@@ -563,11 +572,11 @@ export default {
 .mode-btn--active {
   background-color: var(--color-text);
   color: var(--color-base);
-  box-shadow: 0 0 0.6rem rgba(91, 127, 255, 0.5);
+  box-shadow: 0 0 0.4rem rgba(var(--present-accent-rgb), 0.15);
 }
 
 .mode-btn--active:hover {
-  border-color: #5b7fff;
+  border-color: var(--present-accent);
 }
 
 /* ===== Spells ===== */
@@ -627,8 +636,8 @@ export default {
 
 .affix-btn {
   aspect-ratio: 1;
-  background-color: #5b7fff;
-  box-shadow: 0 0 0.8rem 0.1rem rgba(91, 127, 255, 0.4);
+  background-color: var(--present-accent);
+  box-shadow: 0 0 0.4rem rgba(var(--present-accent-rgb), 0.12);
   border: none;
   cursor: pointer;
   transition: all 0.15s;
@@ -638,33 +647,33 @@ export default {
 
 .affix-btn:hover {
   transform: scale(1.04);
-  box-shadow: 0 0 1.2rem 0.2rem rgba(91, 127, 255, 0.7);
+  box-shadow: 0 0 0.6rem 0.1rem rgba(var(--present-accent-rgb), 0.25);
 }
 
 .affix-btn:active {
   transform: scale(0.96);
-  box-shadow: 0 0 0.4rem 0.05rem rgba(91, 127, 255, 0.3);
+  box-shadow: 0 0 0.3rem rgba(var(--present-accent-rgb), 0.12);
 }
 
 .affix-btn--debuff {
-  background-color: #b55b7f;
-  box-shadow: 0 0 0.8rem 0.1rem rgba(181, 91, 127, 0.4);
+  background-color: var(--present-negative);
+  box-shadow: 0 0 0.4rem rgba(var(--present-negative-rgb), 0.12);
 }
 
 .affix-btn--debuff:hover {
-  box-shadow: 0 0 1.2rem 0.2rem rgba(181, 91, 127, 0.7);
+  box-shadow: 0 0 0.6rem 0.1rem rgba(var(--present-negative-rgb), 0.25);
 }
 
 .affix-btn--used {
-  background-color: #3a3a4a;
-  box-shadow: 0 0 0.4rem 0.1rem rgba(58, 58, 74, 0.3);
+  background-color: var(--present-disabled);
+  box-shadow: none;
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 .affix-btn--used:hover {
   transform: none;
-  box-shadow: 0 0 0.4rem 0.1rem rgba(58, 58, 74, 0.3);
+  box-shadow: none;
 }
 
 .affix-btn-inner {
@@ -675,10 +684,10 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #1a1a3e;
+  background-color: var(--present-surface);
   font-family: Typewriter, serif;
   font-weight: bold;
-  color: #c8d6ff;
+  color: var(--present-text);
 }
 
 .affix-btn-name {
@@ -703,7 +712,7 @@ export default {
 
 .affix-btn-cost {
   font-size: 0.85rem;
-  color: #8899cc;
+  color: var(--present-text-muted);
   margin-top: 0.3rem;
 }
 </style>
