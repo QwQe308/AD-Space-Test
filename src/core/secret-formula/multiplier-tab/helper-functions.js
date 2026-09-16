@@ -2,9 +2,16 @@ import { DC } from "../../constants";
 
 import { memoizeBreakdown } from "./cache";
 
+const activeDimensionCounts = memoizeBreakdown(() => new Map());
+
 export const MultiplierTabHelper = {
   // Helper method for counting enabled dimensions
   activeDimCount(type) {
+    const counts = activeDimensionCounts();
+    if (!counts.has(type)) counts.set(type, this.countActiveDimensions(type));
+    return counts.get(type);
+  },
+  countActiveDimensions(type) {
     switch (type) {
       case "AD":
         // Technically not 100% correct, but within EC7 any AD8 production is going to be irrelevant compared to AD7

@@ -24,8 +24,8 @@ export class BreakdownEntryInfo {
     this._isBase = createGetter(dbEntry.isBase, args);
     this._ignoresNerfPowers = createGetter(dbEntry.ignoresNerfPowers, args);
     this.data = Vue.observable({
-      mult: new Decimal(0),
-      pow: 0,
+      mult: Object.freeze(new Decimal(0)),
+      pow: Object.freeze(new Decimal(1)),
       isVisible: false,
       lastVisibleAt: 0
     });
@@ -35,12 +35,16 @@ export class BreakdownEntryInfo {
     const updateId = getBreakdownUpdateId();
     if (this.lastUpdateId === updateId) return;
     const isVisible = this.isVisible;
-    this.data.mult.fromDecimal(isVisible ? this.mult : DC.D1);
-    this.data.pow = isVisible ? this.pow : 1;
-    this.data.isVisible = isVisible;
-    if (isVisible) {
+    const mult = isVisible ? this.mult : DC.D1;
+    const pow = isVisible ? this.pow : DC.D1;
+    // Observe replacement of the snapshot, not every sign/layer/magnitude access during arithmetic.
+    // Copy before freezing so game state and shared effect values remain mutable.
+    if (this.data.mult.neq(mult)) this.data.mult = Object.freeze(new Decimal(mult));
+    if (this.data.pow.neq(pow)) this.data.pow = Object.freeze(new Decimal(pow));
+    if (this.data.isVisible && !isVisible) {
       this.data.lastVisibleAt = Date.now();
     }
+    this.data.isVisible = isVisible;
     this.lastUpdateId = updateId;
   }
 

@@ -1,8 +1,17 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { memoizeBreakdown } from "./cache";
 import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
+
+const baseADProduction = memoizeBreakdown(() => {
+  const maxTier = EternityChallenge(7).isRunning ? 7 : MultiplierTabHelper.activeDimCount("AD");
+  return AntimatterDimensions.all
+    .filter(ad => ad.isProducing)
+    .reduce((mult, ad) => mult.times(ad.multiplier), DC.D1)
+    .times(AntimatterDimension(maxTier).totalAmount);
+});
 
 // See index.js for documentation
 export const AD = {
@@ -22,13 +31,8 @@ export const AD = {
           : AntimatterDimension(dim).multiplier;
         return formatX(singleMult, 2, 2);
       }
-      const maxTier = EternityChallenge(7).isRunning ? 7 : MultiplierTabHelper.activeDimCount("AD");
       if (NormalChallenge(12).isRunning) return `${format(MultiplierTabHelper.actualNC12Production(), 2)}/sec`;
-      return `${format(AntimatterDimensions.all
-        .filter(ad => ad.isProducing)
-        .map(ad => ad.multiplier)
-        .reduce((x, y) => x.times(y), DC.D1)
-        .times(AntimatterDimension(maxTier).totalAmount), 2)}/sec`;
+      return `${format(baseADProduction(), 2)}/sec`;
     },
     multValue: dim => {
       if (NormalChallenge(12).isRunning) {
@@ -38,12 +42,8 @@ export const AD = {
           ? MultiplierTabHelper.multInNC12(dim)
           : DC.D1;
       }
-      const mult = dim
-        ? AntimatterDimension(dim).multiplier
-        : AntimatterDimensions.all
-          .filter(ad => ad.isProducing)
-          .map(ad => ad.multiplier)
-          .reduce((x, y) => x.times(y), DC.D1);
+      if (!dim) return baseADProduction().clampMin(1);
+      const mult = AntimatterDimension(dim).multiplier;
       const highestDim = AntimatterDimension(
         EternityChallenge(7).isRunning ? 7 : MultiplierTabHelper.activeDimCount("AD")).totalAmount;
       return mult.times(highestDim).clampMin(1);

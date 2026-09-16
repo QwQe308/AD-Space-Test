@@ -42,6 +42,9 @@ function loadSource(filename) {
       ? path.join(root, "src", name.slice(2))
       : path.resolve(path.dirname(filename), name);
     if (resolved === path.join(root, "src/core/constants")) return { DC };
+    if (resolved === path.join(root, "src/core/secret-formula/multiplier-tab/icons")) {
+      return { MultiplierTabIcons: new Proxy({}, { get: () => () => ({}) }) };
+    }
     const target = fs.existsSync(resolved) ? resolved
       : [".js", ".vue"].map(ext => resolved + ext).find(file => fs.existsSync(file));
     return loadSource(target);
@@ -201,6 +204,80 @@ test("group visibility supports numeric powers, stops early and refreshes cached
   assert.equal(new BreakdownEntryInfoGroup(["general_one"]).hasVisibleEntries, true);
 });
 
+test("Decimal snapshots avoid deep observation, preserve sources and notify Vue on replacement", async() => {
+  const source = new Decimal("1e1000");
+  let active = true;
+  global.GameDatabase = { multiplierTabValues: { snapshot: {
+    effect: { isActive: () => active, multValue: () => source, powValue: () => source },
+  } } };
+  const effect = createEntryInfo("snapshot_effect");
+  const view = new Vue({ data: { effect: effect.data } });
+  let changes = 0;
+  view.$watch("effect.mult", () => changes++);
+  beginBreakdownUpdate();
+  effect.update();
+  await Vue.nextTick();
+  const previous = effect.data.mult;
+  assert.equal(changes, 1);
+  assert.equal(previous.__ob__, undefined);
+  assert.equal(effect.data.pow.__ob__, undefined);
+  assert.equal(Object.isFrozen(source), false);
+  beginBreakdownUpdate();
+  effect.update();
+  assert.equal(effect.data.mult, previous);
+  source.fromDecimal(new Decimal("1e2000"));
+  beginBreakdownUpdate();
+  effect.update();
+  await Vue.nextTick();
+  assert.equal(changes, 2);
+  assert.ok(previous.eq("1e1000"));
+  assert.ok(effect.data.mult.eq("1e2000"));
+  active = false;
+  const disappearedAt = Date.now();
+  beginBreakdownUpdate();
+  effect.update();
+  assert.ok(effect.data.lastVisibleAt >= disappearedAt);
+  assert.ok(effect.data.mult.eq(1));
+  assert.equal(Object.isFrozen(DC.D1), false);
+  view.$destroy();
+});
+
+test("Base AD Production shares its aggregate and active dimension count within a refresh", () => {
+  let multiplierReads = 0;
+  let producingReads = 0;
+  const dimensions = Array.from({ length: 8 }, (value, index) => ({
+    producing: true,
+    totalAmount: new Decimal((index + 1) * 10),
+    get isProducing() {
+      producingReads++;
+      return this.producing;
+    },
+    get multiplier() {
+      multiplierReads++;
+      return new Decimal(2);
+    },
+  }));
+  global.AntimatterDimensions = { all: dimensions };
+  global.AntimatterDimension = tier => dimensions[tier - 1];
+  global.EternityChallenge = () => ({ isRunning: false });
+  Math.clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const multiplierDirectory = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { MultiplierTabHelper } = loadSource(path.join(multiplierDirectory, "helper-functions.js"));
+  const { AD } = loadSource(path.join(multiplierDirectory, "antimatter-dimensions.js"));
+  beginBreakdownUpdate();
+  assert.equal(MultiplierTabHelper.activeDimCount("AD"), 8);
+  assert.equal(MultiplierTabHelper.activeDimCount("AD"), 8);
+  assert.equal(producingReads, 8);
+  assert.ok(AD.total.multValue().eq(20480));
+  assert.equal(AD.total.displayOverride(), "20480/sec");
+  assert.equal(multiplierReads, 8);
+  dimensions[7].producing = false;
+  beginBreakdownUpdate();
+  assert.ok(AD.total.multValue().eq(8960));
+  assert.equal(AD.total.displayOverride(), "8960/sec");
+  assert.equal(multiplierReads, 15);
+});
+
 test("Vue rendering reuses display calculations on hover and refreshes after resets and group changes", async() => {
   let mult = new Decimal("1e1000");
   let formatCalls = 0;
@@ -224,6 +301,9 @@ test("Vue rendering reuses display calculations on hover and refreshes after res
   view.update();
   const initialText = view.entryTexts[0];
   const initialStyles = view.barStyles;
+  assert.equal(view.logTotalMultiplier.__ob__, undefined);
+  assert.equal(view.totalPositivePower.__ob__, undefined);
+  assert.equal(view.dilationExponent.__ob__, undefined);
   view._render();
   for (let index = 0; index < 5; index++) {
     view.mouseoverIndex = index % 2 - 1;

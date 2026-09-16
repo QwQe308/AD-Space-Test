@@ -38,17 +38,17 @@ export default {
       hadChildEntriesAt: [],
       mouseoverIndex: -1,
       lastNotEmptyAt: 0,
-      dilationExponent: DC.D1,
+      dilationExponent: Object.freeze(new Decimal(1)),
       isDilated: false,
       // This is used to temporarily remove the transition function from the bar styling when changing the way
       // multipliers are split up; the animation which results from not doing this looks very awkward
       lastLayoutChange: Date.now(),
       now: Date.now(),
-      logTotalMultiplier: DC.D0,
+      logTotalMultiplier: Object.freeze(new Decimal(0)),
       entryTexts: [],
       totalText: "",
       dilationText: "",
-      totalPositivePower: DC.D1,
+      totalPositivePower: Object.freeze(new Decimal(1)),
       replacePowers: player.options.multiplierTab.replacePowers,
       inNC12: false,
     };
@@ -77,8 +77,8 @@ export default {
         const icon = this.entries[index].icon;
         return {
           position: "absolute",
-          top: `${position.top}%`,
-          height: `${position.height}%`,
+          top: `${position.top.toFixed(3)}%`,
+          height: `${position.height.toFixed(3)}%`,
           width: "100%",
           "transition-duration": transition,
           border: percent === 0 ? "" : "0.1rem solid var(--color-text)",
@@ -144,7 +144,10 @@ export default {
           this.hadChildEntriesAt[i] = this.now;
         }
       }
-      this.dilationExponent = new Decimal(this.resource.dilationEffect);
+      const dilationExponent = this.resource.dilationEffect;
+      if (this.dilationExponent.neq(dilationExponent)) {
+        this.dilationExponent = Object.freeze(new Decimal(dilationExponent));
+      }
       this.isDilated = this.dilationExponent.neq(1);
       this.calculatePercents();
       this.updateDisplayText();
@@ -165,8 +168,12 @@ export default {
       this.percentList = result.percents;
       this.rollingAverage.add(result.isEmpty ? undefined : result.percents);
       this.averagedPercentList = this.rollingAverage.average;
-      this.logTotalMultiplier = result.log10Mult;
-      this.totalPositivePower = result.totalPosPow;
+      if (this.logTotalMultiplier.neq(result.log10Mult)) {
+        this.logTotalMultiplier = Object.freeze(new Decimal(result.log10Mult));
+      }
+      if (this.totalPositivePower.neq(result.totalPosPow)) {
+        this.totalPositivePower = Object.freeze(new Decimal(result.totalPosPow));
+      }
     },
     updateDisplayText() {
       this.totalText = this.totalString();
