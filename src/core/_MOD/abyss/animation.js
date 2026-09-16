@@ -191,6 +191,7 @@ export async function abyssAnimation() {
   player.challenge.eternity.requirementBits = 0;
   SpaceResearchTierDetail[4].forEach(x => SpaceResearchRifts[x].reset());
   eternity(true, true);
+  player.eternityPoints = new Decimal(0);
   player.eternities = new Decimal(100);
   AbyssResearches.A1.unlock();
   AbyssResearches.A2.show();
