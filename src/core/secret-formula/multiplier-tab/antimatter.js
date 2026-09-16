@@ -1,7 +1,10 @@
+import { abyssResearch } from "./mod-research";
 import { MultiplierTabIcons } from "./icons";
+import { spaceDivisorBreakdown } from "./space-divisor";
 
 // See index.js for documentation
 export const AM = {
+  ...spaceDivisorBreakdown,
   total: {
     name: "Antimatter Production",
     displayOverride: () => `${format(Currency.antimatter.productionPerSecond, 2, 2)}/sec`,
@@ -28,6 +31,7 @@ export const AM = {
         2
       )}/sec -> ${format(Currency.antimatter.productionPerSecond.div(getAMMultiplier()), 2, 2)}/sec`,
     powValue: () => getSpaceNerf().recip(),
+    fakeValue: () => getSpaceNerf().recip(),
     isActive: () => true,
     icon: MultiplierTabIcons.SPACE,
   },
@@ -41,7 +45,7 @@ export const AM = {
     icon: MultiplierTabIcons.ANTIMATTER,
   },
   SR11: {
-    name: "Space Research - Antiparticle Analyzation",
+    name: "Space Research r11 - Antiparticle Analyzation",
     multValue: () => SpaceResearchRifts.r11.effectValue,
     isActive: () => SpaceResearchRifts.r11.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(0),
@@ -52,10 +56,23 @@ export const AM = {
     isActive: () => player.light.redPercent !== 0,
     icon: MultiplierTabIcons.LIGHT("red"),
   },
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: () => Effects.product(AbyssResearches.A1),
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
+  A1: abyssResearch("A1", "Antimatter"),
+  infinityUpgrade: {
+    name: "Infinity Upgrade - Antimatter Multiplier (IU32)",
+    multValue: () => InfinityUpgrade.dim45mult.effectOrDefault(1),
+    isActive: () => InfinityUpgrade.dim45mult.canBeApplied,
+    icon: MultiplierTabIcons.UPGRADE("infinity"),
+  },
+  timeStudy71: {
+    name: "Time Study 71 - Direct Antimatter",
+    multValue: () => TimeStudy(71).effectOrDefault(1),
+    isActive: () => TimeStudy(71).canBeApplied,
+    icon: MultiplierTabIcons.TIME_STUDY,
+  },
+  timeStudy101: {
+    name: "Time Study 101 - Direct Antimatter",
+    multValue: () => TimeStudy(101).effectOrDefault(1),
+    isActive: () => TimeStudy(101).canBeApplied,
+    icon: MultiplierTabIcons.TIME_STUDY,
   },
 };

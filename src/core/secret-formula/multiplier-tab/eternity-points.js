@@ -1,6 +1,8 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabIcons } from "./icons";
 
 // See index.js for documentation
@@ -51,11 +53,12 @@ export const EP = {
     icon: MultiplierTabIcons.UPGRADE("eternity"),
   },
   SR51: {
-    name: () => `Space Research - Endless Amplifier`,
+    name: () => `Space Research r51 - Endless Amplifier`,
     multValue: () => SpaceResearchRifts.r51.effectValue,
     isActive: () => SpaceResearchRifts.r51.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
+  B0: abyssResearch("B0", "Eternity Points"),
   timeStudy: {
     name: "Time Studies",
     multValue: () => DC.D1.timesEffectsOf(

@@ -21,11 +21,15 @@ global.formatX = value => `x${value}`;
 global.formatPow = value => `^${value}`;
 global.formatPercents = value => `${Number(value) * 100}%`;
 Array.repeat = (value, count) => Array(count).fill(value);
+Array.range = (start, count) => Array.from({ length: count }, (_, i) => start + i);
 Vue.directive("tooltip", {});
 
 const root = path.resolve(__dirname, "..");
 const stats = path.join(root, "src/components/tabs/statistics");
-const DC = { D0: new Decimal(0), D1: new Decimal(1), DM1: new Decimal(-1) };
+const DC = {
+  D0: new Decimal(0), D1: new Decimal(1), D2: new Decimal(2), D5: new Decimal(5),
+  E1: new Decimal(10), E100: new Decimal("1e100"), DM1: new Decimal(-1), BEMAX: new Decimal(Infinity)
+};
 const modules = new Map();
 
 // Use the project's Babel/Vue compilers without adding a test framework or changing production imports.
@@ -42,6 +46,7 @@ function loadSource(filename) {
       ? path.join(root, "src", name.slice(2))
       : path.resolve(path.dirname(filename), name);
     if (resolved === path.join(root, "src/core/constants")) return { DC };
+    if (resolved === path.join(root, "src/env")) return { DEV: false };
     if (resolved === path.join(root, "src/core/secret-formula/multiplier-tab/icons")) {
       return { MultiplierTabIcons: new Proxy({}, { get: () => () => ({}) }) };
     }
@@ -285,7 +290,7 @@ test("the breakdown refreshes at 10 Hz while grouping, power display and expansi
   let calls = 0;
   const values = {};
   for (const key of ["AM", "tickspeed", "AD", "IP", "ID", "infinities", "replicanti",
-    "EP", "TD", "eternities", "DT", "gamespeed"]) {
+    "EP", "TD", "eternities", "DT", "gamespeed", "RS", "ARS"]) {
     values[key] = { total: { isActive: false } };
   }
   values.AM = {
@@ -410,4 +415,256 @@ test("Vue rendering reuses display calculations on hover and refreshes after res
   assert.deepEqual(Array.from(view.percentList), [0]);
   view._render();
   view.$destroy();
+});
+
+function mockEffect(value = 1, active = true) {
+  return {
+    effectValue: Array.isArray(value) ? value.map(v => new Decimal(v)) : new Decimal(value),
+    canBeApplied: active,
+    isBought: active,
+    isRunning: false,
+    effectOrDefault(fallback) { return this.canBeApplied ? this.effectValue : new Decimal(fallback); },
+    applyEffect(fn) { if (this.canBeApplied) fn(this.effectValue); },
+  };
+}
+
+// Execute the actual production getters without booting the game or replacing them with a test formula.
+function productionMethod(file, name) {
+  const source = fs.readFileSync(path.join(root, "src", file), "utf8");
+  const ast = require("@babel/parser").parse(source, { sourceType: "module" });
+  let method;
+  function visit(node) {
+    if (!node || typeof node !== "object") return;
+    if (["ClassMethod", "ObjectMethod"].includes(node.type) && node.key.name === name) method = node;
+    for (const child of Object.values(node)) {
+      if (Array.isArray(child)) child.forEach(visit);
+      else if (child && typeof child === "object") visit(child);
+    }
+  }
+  visit(ast);
+  assert.ok(method, `Missing production method ${name}`);
+  return compileFunction(source.slice(method.body.start + 1, method.body.end - 1), method.params.map(p => p.name));
+}
+
+function assertDecimalClose(actual, expected) {
+  assert.ok(Decimal.eq_tolerance(actual, expected, 1e-10), `${actual} differs from ${expected}`);
+}
+
+function breakdownProduct(definitions, dim) {
+  let mult = new Decimal(1);
+  let pow = new Decimal(1);
+  for (const def of Object.values(definitions)) {
+    if (!(typeof def.isActive === "function" ? def.isActive(dim) : def.isActive)) continue;
+    if (def.multValue) mult = mult.mul(def.multValue(dim));
+    if (def.powValue) pow = pow.mul(def.powValue(dim));
+  }
+  return mult.pow(pow);
+}
+
+test("research IDs select their own effects, including huge values and inactive single-level research", () => {
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  global.AbyssResearches = Object.fromEntries(["A1", "A2", "A3", "A11", "A12", "A14", "A18", "A19", "A20", "B0"]
+    .map((id, i) => [id, mockEffect(i + 2)]));
+  global.SpaceResearchRifts = { r51: mockEffect(7), r52: mockEffect(11), r53: mockEffect(13) };
+  const { replicanti } = loadSource(path.join(base, "replicanti.js"));
+  const { eternities } = loadSource(path.join(base, "eternities.js"));
+  assert.ok(replicanti.SR52.multValue().eq(11));
+  assert.ok(eternities.SR53.multValue().eq(13));
+  assert.equal(replicanti.SR51, undefined);
+  assert.equal(eternities.SR51, undefined);
+  const { EP } = loadSource(path.join(base, "eternity-points.js"));
+  AbyssResearches.B0 = mockEffect("ee400");
+  assert.ok(EP.B0.multValue().eq("ee400"));
+  const { tickspeedUpgrades } = loadSource(path.join(base, "tickspeed.js"));
+  AbyssResearches.A2 = mockEffect(6, false);
+  assert.equal(tickspeedUpgrades.A2.isActive(), false);
+  assert.ok(tickspeedUpgrades.A2.multValue().eq(1));
+  AbyssResearches.A2.canBeApplied = true;
+  AbyssResearches.A11 = mockEffect(25);
+  assertDecimalClose(tickspeedUpgrades.A2.multValue().mul(tickspeedUpgrades.A11.multValue()).log10(), 31);
+  const { RS } = loadSource(path.join(base, "space-research-speed.js"));
+  AbyssResearches.A1.canBeApplied = false;
+  assert.equal(RS.A3.isActive(), true);
+  for (const [filename, exportName, ids] of [
+    ["antimatter.js", "AM", ["A1"]], ["infinities.js", "infinities", ["A12", "A18"]],
+    ["infinity-points.js", "IP", ["A14"]], ["infinity-dimensions.js", "ID", ["A20"]],
+  ]) {
+    const values = loadSource(path.join(base, filename))[exportName];
+    for (const id of ids) {
+      assert.ok(values[id].name.includes(id));
+      assertDecimalClose(values[id].multValue(1), AbyssResearches[id].effectOrDefault(1));
+    }
+    assert.equal(values.AR, undefined);
+  }
+});
+
+test("AD buy-ten research decomposition matches the production getter, continuum, challenges and huge counts", () => {
+  global.DC = DC;
+  global.Effects = loadSource(path.join(root, "src/core/game-mechanics/effects.js")).Effects;
+  let nc7 = false;
+  let ec11 = false;
+  global.NormalChallenge = id => ({ isRunning: id === 7 && nc7 });
+  global.EternityChallenge = id => ({ isRunning: id === 11 && ec11, reward: mockEffect(0.3) });
+  global.Achievement = () => ({ ...mockEffect(1.1), effects: { buyTenMult: mockEffect(0.2) } });
+  global.InfinityUpgrade = { buy10Mult: { ...mockEffect(1.5), chargedEffect: mockEffect(1.2) } };
+  global.TimeStudy = () => mockEffect(1.3);
+  global.ImaginaryUpgrade = () => mockEffect(1.4);
+  global.getAdjustedGlyphEffect = () => new Decimal(1.1);
+  global.AbyssResearches = { A10: mockEffect(1.8) };
+  global.SpaceResearchRifts = { r31: mockEffect([1.6, 1.25]) };
+  global.Laitela = { continuumActive: false };
+  global.DimBoost = { totalBoosts: new Decimal(3) };
+  global.AntimatterDimensions = { all: Array.from({ length: 8 }, (_, i) => ({
+    tier: i + 1, isProducing: i < 4, bought: new Decimal(23 + i * 10), continuumValue: new Decimal(2.5 + i),
+  })) };
+  const { adPurchaseBreakdown } = loadSource(path.join(root,
+    "src/core/secret-formula/multiplier-tab/antimatter-purchases.js"));
+  const buyTen = productionMethod("core/dimensions/antimatter-dimension.js", "buyTenMultiplier");
+  for (const continuum of [false, true]) {
+    Laitela.continuumActive = continuum;
+    for (const challenge of [false, true]) {
+      nc7 = challenge;
+      beginBreakdownUpdate();
+      let total = new Decimal(1);
+      for (const ad of AntimatterDimensions.all) {
+        const count = continuum ? ad.continuumValue : ad.bought.div(10).floor();
+        const expected = buyTen().pow(count);
+        assertDecimalClose(breakdownProduct(adPurchaseBreakdown, ad.tier), expected);
+        if (ad.isProducing) total = total.mul(expected);
+      }
+      assertDecimalClose(breakdownProduct(adPurchaseBreakdown), total);
+    }
+  }
+  nc7 = false;
+  AntimatterDimensions.all[0].continuumValue = new Decimal("1e400");
+  beginBreakdownUpdate();
+  assertDecimalClose(breakdownProduct(adPurchaseBreakdown, 1).log10(), buyTen().log10().mul("1e400"));
+  ec11 = true;
+  assert.ok(Object.values(adPurchaseBreakdown).every(def => !def.isActive()));
+});
+
+test("dimension boost research and green light match production with Mirror clamps, SC4 and Ra", () => {
+  let nc8 = false;
+  let scTier = 0;
+  let green = new Decimal(1.5);
+  global.NormalChallenge = id => ({ isRunning: id === 8 && nc8 });
+  global.isSCRunningOnTier = (id, tier) => id === 4 && tier === scTier;
+  global.InfinityChallenge = () => ({ ...mockEffect(2), reward: mockEffect(3) });
+  global.TimeStudy = () => mockEffect(1.1);
+  global.Achievement = () => mockEffect(1.05);
+  global.GlyphEffect = { dimBoostPower: mockEffect(1.2) };
+  global.PelleRifts = { recursion: { milestones: [mockEffect(1.3)] } };
+  global.GlyphAlteration = { isAdded: () => true };
+  global.getSecondaryGlyphEffect = () => new Decimal(1.15);
+  global.InfinityUpgrade = { dimboostMult: { ...mockEffect(2), chargedEffect: mockEffect(1.2) } };
+  global.ImaginaryUpgrade = id => mockEffect({ 12: 4, 23: 2, 24: 1.25 }[id]);
+  global.Ra = { isRunning: false };
+  global.AbyssResearches = { A8: mockEffect(3) };
+  global.SpaceResearchRifts = { r21: mockEffect([5, 10]) };
+  global.light = { green: { effectValue: () => green } };
+  const dimboostFile = "core/dimboost.js";
+  global.DimBoost = { purchasedBoosts: new Decimal(12) };
+  Object.defineProperties(DimBoost, {
+    power: { get: productionMethod(dimboostFile, "power") },
+    imaginaryBoosts: { get: productionMethod(dimboostFile, "imaginaryBoosts") },
+  });
+  DimBoost.multiplierToNDTier = productionMethod(dimboostFile, "multiplierToNDTier");
+  const { adBoostBreakdown } = loadSource(path.join(root,
+    "src/core/secret-formula/multiplier-tab/antimatter-boosts.js"));
+  for (const scenario of [
+    [1.5, 0, false, false, 12], [0.001, 0, false, false, 2], [1.5, 1, false, false, 3],
+    [1.5, 2, false, false, 20], [1.5, 0, true, false, 12], [1.5, 0, false, true, 12],
+  ]) {
+    [green, scTier, nc8, Ra.isRunning] = [new Decimal(scenario[0]), ...scenario.slice(1, 4)];
+    DimBoost.purchasedBoosts = new Decimal(scenario[4]);
+    beginBreakdownUpdate();
+    let total = new Decimal(1);
+    for (const ad of AntimatterDimensions.all) {
+      const expected = DimBoost.multiplierToNDTier(ad.tier);
+      assertDecimalClose(breakdownProduct(adBoostBreakdown, ad.tier), expected);
+      if (ad.isProducing) total = total.mul(expected);
+    }
+    assertDecimalClose(breakdownProduct(adBoostBreakdown), total);
+  }
+});
+
+test("space, research speed and conversion breakdowns reconstruct the live formulas", () => {
+  global.PlayerProgress.imaginaryUnlocked = () => true;
+  global.AbyssResearches = { A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5) };
+  global.SpaceResearchRifts = {
+    r11: mockEffect(7), r21: mockEffect([3, 11]), r22: { ...mockEffect(1.5), level: new Decimal(4) },
+    r42: mockEffect(2), r45: mockEffect(2.5),
+  };
+  global.Achievements = { power: new Decimal(3) };
+  global.InfinityUpgrade = { totalTimeMult: mockEffect(1, false), dim45mult: mockEffect(2) };
+  global.TimeStudy = () => mockEffect(2);
+  global.DilationUpgrade = { spaceDivisorDT: mockEffect(2) };
+  global.light = { cyan: { effectValue: () => new Decimal(3) },
+    white: { effectValue: () => new Decimal(1.2) }, red: { effectValue: () => new Decimal(5) } };
+  global.SpaceResearchTierDetail = [["r22"], [], []];
+  global.isSCRunningOnTier = (id, tier) => id === 3 && tier === 2;
+  global.player.space = new Decimal(1000);
+  global.player.spaceDivisiorActivePercentage = new Decimal(0.75);
+  global.player.records = { thisReality: { maxSpace: new Decimal(10000) } };
+  global.DimBoost = { totalBoosts: new Decimal(8) };
+  const space = loadSource(path.join(root, "src/core/_MOD/space.js"));
+  Object.assign(global, space);
+  const speed = loadSource(path.join(root, "src/core/_MOD/space-researches/spaceResearches.js"));
+  Object.assign(global, { globalResearchSpeed: speed.globalResearchSpeed,
+    getBaseResearchSpeed: speed.getBaseResearchSpeed });
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { RS } = loadSource(path.join(base, "space-research-speed.js"));
+  const { ARS } = loadSource(path.join(base, "abyss-research-speed.js"));
+  const { AM } = loadSource(path.join(base, "antimatter.js"));
+  global.PlayerProgress.eternityUnlocked = () => true;
+  assertDecimalClose(breakdownProduct(Object.fromEntries(["space", "dimBoost", "Abyss"].map(k => [k, RS[k]]))),
+    speed.getBaseResearchSpeed());
+  assertDecimalClose(breakdownProduct(Object.fromEntries(
+    ["base", "achievementMult", "SR21", "infinityUpgrade", "timeStudy", "A3"].map(k => [k, RS[k]]))),
+  speed.globalResearchSpeed());
+  assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5, A9: ARS.A9 }), ARS.total.multValue());
+  assertDecimalClose(breakdownProduct(Object.fromEntries(
+    ["SR22", "A9", "spaceDilation", "lightWhite", "spaceChallenge3", "spaceDivisorPercentage"]
+      .map(k => [k, AM[k]]))), space.getSpaceDivisor());
+  assertDecimalClose(AM.spaceBase.powValue().mul(AM.spaceDivisor.powValue()), AM.space.powValue());
+  assert.ok(AM.space.fakeValue().neq(1));
+  global.PelleUpgrade = { infConversion: mockEffect(4) };
+  global.PelleRifts = { paradox: { milestones: [null, null, mockEffect(1.4)] } };
+  global.getAdjustedGlyphEffect = () => new Decimal(0.5);
+  const rate = productionMethod("core/dimensions/infinity-dimension.js", "powerConversionRate");
+  const { ID } = loadSource(path.join(base, "infinity-dimensions.js"));
+  assertDecimalClose(breakdownProduct({ base: ID.conversionBase, research: ID.conversionSR45,
+    pelle: ID.conversionPelle }).log10(), rate());
+});
+
+test("all reachable breakdown tree references resolve and mod research is reachable without double counting", () => {
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { multiplierTabValues: values } = loadSource(path.join(base, "values.js"));
+  const { multiplierTabTree: tree } = loadSource(path.join(base, "tree.js"));
+  const visited = new Set();
+  function visit(parent) {
+    if (visited.has(parent)) return;
+    visited.add(parent);
+    const groups = tree[parent];
+    if (!groups) return;
+    for (const key of [parent, ...groups.flat()]) {
+      const [resource, prop] = key.split("_");
+      assert.ok(values[resource]?.[prop], `Unresolved ${key} in ${parent}`);
+    }
+    for (const group of groups) assert.equal(new Set(group).size, group.length, `Duplicate child in ${parent}`);
+    groups.flat().forEach(visit);
+  }
+  Object.keys(values).filter(key => values[key].total).forEach(key => visit(`${key}_total`));
+  assert.ok(tree.DT_total[0].includes("DT_SR54"));
+  assert.ok(tree.EP_total[0].includes("EP_B0"));
+  assert.ok(tree.infinities_total[0].includes("infinities_A12"));
+  assert.ok(tree.infinities_total[0].includes("infinities_A18"));
+  assert.ok(tree.AD_purchase[0].includes("AD_buy10A10"));
+  assert.ok(tree.AD_dimboost[0].includes("AD_boostA8"));
+  assert.ok(!tree.AD_total[0].includes("AD_buy10A10"));
+  assert.ok(!tree.AD_total[0].includes("AD_boostA8"));
+  for (let dim = 1; dim <= 8; dim++) {
+    assert.ok(tree[`AD_purchase_${dim}`][0].includes(`AD_buy10SR31_${dim}`));
+    assert.ok(tree[`AD_dimboost_${dim}`][0].includes(`AD_boostSR21_${dim}`));
+  }
 });

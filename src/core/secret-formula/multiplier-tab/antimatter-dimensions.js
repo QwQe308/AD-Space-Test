@@ -1,6 +1,8 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { adBoostBreakdown } from "./antimatter-boosts";
+import { adPurchaseBreakdown } from "./antimatter-purchases";
 import { memoizeBreakdown } from "./cache";
 import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
@@ -15,6 +17,8 @@ const baseADProduction = memoizeBreakdown(() => {
 
 // See index.js for documentation
 export const AD = {
+  ...adBoostBreakdown,
+  ...adPurchaseBreakdown,
   total: {
     name: dim => {
       if (dim) return `AD ${dim} Multiplier`;

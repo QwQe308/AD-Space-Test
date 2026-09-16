@@ -18,14 +18,15 @@ export const DT = {
     dilationEffect: () => (Enslaved.isRunning ? 0.85 : 1),
     isDilated: true,
     overlay: ["Ψ"],
-  }, /* I dont use it why i fix it
-  achievement: {
-    name: "Achievements",
-    multValue: () => Achievement(132).effectOrDefault(new Decimal(1)) * Achievement(137).effectOrDefault(1),
-    isActive: () => (Achievement(132).canBeApplied || Achievement(137).canBeApplied) &&
-      getDilationGainPerSecond().neq(0),
-    icon: MultiplierTabIcons.ACHIEVEMENT,
-  }, */
+  },
+  // I dont use it why i fix it
+  // achievement: {
+  // name: "Achievements",
+  // multValue: () => Achievement(132).effectOrDefault(new Decimal(1)) * Achievement(137).effectOrDefault(1),
+  // isActive: () => (Achievement(132).canBeApplied || Achievement(137).canBeApplied) &&
+  //     getDilationGainPerSecond().neq(0),
+  // icon: MultiplierTabIcons.ACHIEVEMENT,
+  // },
   dilation: {
     name: "Repeatable Dilation Upgrades",
     multValue: () => DC.D1.timesEffectsOf(
@@ -33,8 +34,14 @@ export const DT = {
       DilationUpgrade.dtGainPelle,
       DilationUpgrade.flatDilationMult
     ),
-    isActive: () => this.multValue().gt(1),
+    isActive: () => DT.dilation.multValue().gt(1),
     icon: MultiplierTabIcons.UPGRADE("dilation"),
+  },
+  SR54: {
+    name: "Space Research r54 - Particle Accelerator (Dilated Time)",
+    multValue: () => SpaceResearchRifts.r54.effectOrDefault(1),
+    isActive: () => SpaceResearchRifts.r54.canBeApplied && getDilationGainPerSecond().neq(0),
+    icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
   amplifierDT: {
     name: "Reality Upgrade - Temporal Amplifier",

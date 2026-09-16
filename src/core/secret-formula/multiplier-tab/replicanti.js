@@ -1,5 +1,7 @@
 import { DC } from "../../constants";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabIcons } from "./icons";
 
 // See index.js for documentation
@@ -26,18 +28,13 @@ export const replicanti = {
     isActive: () => PlayerProgress.eternityUnlocked() && !Pelle.isDoomed,
     icon: MultiplierTabIcons.TIME_STUDY,
   },
-  SR51: {
-    name: () => `Space Research - Replicated Flux`,
-    multValue: () => SpaceResearchRifts.r51.effectValue,
-    isActive: () => SpaceResearchRifts.r51.canBeApplied,
+  SR52: {
+    name: () => `Space Research r52 - Replicated Flux`,
+    multValue: () => SpaceResearchRifts.r52.effectValue,
+    isActive: () => SpaceResearchRifts.r52.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: () => Effects.product(AbyssResearches.A19),
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
-  },
+  A19: abyssResearch("A19", "Replicanti Speed"),
   glyph: {
     name: "Glyph Effects",
     multValue: () => {

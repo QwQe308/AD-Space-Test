@@ -1,6 +1,8 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
 
@@ -96,15 +98,16 @@ export const ID = {
     },
     isActive: () => Tesseracts.bought.gt(0),
     icon: MultiplierTabIcons.PURCHASE("tesseractID"),
-  }, /*
-  InfinityGlyphSacrifice: {
-    name: "Infinity Glyph sacrifice",
-    multValue: () => (InfinityDimension(8).isProducing
-      ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.div(10)))
-      : DC.D1),
-    isActive: () => Decimal.gt(GlyphSacrifice.infinity.effectValue, 1),
-    icon: MultiplierTabIcons.SACRIFICE("infinity"),
-  }, */
+  },
+  //
+  // InfinityGlyphSacrifice: {
+  // name: "Infinity Glyph sacrifice",
+  // multValue: () => (InfinityDimension(8).isProducing
+  //     ? Decimal.pow(GlyphSacrifice.infinity.effectValue, Decimal.floor(InfinityDimension(8).baseAmount.div(10)))
+  //     : DC.D1),
+  // isActive: () => Decimal.gt(GlyphSacrifice.infinity.effectValue, 1),
+  // icon: MultiplierTabIcons.SACRIFICE("infinity"),
+  // },
   powPurchase: {
     name: "Imaginary Upgrade - Recollection of Intrusion",
     powValue: () => ImaginaryUpgrade(14).effectOrDefault(1),
@@ -126,12 +129,7 @@ export const ID = {
     icon: MultiplierTabIcons.LIGHT("yellow"),
   },
 
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: dim => Decimal.pow(Effects.product(AbyssResearches.A20), dim ? 1 : MultiplierTabHelper.activeDimCount("ID")),
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
-  },
+  A20: abyssResearch("A20", "Infinity Dimensions", "ID"),
 
   achievementMult: {
     name: "Achievement Multiplier",
@@ -281,8 +279,32 @@ export const ID = {
   powerConversion: {
     name: "Infinity Power Conversion",
     powValue: () => InfinityDimensions.powerConversionRate,
+    fakeValue: () => Decimal.pow10(InfinityDimensions.powerConversionRate),
     isActive: () => Currency.infinityPower.value.gt(1) && !EternityChallenge(9).isRunning,
     icon: MultiplierTabIcons.IPOW_CONVERSION,
+  },
+  conversionBase: {
+    name: "Base Conversion Exponent (Base, Infinity Glyph and Pelle Upgrade)",
+    displayOverride: () => formatPow(getAdjustedGlyphEffect("infinityrate").add(7)
+      .add(PelleUpgrade.infConversion.effectOrDefault(0)), 2, 2),
+    multValue: () => Decimal.pow10(getAdjustedGlyphEffect("infinityrate").add(7)
+      .add(PelleUpgrade.infConversion.effectOrDefault(0))),
+    isActive: true,
+    icon: MultiplierTabIcons.IPOW_CONVERSION,
+  },
+  conversionSR45: {
+    name: "Space Research r45 - Additive Infinity Power Conversion Exponent",
+    displayOverride: () => `+${format(SpaceResearchRifts.r45.effectValue, 2, 2)} to exponent`,
+    multValue: () => Decimal.pow10(SpaceResearchRifts.r45.effectValue),
+    isActive: () => SpaceResearchRifts.r45.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(3),
+  },
+  conversionPelle: {
+    name: "Pelle Paradox Milestone - Conversion Exponent Multiplier",
+    powValue: () => PelleRifts.paradox.milestones[2].effectOrDefault(1),
+    displayOverride: () => `${formatX(PelleRifts.paradox.milestones[2].effectOrDefault(1), 2, 2)} to exponent`,
+    isActive: () => PelleRifts.paradox.milestones[2].canBeApplied,
+    icon: MultiplierTabIcons.PELLE,
   },
 
   nerfV: {

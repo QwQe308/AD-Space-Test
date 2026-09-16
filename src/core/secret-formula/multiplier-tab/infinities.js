@@ -1,5 +1,7 @@
 import { DC } from "../../constants";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabIcons } from "./icons";
 
 // See index.js for documentation
@@ -24,17 +26,13 @@ export const infinities = {
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
   SR43: {
-    name: "Space Research - Infinite Intensifier",
+    name: "Space Research r43 - Infinite Intensifier",
     multValue: () => SpaceResearchRifts.r43.effectValue,
     isActive: () => SpaceResearchRifts.r43.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH("3"),
   },
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: () => Effects.product(AbyssResearches.A12, AbyssResearches.A18),
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
-  },
+  A12: abyssResearch("A12", "Triple Infinities"),
+  A18: abyssResearch("A18", "Infinities per Level"),
   amplifierInf: {
     name: "Reality Upgrade - Boundless Amplifier",
     multValue: () => DC.D1.timesEffectsOf(RealityUpgrade(5)),

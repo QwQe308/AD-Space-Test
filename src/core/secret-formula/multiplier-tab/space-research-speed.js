@@ -1,11 +1,13 @@
 import { DC } from "../../constants";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabIcons } from "./icons";
 
 // See index.js for documentation
 export const RS = {
   total: {
-    name: "Research Speed",
+    name: "Global Space Research Speed (before Tier Bonuses)",
     multValue: () => globalResearchSpeed(),
     isActive: () => true,
     overlay: ["Σ"],
@@ -14,11 +16,14 @@ export const RS = {
     name: "Base Research Speed",
     multValue: () => getBaseResearchSpeed(),
     isActive: () => true,
-    icon: MultiplierTabIcons.SPACE_RESEARCH(), // This spawns only a sigma symbol
+    // This spawns only a sigma symbol.
+    icon: MultiplierTabIcons.SPACE_RESEARCH(),
   },
   // --these extends the base one
   space: {
-    name: "Space",
+    name: "Effective Space - Research Speed Formula",
+    displayOverride: () => `${format(getEffectiveSpace(), 2, 2)} Effective Space`,
+    fakeValue: () => getEffectiveSpace(),
     multValue: () => DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1)),
     isActive: () => true,
     icon: MultiplierTabIcons.SPACE,
@@ -40,19 +45,19 @@ export const RS = {
   achievementMult: {
     name: "Achievement Multiplier",
     multValue: () => Achievements.power,
-    isActive: () => !PlayerProgress.imaginaryUnlocked(),
+    isActive: true,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
   SR21: {
-    name: "Space Research - Dimensional Discovery",
+    name: "Space Research r21 - Dimensional Discovery",
     multValue: () => SpaceResearchRifts.r21.effectValue[1],
     isActive: () => SpaceResearchRifts.r21.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(1),
   },
   infinityUpgrade: {
     name: () => "Infinity Upgrade (IU11)",
-    multValue: () => Effects.sum(InfinityUpgrade.totalTimeMult),
-    isActive: () => PlayerProgress.infinityUnlocked(),
+    multValue: () => InfinityUpgrade.totalTimeMult.effectOrDefault(1),
+    isActive: () => InfinityUpgrade.totalTimeMult.canBeApplied,
     icon: MultiplierTabIcons.UPGRADE("infinity"),
   },
   timeStudy: {
@@ -61,11 +66,24 @@ export const RS = {
     isActive: () => PlayerProgress.eternityUnlocked(),
     icon: MultiplierTabIcons.TIME_STUDY,
   },
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: () => Effects.product(AbyssResearches.A3),
-    isActive: () => AbyssResearches.A1.canBeApplied,
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
+  A3: abyssResearch("A3", "Research Speed"),
+  spaceAmount: {
+    name: "Space Amount",
+    multValue: () => player.space,
+    isActive: true,
+    icon: MultiplierTabIcons.SPACE,
+  },
+  SR42: {
+    name: "Space Research r42 - Effective Space",
+    multValue: () => SpaceResearchRifts.r42.effectOrDefault(1),
+    isActive: () => SpaceResearchRifts.r42.canBeApplied,
+    icon: MultiplierTabIcons.SPACE_RESEARCH(3),
+  },
+  lightCyan: {
+    name: "Mirror - Cyan Light (Effective Space)",
+    multValue: () => light.cyan.effectValue(),
+    isActive: () => light.cyan.effectValue().neq(1),
+    icon: MultiplierTabIcons.LIGHT("cyan"),
   },
 
   SC51: {

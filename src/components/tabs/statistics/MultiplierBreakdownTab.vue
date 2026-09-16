@@ -19,6 +19,8 @@ const MULT_TAB_OPTIONS = [
   { id: 9, key: "eternities", text: "Eternities" },
   { id: 10, key: "DT", text: "Dilated Time" },
   { id: 11, key: "gamespeed", text: "Game Speed" },
+  { id: 12, key: "RS", text: "Research Speed" },
+  { id: 13, key: "ARS", text: "Abyss Research Speed" },
 ];
 
 export default {

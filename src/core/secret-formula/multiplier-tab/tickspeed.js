@@ -1,5 +1,7 @@
 import { DC } from "../../constants";
 
+import { abyssTickspeedUpgrades } from "./mod-research";
+
 import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
 
@@ -68,11 +70,6 @@ export const tickspeed = {
 };
 
 
-// To reuse a function more, it is here
-function getAbyssResearchTUs() {
-  return Effects.sum(AbyssResearches.A2, AbyssResearches.A11);
-}
-
 export const tickspeedUpgrades = {
   purchased: {
     name: "Purchased Tickspeed Upgrades",
@@ -92,7 +89,7 @@ export const tickspeedUpgrades = {
   },
 
   SR13: {
-    name: "Space Research - Additive Temporality",
+    name: "Space Research r13 - Additive Temporality",
     displayOverride: () => formatInt(SpaceResearchRifts.r13.effectValue),
     multValue: () => Decimal.pow10(SpaceResearchRifts.r13.effectValue),
     isActive: () => SpaceResearchRifts.r13.canBeApplied,
@@ -106,11 +103,6 @@ export const tickspeedUpgrades = {
     icon: MultiplierTabIcons.LIGHT("purple"),
   },
 
-  AR: {
-    name: "Abyss Researches (Static)",
-    displayOverride: () => formatInt(getAbyssResearchTUs()),
-    multValue: () => Decimal.pow10(getAbyssResearchTUs()), // See upper
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
-  },
+  A2: abyssTickspeedUpgrades("A2"),
+  A11: abyssTickspeedUpgrades("A11"),
 };

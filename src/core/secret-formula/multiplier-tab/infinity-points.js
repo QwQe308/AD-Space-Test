@@ -1,6 +1,8 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { abyssResearch } from "./mod-research";
+
 import { MultiplierTabIcons } from "./icons";
 
 // See index.js for documentation
@@ -53,17 +55,12 @@ export const IP = {
     icon: MultiplierTabIcons.UPGRADE("infinity"),
   },
   SR41: {
-    name: () => `Space Research - Infinity Amplifier`,
+    name: () => `Space Research r41 - Infinity Amplifier`,
     multValue: () => SpaceResearchRifts.r41.effectValue,
     isActive: () => SpaceResearchRifts.r41.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(3),
   },
-  AR: {
-    name: "Abyss Researches (Static)",
-    multValue: () => Effects.product(AbyssResearches.A14),
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
-    icon: MultiplierTabIcons.ABYSS_RESEARCH,
-  },
+  A14: abyssResearch("A14", "Infinity Points"),
   achievement: {
     name: "Achievements",
     multValue: () => DC.D1.timesEffectsOf(

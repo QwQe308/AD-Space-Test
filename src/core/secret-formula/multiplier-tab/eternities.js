@@ -15,10 +15,10 @@ export const eternities = {
     isActive: () => Achievement(113).canBeApplied,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
-  SR51: {
-    name: () => `Space Research - Endless Intensifier`,
-    multValue: () => SpaceResearchRifts.r51.effectValue,
-    isActive: () => SpaceResearchRifts.r51.canBeApplied,
+  SR53: {
+    name: () => `Space Research r53 - Endless Intensifier`,
+    multValue: () => SpaceResearchRifts.r53.effectValue,
+    isActive: () => SpaceResearchRifts.r53.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
   amplifierEter: {

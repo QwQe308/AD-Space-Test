@@ -8,13 +8,15 @@ const propList = {
   AD: ["purchase", "dimboost", "sacrifice", "achievementMult", "achievement", "infinityUpgrade",
     "breakInfinityUpgrade", "infinityPower", "infinityChallenge", "timeStudy", "eternityChallenge", "glyph", "v",
     "alchemy", "pelle", "iap", "effectNC", "nerfIC", "nerfV", "nerfCursed", "nerfPelle"],
-  ID: ["purchase", "AR", "achievementMult", "achievement", "lightYellow", "replicanti", "infinityChallenge", "timeStudy", "eternityUpgrade",
+  ID: ["purchase", "A20", "achievementMult", "achievement", "lightYellow", "replicanti", "infinityChallenge",
+    "timeStudy", "eternityUpgrade",
     "eternityChallenge", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "nerfV", "nerfCursed", "nerfPelle"],
   TD: ["purchase", "achievementMult", "achievement", "timeStudy", "eternityUpgrade", "eternityChallenge",
     "dilationUpgrade", "realityUpgrade", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "iap", "nerfV", "nerfCursed"],
-  IP: ["base", "infinityUpgrade", "SR41", "AR", "achievement", "timeStudy", "glyph", "alchemy", "pelle", "iap",
+  IP: ["base", "infinityUpgrade", "SR41", "A14", "achievement", "timeStudy", "glyph", "alchemy", "pelle", "iap",
     "nerfTeresa", "nerfV"],
-  EP: ["base", "eternityUpgrade", "SR51", "timeStudy", "glyph", "realityUpgrade", "pelle", "iap", "nerfTeresa", "nerfV"],
+  EP: ["base", "eternityUpgrade", "SR51", "B0", "timeStudy", "glyph", "realityUpgrade", "pelle", "iap",
+    "nerfTeresa", "nerfV"],
 };
 
 // Some of the props above would contain every entry except "total" in their respective value GameDB entry, so we
@@ -51,8 +53,11 @@ export const multiplierTabTree = {
     ["AD_total", "tickspeed_total", "AM_space", "AM_AMMult", "AM_effarigAM"]
   ],
   AM_AMMult: [
-    ["AM_SR11", "AM_lightRed", "AM_AR"]
+    ["AM_SR11", "AM_lightRed", "AM_A1", "AM_infinityUpgrade", "AM_timeStudy71", "AM_timeStudy101"]
   ],
+  AM_space: [["AM_spaceBase", "AM_spaceDivisor"]],
+  AM_spaceDivisor: [["AM_SR22", "AM_A9", "AM_spaceDilation", "AM_lightWhite",
+    "AM_spaceChallenge3", "AM_spaceDivisorPercentage"]],
   AD_total: [
     getProps("AD"),
     append8("AD_total")
@@ -87,7 +92,8 @@ export const multiplierTabTree = {
     ["tickspeed_base", "tickspeed_upgrades", "tickspeed_galaxies", "tickspeed_pelleTickspeedPow"]
   ],
   tickspeed_upgrades: [
-    ["tickspeedUpgrades_purchased", "tickspeedUpgrades_free", "tickspeedUpgrades_SR13", "tickspeedUpgrades_lightPurple", "tickspeedUpgrades_AR"]
+    ["tickspeedUpgrades_purchased", "tickspeedUpgrades_free", "tickspeedUpgrades_SR13",
+      "tickspeedUpgrades_lightPurple", "tickspeedUpgrades_A2", "tickspeedUpgrades_A11"]
   ],
   tickspeed_galaxies: [
     ["galaxies_antimatter", "galaxies_replicanti", "galaxies_tachyon", "galaxies_nerfPelle"]
@@ -104,6 +110,12 @@ export const multiplierTabTree = {
   replicanti_total: [
     getProps("replicanti")
   ],
+  RS_total: [["RS_base", "RS_achievementMult", "RS_SR21", "RS_infinityUpgrade", "RS_timeStudy", "RS_A3", "RS_SC51"]],
+  RS_base: [["RS_space", "RS_dimBoost", "RS_Abyss"]],
+  RS_space: [["RS_spaceAmount", "RS_SR42", "RS_lightCyan"]],
+  RS_timeStudy: [[91, 92, 102, 222].map(id => `general_timeStudy_${id}`)],
+  ARS_total: [["ARS_base", "ARS_A5", "ARS_A9"]],
+  ID_powerConversion: [["ID_conversionBase", "ID_conversionSR45", "ID_conversionPelle"]],
 };
 
 // Gamespeed's two alternate displays are current and average gamespeed, distinguished by which of two
@@ -194,6 +206,18 @@ for (let dim = 1; dim <= 7; dim++) {
     "ID_powPurchase"]];
 }
 multiplierTabTree.ID_purchase_8 = [[`ID_basePurchase_8`, "ID_powPurchase"]];
+
+// Mod research changes the buy-ten multiplier and boost counts; expose it inside those sources
+// so the same contribution is not counted a second time in AD_total.
+for (const [source, children] of Object.entries({
+  purchase: ["basePurchase", "buy10A10", "buy10SR31", "buy10Glyph", "buy10Charged", "buy10Imaginary"],
+  dimboost: ["boostBase", "boostSR21", "boostA8", "boostLightGreen"],
+})) {
+  multiplierTabTree[`AD_${source}`].unshift(children.map(child => `AD_${child}`));
+  for (let dim = 1; dim <= 8; dim++) {
+    multiplierTabTree[`AD_${source}_${dim}`] = [children.map(child => `AD_${child}_${dim}`)];
+  }
+}
 
 // These are also added one layer deep
 for (let dim = 1; dim <= 7; dim++) {
