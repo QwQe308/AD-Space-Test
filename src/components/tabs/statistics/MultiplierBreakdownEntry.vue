@@ -1,5 +1,6 @@
 <script>
 import { DC } from "@/core/constants";
+import { getBreakdownUpdateId } from "@/core/secret-formula/multiplier-tab/cache";
 
 import { breakdownBarLayout, calculateBreakdownPercentages, nerfBlacklist } from "./breakdown-math";
 import { BreakdownEntryInfo } from "./breakdown-entry-info";
@@ -32,6 +33,7 @@ export default {
   data() {
     return {
       selected: 0,
+      refreshState: Object.seal({ lastUpdateId: -1 }),
       percentList: [],
       averagedPercentList: [],
       showGroup: [],
@@ -123,6 +125,7 @@ export default {
   watch: {
     replacePowers(newValue) {
       player.options.multiplierTab.replacePowers = newValue;
+      this.updateDisplayText();
     },
   },
   created() {
@@ -132,6 +135,12 @@ export default {
   },
   methods: {
     update() {
+      const updateId = getBreakdownUpdateId();
+      if (this.refreshState.lastUpdateId === updateId) return;
+      this.refreshState.lastUpdateId = updateId;
+      this.refresh();
+    },
+    refresh() {
       this.now = Date.now();
       this.replacePowers = player.options.multiplierTab.replacePowers && this.allowPowerToggle;
       this.resource.update();
@@ -160,7 +169,10 @@ export default {
       this.hadChildEntriesAt = Array.repeat(0, this.entries.length);
       this.lastLayoutChange = Date.now();
       this.rollingAverage.clear();
-      this.update();
+      this.refresh();
+    },
+    toggleGroup(index) {
+      this.$set(this.showGroup, index, !this.showGroup[index]);
     },
     calculatePercents() {
       const result = calculateBreakdownPercentages(this.entries, this.resource.fakeValue ?? this.resource.mult);
@@ -347,7 +359,7 @@ export default {
         :class="{ 'c-bar-highlight' : mouseoverIndex === index }"
         @mouseover="mouseoverIndex = index"
         @mouseleave="mouseoverIndex = -1"
-        @click="showGroup[index] = !showGroup[index]"
+        @click="toggleGroup(index)"
       >
         <span
           class="c-bar-overlay"
@@ -398,7 +410,7 @@ export default {
           v-if="shouldShowEntry(entry)"
           :class="singleEntryClass(index)"
         >
-          <div @click="showGroup[index] = !showGroup[index]">
+          <div @click="toggleGroup(index)">
             <span
               :class="expandIcon(index)"
               :style="expandIconStyle(index)"

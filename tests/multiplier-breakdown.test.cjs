@@ -137,19 +137,19 @@ test("bar prefix positions preserve positive and negative shares", () => {
   assert.deepEqual(breakdownBarLayout([]), []);
 });
 
-test("rolling averages match a ten-frame reference including missing samples and long runs", () => {
+test("rolling averages match a three-frame reference including missing samples and long runs", () => {
   const average = new PercentageRollingAverage();
   const history = [];
   for (let frame = 0; frame < 2000; frame++) {
     const point = frame % 7 === 0 ? undefined : [Math.sin(frame) / 2 + 0.5, -frame % 10 / 10];
     history.push(point);
-    if (history.length > 10) history.shift();
+    if (history.length > 3) history.shift();
     average.add(point);
     const valid = history.filter(Boolean);
     if (valid.length === 0) assert.deepEqual(average.average, []);
     else for (let i = 0; i < 2; i++) close(average.average[i], valid.reduce((sum, p) => sum + p[i], 0) / valid.length);
   }
-  for (let i = 0; i < 10; i++) average.add(undefined);
+  for (let i = 0; i < 3; i++) average.add(undefined);
   assert.deepEqual(average.average, []);
   average.add([0.2, 0.8]);
   average.add([1]);
@@ -276,6 +276,84 @@ test("Base AD Production shares its aggregate and active dimension count within 
   assert.ok(AD.total.multValue().eq(8960));
   assert.equal(AD.total.displayOverride(), "8960/sec");
   assert.equal(multiplierReads, 15);
+});
+
+test("the breakdown refreshes at 10 Hz while grouping, power display and expansion remain immediate", async t => {
+  let timestamp = 0;
+  t.mock.method(performance, "now", () => timestamp);
+  let mult = new Decimal(1000);
+  let calls = 0;
+  const values = {};
+  for (const key of ["AM", "tickspeed", "AD", "IP", "ID", "infinities", "replicanti",
+    "EP", "TD", "eternities", "DT", "gamespeed"]) {
+    values[key] = { total: { isActive: false } };
+  }
+  values.AM = {
+    total: { name: "Total", isActive: true, multValue: () => mult },
+    sampled: {
+      name: "Sampled", isActive: true,
+      multValue: () => {
+        calls++;
+        return mult;
+      }
+    },
+    power: { name: "Power", isActive: true, powValue: 2 },
+  };
+  global.GameDatabase = {
+    multiplierTabValues: values,
+    multiplierTabTree: { "AM_total": [["AM_sampled"], ["AM_power"]] },
+  };
+  player.options.multiplierTab.currTab = 0;
+  player.options.multiplierTab.showAltGroup = false;
+  player.options.multiplierTab.replacePowers = false;
+  const tabOptions = loadSource(path.join(stats, "MultiplierBreakdownTab.vue")).default;
+  const entryOptions = loadSource(path.join(stats, "MultiplierBreakdownEntry.vue")).default;
+  const tab = new Vue(tabOptions);
+  const view = new Vue({ ...entryOptions, propsData: { resource: createEntryInfo("AM_total") } });
+  tab.update();
+  view.update();
+  const firstText = view.totalText;
+  mult = new Decimal(10000);
+  for (const time of [33, 66, 99]) {
+    timestamp = time;
+    tab.update();
+    view.update();
+    assert.equal(view.totalText, firstText);
+    assert.equal(calls, 1);
+  }
+  timestamp = 100;
+  tab.update();
+  view.update();
+  assert.notEqual(view.totalText, firstText);
+  assert.equal(calls, 2);
+  view.changeGroup();
+  assert.ok(view.entryTexts[0].includes("^2"));
+  view.replacePowers = true;
+  await Vue.nextTick();
+  assert.ok(!view.entryTexts[0].includes("^2"));
+  let expanded = false;
+  view.$watch(() => view.showGroup[0], value => {
+    expanded = value;
+  });
+  view.toggleGroup(0);
+  await Vue.nextTick();
+  assert.equal(expanded, true);
+  view.changeGroup();
+  // A 33 ms game tick should average 10 Hz, rather than drifting down to one sample every 132 ms.
+  for (timestamp = 132; timestamp < 1000; timestamp += 33) {
+    tab.update();
+    view.update();
+  }
+  assert.equal(calls, 10);
+  timestamp = 5000;
+  tab.update();
+  view.update();
+  assert.equal(calls, 11);
+  tab.update();
+  view.update();
+  assert.equal(calls, 11);
+  view.$destroy();
+  tab.$destroy();
 });
 
 test("Vue rendering reuses display calculations on hover and refreshes after resets and group changes", async() => {

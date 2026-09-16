@@ -1,4 +1,5 @@
-const MAX_DATA_POINTS = 10;
+// Preserve an approximately 300 ms smoothing window at the breakdown's 10 Hz refresh rate.
+const MAX_DATA_POINTS = 3;
 
 export class PercentageRollingAverage {
   constructor() {
