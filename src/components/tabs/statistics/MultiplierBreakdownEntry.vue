@@ -1,14 +1,11 @@
 <script>
 import { DC } from "@/core/constants";
 
+import { breakdownBarLayout, calculateBreakdownPercentages, nerfBlacklist } from "./breakdown-math";
 import { BreakdownEntryInfo } from "./breakdown-entry-info";
 import { getResourceEntryInfoGroups } from "./breakdown-entry-info-group";
 import { PercentageRollingAverage } from "./percentage-rolling-average";
 import PrimaryToggleButton from "@/components/PrimaryToggleButton";
-
-// A few props are special-cased because they're base values which can be less than 1, but we don't want to
-// show them as nerfs
-const nerfBlacklist = ["IP_base", "EP_base", "TP_base"];
 
 function padPercents(percents) {
   // Add some padding to percents to prevent text flicker
@@ -47,7 +44,10 @@ export default {
       // multipliers are split up; the animation which results from not doing this looks very awkward
       lastLayoutChange: Date.now(),
       now: Date.now(),
-      totalMultiplier: DC.D1,
+      logTotalMultiplier: DC.D0,
+      entryTexts: [],
+      totalText: "",
+      dilationText: "",
       totalPositivePower: DC.D1,
       replacePowers: player.options.multiplierTab.replacePowers,
       inNC12: false,
@@ -65,6 +65,29 @@ export default {
     },
     rollingAverage() {
       return new PercentageRollingAverage();
+    },
+    totalMultiplier() {
+      return Decimal.pow10(this.logTotalMultiplier);
+    },
+    barStyles() {
+      const layout = breakdownBarLayout(this.averagedPercentList);
+      const transition = this.isRecent(this.lastLayoutChange) ? undefined : "0.2s";
+      return layout.map((position, index) => {
+        const percent = this.averagedPercentList[index];
+        const icon = this.entries[index].icon;
+        return {
+          position: "absolute",
+          top: `${position.top}%`,
+          height: `${position.height}%`,
+          width: "100%",
+          "transition-duration": transition,
+          border: percent === 0 ? "" : "0.1rem solid var(--color-text)",
+          color: icon?.textColor ?? "black",
+          background: percent < 0
+            ? `repeating-linear-gradient(-45deg, var(--color-bad), ${icon?.color} 0.8rem)`
+            : icon?.color,
+        };
+      });
     },
     containerClass() {
       return {
@@ -109,20 +132,22 @@ export default {
   },
   methods: {
     update() {
+      this.now = Date.now();
+      this.replacePowers = player.options.multiplierTab.replacePowers && this.allowPowerToggle;
+      this.resource.update();
       for (let i = 0; i < this.entries.length; i++) {
         const entry = this.entries[i];
         entry.update();
-        const hasChildEntries = getResourceEntryInfoGroups(entry.key)
+        const hasChildEntries = entry.data.isVisible && getResourceEntryInfoGroups(entry.key)
           .some(group => group.hasVisibleEntries);
         if (hasChildEntries) {
-          this.hadChildEntriesAt[i] = Date.now();
+          this.hadChildEntriesAt[i] = this.now;
         }
       }
       this.dilationExponent = new Decimal(this.resource.dilationEffect);
       this.isDilated = this.dilationExponent.neq(1);
       this.calculatePercents();
-      this.now = Date.now();
-      this.replacePowers = player.options.multiplierTab.replacePowers && this.allowPowerToggle;
+      this.updateDisplayText();
       this.inNC12 = NormalChallenge(12).isRunning;
     },
     changeGroup() {
@@ -135,72 +160,19 @@ export default {
       this.update();
     },
     calculatePercents() {
-      const powList = this.entries.map(e => new Decimal(e.data.pow));
-      const totalPosPow = powList.filter(p => p.gt(1)).reduce((x, y) => x.mul(y), DC.D1);
-      const totalNegPow = powList.filter(p => p.lt(1)).reduce((x, y) => x.mul(y), DC.D1);
-      const log10Mult = (this.resource.fakeValue ?? this.resource.mult).log10().div(totalPosPow);
-      const isEmpty = log10Mult.eq(0);
-      if (!isEmpty) {
-        this.lastNotEmptyAt = Date.now();
-      }
-      let percentList = [];
-      for (const entry of this.entries) {
-        const multFrac = log10Mult.eq(0)
-          ? DC.D0
-          : Decimal.log10(entry.data.mult).div(log10Mult);
-        const powFrac = totalPosPow.eq(1) ? DC.D0 : Decimal.log(entry.data.pow, Math.E).div(Decimal.log(totalPosPow, Math.E));
-
-        // Handle nerf powers differently from everything else in order to render them with the correct bar percentage
-        const perc = Decimal.gte(entry.data.pow, 1)
-          ? multFrac.div(totalPosPow).add(powFrac.mul(Decimal.sub(1, totalPosPow.reciprocal())))
-          : Decimal.log(entry.data.pow, Math.E).div(Decimal.log(totalNegPow, Math.E)).mul(totalNegPow.sub(1));
-
-        // This is clamped to a minimum of something that's still nonzero in order to show it at <0.1% instead of 0%
-        percentList.push(
-          [entry.ignoresNerfPowers, nerfBlacklist.includes(entry.key) ? Decimal.clampMin(perc, 0.0001) : perc]
-        );
-      }
-
-      // Shortly after a prestige, these may add up to a lot more than the base amount as production catches up. This
-      // is also necessary to suppress some visual weirdness for certain categories which have lots of exponents but
-      // actually apply only to specific dimensions (eg. charged infinity upgrades)
-      // We have a nerfedPerc variable to give a percentage breakdown as if all multipliers which ARE affected by nerf
-      // power effects already had them applied; there is support in the classes to allow for some to be affected but
-      // not others. The only actual case of this occurring is V's Reality not affecting gamespeed for DT, but it was
-      // cleaner to adjust the class structure instead of specifically special-casing it here
-      const totalPerc = percentList.filter(p => p[1].gt(0)).map(p => p[1]).sum();
-      const nerfedPerc = percentList.filter(p => p[1].gt(0))
-        .reduce((x, y) => x.add(y[0] ? y[1] : y[1].mul(totalNegPow)), DC.D0);
-      percentList = percentList.map(p => {
-        if (p[1].gt(0)) {
-          return (p[0] ? p[1] : p[1].mul(totalNegPow)).div(nerfedPerc);
-        }
-        return Decimal.clampMin(p[1].mul(totalPerc.sub(nerfedPerc)).div(totalPerc).div(totalNegPow), -1);
-      });
-      this.percentList = percentList;
-      this.rollingAverage.add(isEmpty ? undefined : percentList);
+      const result = calculateBreakdownPercentages(this.entries, this.resource.fakeValue ?? this.resource.mult);
+      if (!result.isEmpty) this.lastNotEmptyAt = this.now;
+      this.percentList = result.percents;
+      this.rollingAverage.add(result.isEmpty ? undefined : result.percents);
       this.averagedPercentList = this.rollingAverage.average;
-      this.totalMultiplier = Decimal.pow10(log10Mult);
-      this.totalPositivePower = totalPosPow;
+      this.logTotalMultiplier = result.log10Mult;
+      this.totalPositivePower = result.totalPosPow;
     },
-    styleObject(index) {
-      const netPerc = this.averagedPercentList.sum();
-      const isNerf = this.averagedPercentList[index].lt(0);
-      const iconObj = this.entries[index].icon;
-      const percents = this.averagedPercentList[index];
-      const barSize = perc => (perc.gt(0) ? perc.mul(netPerc) : perc.neg());
-      return {
-        position: "absolute",
-        top: `${100 * this.averagedPercentList.slice(0, index).map(p => barSize(p)).sum().toNumber()}%`,
-        height: `${100 * barSize(percents).toNumber()}%`,
-        width: "100%",
-        "transition-duration": this.isRecent(this.lastLayoutChange) ? undefined : "0.2s",
-        border: percents.eq(0) ? "" : "0.1rem solid var(--color-text)",
-        color: iconObj?.textColor ?? "black",
-        background: isNerf
-          ? `repeating-linear-gradient(-45deg, var(--color-bad), ${iconObj?.color} 0.8rem)`
-          : iconObj?.color,
-      };
+    updateDisplayText() {
+      this.totalText = this.totalString();
+      this.entryTexts = this.entries.map((entry, index) =>
+        (!this.isEmpty && this.shouldShowEntry(entry) ? this.entryString(index) : ""));
+      this.dilationText = this.isDilated && !this.isEmpty ? this.dilationString() : "";
     },
     singleEntryClass(index) {
       return {
@@ -227,17 +199,17 @@ export default {
     },
     entryString(index) {
       const percents = this.percentList[index];
-      if (percents.lt(0) && !nerfBlacklist.includes(this.entries[index].key)) {
+      if (percents < 0 && !nerfBlacklist.includes(this.entries[index].key)) {
         return this.nerfString(index);
       }
 
       // We want to handle very small numbers carefully to distinguish between "disabled/inactive" and
       // "too small to be relevant"
       let percString;
-      if (percents.eq(0)) percString = formatPercents(0);
-      else if (percents.eq(1)) percString = formatPercents(1);
-      else if (percents.lt(0.001)) percString = `<${formatPercents(0.001, 1)}`;
-      else if (percents.gt(0.9995)) percString = `~${formatPercents(1)}`;
+      if (percents === 0) percString = formatPercents(0);
+      else if (percents === 1) percString = formatPercents(1);
+      else if (percents < 0.001) percString = `<${formatPercents(0.001, 1)}`;
+      else if (percents > 0.9995) percString = `~${formatPercents(1)}`;
       else percString = formatPercents(percents, 1);
       percString = padPercents(percString);
 
@@ -364,7 +336,7 @@ export default {
       <div
         v-for="(perc, index) in averagedPercentList"
         :key="100 + index"
-        :style="styleObject(index)"
+        :style="barStyles[index]"
         :class="{ 'c-bar-highlight' : mouseoverIndex === index }"
         @mouseover="mouseoverIndex = index"
         @mouseleave="mouseoverIndex = -1"
@@ -380,7 +352,7 @@ export default {
     <div class="c-info-list">
       <div class="c-total-mult">
         <b>
-          {{ totalString() }}
+          {{ totalText }}
         </b>
         <span class="c-display-settings">
           <PrimaryToggleButton
@@ -424,7 +396,7 @@ export default {
               :class="expandIcon(index)"
               :style="expandIconStyle(index)"
             />
-            {{ entryString(index) }}
+            {{ entryTexts[index] }}
           </div>
           <MultiplierBreakdownEntry
             v-if="showGroup[index] && hasChildEntries(index)"
@@ -435,7 +407,7 @@ export default {
       <div v-if="isDilated && !isEmpty">
         <div class="c-single-entry c-dilation-entry">
           <div>
-            {{ dilationString() }}
+            {{ dilationText }}
           </div>
         </div>
       </div>

@@ -7,4 +7,5 @@ node_modules
 .eslintrc.js
 .DS_Store
 CLAUDE.md
+AGENT.md
 skills-lock.json

@@ -1,4 +1,6 @@
 <script>
+import { beginBreakdownUpdate } from "@/core/secret-formula/multiplier-tab/cache";
+
 import { createEntryInfo } from "./breakdown-entry-info";
 import MultiplierBreakdownEntry from "./MultiplierBreakdownEntry";
 
@@ -41,10 +43,12 @@ export default {
   },
   methods: {
     update() {
-      this.availableOptions = MULT_TAB_OPTIONS.map(opt => ({
-        ...opt,
-        isActive: this.checkActiveKey(opt.key)
-      })).filter(opt => opt.isActive);
+      beginBreakdownUpdate();
+      const availableOptions = MULT_TAB_OPTIONS.filter(opt => this.checkActiveKey(opt.key));
+      if (availableOptions.length !== this.availableOptions.length ||
+          availableOptions.some((opt, index) => opt !== this.availableOptions[index])) {
+        this.availableOptions = availableOptions;
+      }
     },
     checkActiveKey(key) {
       const act = GameDatabase.multiplierTabValues[key].total.isActive;
@@ -72,7 +76,7 @@ export default {
     <div class="l-multiplier-subtab-btn-container">
       <button
         v-for="(option, index) in availableOptions"
-        :key="option.key + option.isActive"
+        :key="option.key"
         :class="subtabClassObject(option)"
         @click="clickSubtab(index)"
       >

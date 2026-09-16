@@ -1,5 +1,7 @@
 import { DC } from "../../constants";
 
+import { memoizeBreakdown } from "./cache";
+
 export const MultiplierTabHelper = {
   // Helper method for counting enabled dimensions
   activeDimCount(type) {
@@ -22,26 +24,24 @@ export const MultiplierTabHelper = {
   },
 
   // Helper method for galaxy strength multipliers affecting all galaxy types (this is used a large number of times)
-  globalGalaxyMult() {
-    return Effects.product(
-      InfinityUpgrade.galaxyBoost,
-      InfinityUpgrade.galaxyBoost.chargedEffect,
-      BreakInfinityUpgrade.galaxyBoost,
-      TimeStudy(212),
-      TimeStudy(232),
-      Achievement(86),
-      Achievement(178),
-      InfinityChallenge(5).reward,
-      PelleUpgrade.galaxyPower,
-      PelleRifts.decay.milestones[1]
-    ).mul(Pelle.specialGlyphEffect.power);
-  },
+  globalGalaxyMult: memoizeBreakdown(() => Effects.product(
+    InfinityUpgrade.galaxyBoost,
+    InfinityUpgrade.galaxyBoost.chargedEffect,
+    BreakInfinityUpgrade.galaxyBoost,
+    TimeStudy(212),
+    TimeStudy(232),
+    Achievement(86),
+    Achievement(178),
+    InfinityChallenge(5).reward,
+    PelleUpgrade.galaxyPower,
+    PelleRifts.decay.milestones[1]
+  ).mul(Pelle.specialGlyphEffect.power)),
 
   // Helper method for galaxies and tickspeed, broken up as contributions of tickspeed*log(perGalaxy) and galaxyCount to
   // their product, which is proportional to log(tickspeed)
-  decomposeTickspeed() {
+  decomposeTickspeed: memoizeBreakdown(() => {
     let effectiveCount = effectiveBaseGalaxies();
-    const effects = this.globalGalaxyMult();
+    const effects = MultiplierTabHelper.globalGalaxyMult();
 
     let galFrac, tickFrac;
     if (effectiveCount.lt(3)) {
@@ -61,11 +61,13 @@ export const MultiplierTabHelper = {
       effectiveCount = effectiveCount.mul(Pelle.specialGlyphEffect.power);
 
       tickFrac = Tickspeed.totalUpgrades.mul(logBase);
-      galFrac = Decimal.log10(Decimal.max(0.01, Decimal.sub(1 / baseMult, effectiveCount.mul(perGalaxy)))).div(logBase).neg();
+      galFrac = Decimal.log10(Decimal.max(0.01, Decimal.sub(1 / baseMult, effectiveCount.mul(perGalaxy))))
+        .div(logBase).neg();
     } else {
       effectiveCount = effectiveCount.sub(2);
       effectiveCount = effectiveCount.mul(effects);
-      effectiveCount = effectiveCount.mul(getAdjustedGlyphEffect("realitygalaxies").mul(ImaginaryUpgrade(9).effectOrDefault(DC.D0).add(1)));
+      effectiveCount = effectiveCount.mul(getAdjustedGlyphEffect("realitygalaxies")
+        .mul(ImaginaryUpgrade(9).effectOrDefault(DC.D0).add(1)));
       effectiveCount = effectiveCount.mul(Pelle.specialGlyphEffect.power);
 
       // These all need to be framed as INCREASING x/sec tick rate (ie. all multipliers > 1, all logs > 0)
@@ -104,7 +106,7 @@ export const MultiplierTabHelper = {
       tickspeed: tickFrac.mul(factor),
       galaxies: galFrac.mul(factor),
     };
-  },
+  }),
 
   // Helper method to check for whether an achievement affects a particular dimension or not. Format of dimStr is
   // expected to be a three-character string "XXN", eg. "AD3" or "TD2"

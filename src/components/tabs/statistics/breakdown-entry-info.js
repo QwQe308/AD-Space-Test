@@ -1,10 +1,12 @@
 import Vue from "vue";
 
+import { getBreakdownUpdateId, memoizeBreakdown } from "@/core/secret-formula/multiplier-tab/cache";
 import { DC } from "@/core/constants";
 
 export class BreakdownEntryInfo {
   constructor(key) {
     this.key = key;
+    this.lastUpdateId = -1;
     const keyArgs = this.key.split("_");
     const dbEntry = GameDatabase.multiplierTabValues[keyArgs[0]][keyArgs[1]];
     const args = keyArgs.length >= 3
@@ -30,6 +32,8 @@ export class BreakdownEntryInfo {
   }
 
   update() {
+    const updateId = getBreakdownUpdateId();
+    if (this.lastUpdateId === updateId) return;
     const isVisible = this.isVisible;
     this.data.mult.fromDecimal(isVisible ? this.mult : DC.D1);
     this.data.pow = isVisible ? this.pow : 1;
@@ -37,6 +41,7 @@ export class BreakdownEntryInfo {
     if (isVisible) {
       this.data.lastVisibleAt = Date.now();
     }
+    this.lastUpdateId = updateId;
   }
 
   get name() {
@@ -44,15 +49,15 @@ export class BreakdownEntryInfo {
   }
 
   get mult() {
-    return new Decimal(this._multValue() ?? new Decimal(1));
+    return Decimal.fromValue_noAlloc(this._multValue() ?? DC.D1);
   }
 
   get pow() {
-    return this._powValue() ?? new Decimal(1);
+    return this._powValue() ?? DC.D1;
   }
 
   get dilationEffect() {
-    return this._dilationEffect() ?? new Decimal(1);
+    return this._dilationEffect() ?? DC.D1;
   }
 
   get isActive() {
@@ -84,13 +89,13 @@ export class BreakdownEntryInfo {
   }
 
   get isVisible() {
-    return this.isActive && (this.pow !== 1 || this.mult.neq(1));
+    return this.isActive && (Decimal.neq(this.pow, 1) || this.mult.neq(1));
   }
 }
 
 function createGetter(property, args) {
   if (typeof property === "function") {
-    return () => property(...args);
+    return memoizeBreakdown(() => property(...args));
   }
 
   return () => property;

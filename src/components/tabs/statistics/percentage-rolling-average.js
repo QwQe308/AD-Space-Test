@@ -2,32 +2,44 @@ const MAX_DATA_POINTS = 10;
 
 export class PercentageRollingAverage {
   constructor() {
-    this.dataPoints = [];
+    this.clear();
   }
 
   add(dataPoint) {
-    this.dataPoints.push(dataPoint);
-    if (this.dataPoints.length > MAX_DATA_POINTS) {
-      this.dataPoints.shift();
+    if (dataPoint && dataPoint.length !== this.totals.length) {
+      this.clear();
+      this.totals = Array(dataPoint.length).fill(0);
+    }
+    const previous = this.dataPoints[this.nextIndex];
+    if (previous) {
+      for (let i = 0; i < previous.length; i++) this.totals[i] -= previous[i];
+      this.count--;
+    }
+    this.dataPoints[this.nextIndex] = dataPoint;
+    if (dataPoint) {
+      for (let i = 0; i < dataPoint.length; i++) this.totals[i] += dataPoint[i];
+      this.count++;
+    }
+    this.nextIndex = (this.nextIndex + 1) % MAX_DATA_POINTS;
+
+    // Periodically rebuild the sums to keep subtraction rounding errors from accumulating.
+    if (this.nextIndex === 0 || this.count === 0) {
+      this.totals.fill(0);
+      for (const point of this.dataPoints) {
+        if (!point) continue;
+        for (let i = 0; i < point.length; i++) this.totals[i] += point[i];
+      }
     }
   }
 
   get average() {
-    const dataPoints = this.dataPoints.filter(p => p !== undefined);
-    if (dataPoints.length === 0) {
-      return [];
-    }
-
-    const average = [];
-    const reference = dataPoints[0];
-    for (let i = 0; i < reference.length; i++) {
-      average[i] = dataPoints.map(p => p[i]).sum().div(dataPoints.length);
-    }
-
-    return average;
+    return this.count === 0 ? [] : this.totals.map(total => total / this.count);
   }
 
   clear() {
-    this.dataPoints = [];
+    this.dataPoints = Array(MAX_DATA_POINTS);
+    this.totals = [];
+    this.nextIndex = 0;
+    this.count = 0;
   }
 }
