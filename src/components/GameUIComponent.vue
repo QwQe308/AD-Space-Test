@@ -1,6 +1,7 @@
 <script>
 import BackgroundAnimations from "@/components/BackgroundAnimations";
 import ClassicUi from "@/components/ui-modes/classic/ClassicUi";
+import FpsDisplay from "@/components/FpsDisplay";
 import GameUiComponentFixed from "@/components/GameUiComponentFixed";
 import ModernUi from "@/components/ui-modes/modern/ModernUi";
 import TabComponents from "@/components/tabs";
@@ -14,6 +15,7 @@ export default {
   components: {
     ...TabComponents,
     ClassicUi,
+    FpsDisplay,
     ModernUi,
     GameUiComponentFixed,
     BackgroundAnimations,
@@ -74,6 +76,7 @@ export default {
     <GameUiComponentFixed v-if="!isThemeS12" />
     <BackgroundAnimations v-if="!isThemeS12" />
     <S12UiFixed v-if="isThemeS12" />
+    <FpsDisplay />
   </div>
 </template>
 

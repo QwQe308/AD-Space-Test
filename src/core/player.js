@@ -942,6 +942,7 @@ window.player = {
     themeClassic: "Normal",
     themeModern: "Normal",
     updateRate: 33,
+    showFPS: false,
     newUI: true,
     offlineProgress: true,
     loadBackupWithoutOffline: false,

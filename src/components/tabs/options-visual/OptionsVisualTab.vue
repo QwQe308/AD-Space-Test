@@ -29,6 +29,7 @@ export default {
       lnotation: "",
       sidebarResource: "",
       headerTextColored: true,
+      showFPS: false,
     };
   },
   computed: {
@@ -50,6 +51,9 @@ export default {
     }
   },
   watch: {
+    showFPS(newValue) {
+      player.options.showFPS = newValue;
+    },
     headerTextColored(newValue) {
       player.options.headerTextColored = newValue;
     },
@@ -64,6 +68,7 @@ export default {
         ? "Latest Resource"
         : this.sidebarDB.find(e => e.id === player.options.sidebarResourceID).optionName;
       this.headerTextColored = options.headerTextColored;
+      this.showFPS = Boolean(options.showFPS);
     },
   }
 };
@@ -169,6 +174,13 @@ export default {
         </ExpandingControlBox>
         </div
       -->
+      <div class="l-options-grid__row">
+        <PrimaryToggleButton
+          v-model="showFPS"
+          class="o-primary-btn--option l-options-grid__button"
+          label="Show FPS:"
+        />
+      </div>
       <OpenModalHotkeysButton />
     </div>
   </div>
