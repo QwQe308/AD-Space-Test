@@ -5,16 +5,16 @@ import { MultiplierTabIcons } from "./icons";
 
 export const spaceDivisorBreakdown = {
   spaceBase: {
-    name: "Space Nerf before Space Divisor",
-    powValue: () => getSpaceNerf(player.space).recip(),
+    name: () => `Base Space: ${format(player.space, 2, 2)}`,
+    displayOverride: () => `^(1/${format(getSpaceNerf(player.space), 2, 3)})`,
+    multValue: () => player.space,
     isActive: true,
     icon: MultiplierTabIcons.SPACE,
   },
   spaceDivisor: {
-    name: "Space Divisor",
-    displayOverride: () => `Space /${format(getSpaceDivisor(), 2, 2)} ➜ ${formatPow(
-      getSpaceNerf(player.space).div(getSpaceNerf()), 2, 2)}`,
-    powValue: () => getSpaceNerf(player.space).div(getSpaceNerf()),
+    name: "Space Divisor:",
+    displayOverride: () => `Space / ${format(getSpaceDivisor(), 2, 2)} ➜ ^(1/${format(getSpaceNerf(), 2, 3)})`,
+    multValue: () => getSpaceDivisor().recip(),
     fakeValue: () => getSpaceDivisor(),
     isActive: true,
     icon: MultiplierTabIcons.SPACE,

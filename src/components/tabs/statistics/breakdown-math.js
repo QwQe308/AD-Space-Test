@@ -65,7 +65,8 @@ export function calculateBreakdownPercentages(entries, resourceMultiplier) {
       // Preserve the relative weights when every positive effect has been reduced to zero.
       return toPercentage(nerfedPerc.eq(0) ? percent.div(totalPerc) : nerfed.div(nerfedPerc));
     }
-    if (lostPerc.eq(0)) return 0;
+    // Multiplicative divisors are still nerfs when no power effect reduces the positive sources.
+    if (lostPerc.eq(0)) return toPercentage(percent.div(totalPerc));
     if (totalNegPow.eq(0)) return -1;
     return toPercentage(percent.mul(lostPerc).div(totalPerc).div(totalNegPow));
   });

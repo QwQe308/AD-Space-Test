@@ -31,7 +31,9 @@ export const AM = {
         2
       )}/sec -> ${format(Currency.antimatter.productionPerSecond.div(getAMMultiplier()), 2, 2)}/sec`,
     powValue: () => getSpaceNerf().recip(),
-    fakeValue: () => getSpaceNerf().recip(),
+    // Normalize this branch against base space; the divisor is a negative multiplier contribution.
+    // Using space after division would erase the chart when the two values cancel to one.
+    fakeValue: () => player.space,
     isActive: () => true,
     icon: MultiplierTabIcons.SPACE,
   },

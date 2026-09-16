@@ -108,6 +108,26 @@ test("power contributions and nerf-exempt multipliers keep their original weight
   [1 / 3, 2 / 3, -0.25].forEach((value, index) => close(nerfs.percents[index], value));
 });
 
+test("multiplicative divisors retain a negative share without power nerfs, including layered values", () => {
+  for (const exponent of [new Decimal(6), new Decimal("1e400")]) {
+    const base = Decimal.pow10(exponent);
+    const divisor = Decimal.pow10(exponent.div(3));
+    const result = calculateBreakdownPercentages([entry(base), entry(divisor.recip())], base);
+    close(result.percents[0], 1);
+    close(result.percents[1], -1 / 3);
+    const layout = breakdownBarLayout(result.percents);
+    close(layout[0].height, 200 / 3);
+    close(layout[1].height, 100 / 3);
+    close(layout[1].top + layout[1].height, 100);
+  }
+  for (const divisor of ["1e6", "1e12"]) {
+    const result = calculateBreakdownPercentages([entry("1e6"), entry(Decimal.recip(divisor))], "1e6");
+    assert.equal(result.isEmpty, false);
+    assert.deepEqual(result.percents, [1, -1]);
+    assert.deepEqual(breakdownBarLayout(result.percents), [{ top: 0, height: 0 }, { top: 0, height: 100 }]);
+  }
+});
+
 test("huge and tiny powers stay Decimal until normalization; tiny percentages keep their sign", () => {
   const result = calculateBreakdownPercentages([
     entry("1e1000"), entry(1, new Decimal("1e400"))
@@ -626,8 +646,8 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   assertDecimalClose(breakdownProduct(Object.fromEntries(
     ["SR22", "A9", "spaceDilation", "lightWhite", "spaceChallenge3", "spaceDivisorPercentage"]
       .map(k => [k, AM[k]]))), space.getSpaceDivisor());
-  assertDecimalClose(AM.spaceBase.powValue().mul(AM.spaceDivisor.powValue()), AM.space.powValue());
-  assert.ok(AM.space.fakeValue().neq(1));
+  assertDecimalClose(AM.spaceBase.multValue().mul(AM.spaceDivisor.multValue()), space.getSpaceAfterCalc());
+  assertDecimalClose(AM.space.fakeValue(), player.space);
   global.PelleUpgrade = { infConversion: mockEffect(4) };
   global.PelleRifts = { paradox: { milestones: [null, null, mockEffect(1.4)] } };
   global.getAdjustedGlyphEffect = () => new Decimal(0.5);
@@ -668,3 +688,45 @@ test("all reachable breakdown tree references resolve and mod research is reacha
     assert.ok(tree[`AD_dimboost_${dim}`][0].includes(`AD_boostSR21_${dim}`));
   }
 });
+
+test("Space Nerf uses base-space fakeValue and renders its divisor as a striped nerf while preserving exponent text",
+  () => {
+    const { AM } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/antimatter.js"));
+    let divisor = new Decimal(100);
+    global.player.space = new Decimal("1e6");
+    global.getSpaceDivisor = () => divisor;
+    global.getSpaceNerf = (space = player.space.div(divisor)) => space.add(1).log10().div(3).add(1);
+    global.getAMMultiplier = () => new Decimal(1);
+    global.Currency = { antimatter: { productionPerSecond: new Decimal("1e12") } };
+    global.GameDatabase = {
+      multiplierTabValues: { spaceChart: AM },
+      multiplierTabTree: { "spaceChart_space": [["spaceChart_spaceBase", "spaceChart_spaceDivisor"]] },
+    };
+    const component = loadSource(path.join(stats, "MultiplierBreakdownEntry.vue")).default;
+    const view = new Vue({ ...component, propsData: { resource: createEntryInfo("spaceChart_space") } });
+    beginBreakdownUpdate();
+    view.update();
+    close(view.percentList[0], 1);
+    close(view.percentList[1], -1 / 3);
+    assert.ok(view.entries.every(source => source.data.pow.eq(1)));
+    assert.ok(view.resource.fakeValue.eq(player.space));
+    assert.ok(view.resource.pow.eq(getSpaceNerf().recip()));
+    assert.ok(view.entries[1].fakeValue.eq(divisor));
+    assert.ok(view.entries[1].data.mult.eq(divisor.recip()));
+    assert.match(view.entryTexts[0], /Base Space: 1000000 \(\^\(1\//u);
+    assert.match(view.entryTexts[1], /Space Divisor: \(Space \/ 100 ➜ \^\(1\//u);
+    assert.match(view.barStyles[1].background, /repeating-linear-gradient/u);
+    assert.equal(view.barStyles[1].height, "33.333%");
+
+    divisor = new Decimal("1e6");
+    beginBreakdownUpdate();
+    view.update();
+    assert.deepEqual(view.percentList, [1, -1]);
+    assert.equal(view.isEmpty, false);
+    divisor = new Decimal(1);
+    beginBreakdownUpdate();
+    view.update();
+    assert.deepEqual(view.percentList, [1, 0]);
+    assert.equal(view.entries[1].data.isVisible, false);
+    view.$destroy();
+  });
