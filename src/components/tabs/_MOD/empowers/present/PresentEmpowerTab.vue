@@ -84,14 +84,14 @@ export default {
       if (!affix) return "";
       const data = simulateSpellData(this.selectedAffixes, index);
       const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
-      return `${this.cap(name)} (${spDisplay})<br><hr class="center-margin"><br>${affix.description(data)}`;
+      return `${this.cap(name)} (${spDisplay})<hr class="present-tooltip-division">${affix.description(data)}`;
     },
     affixNextTooltip(affix) {
       if (!affix) return "";
       const names = [...this.selectedAffixes, affix.name];
       const data = simulateSpellData(names, this.selectedAffixes.length);
       const spDisplay = formatPercents(data.totalSpellPower, 2, 2);
-      return `${this.cap(affix.name)} (${spDisplay})<br><hr class="center-margin"><br>${affix.description(data)}`;
+      return `${this.cap(affix.name)} (${spDisplay})<hr class="present-tooltip-division">${affix.description(data)}`;
     },
     affixNextCost(affix) {
       if (!affix) return { base: 0, actual: 0 };
@@ -137,12 +137,12 @@ export default {
         const a = Affixes[name];
         return a ? name.charAt(0).toUpperCase() : name;
       }).join(" → ");
-      const parts = [spell.name, chain];
+      const parts = [`${spell.name}<br>${chain}`];
       if (spell.effects.length) {
-        parts.push("<hr class='center-margin'>", ...spell.effects);
+        parts.push(spell.effects.join("<br>"));
       }
-      parts.push("<hr class='center-margin'>", `${spell.manaCost} mana`);
-      return parts.join("<br>");
+      parts.push(`${spell.manaCost} mana`);
+      return parts.join("<hr class='present-tooltip-division'>");
     },
     toggleEditMode() {
       this.editMode = !this.editMode;
@@ -453,7 +453,7 @@ export default {
 
 .panel-division {
   color: var(--color-text);
-  margin: 0.6rem 0 0.2rem;
+  margin: 0.8rem 0 0.4rem;
 }
 
 /* ===== Assembly Content ===== */

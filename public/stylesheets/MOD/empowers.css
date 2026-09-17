@@ -5,3 +5,7 @@
 .frozen-currency::before{
   content:"❄";
 }
+
+hr.present-tooltip-division {
+  margin: 7px 0;
+}
