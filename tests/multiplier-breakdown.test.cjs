@@ -381,6 +381,47 @@ test("the breakdown refreshes at 10 Hz while grouping, power display and expansi
   tab.$destroy();
 });
 
+test("menu pagination restores selection, preserves content while browsing and handles locked categories", t => {
+  let timestamp = 0;
+  t.mock.method(performance, "now", () => timestamp);
+  const keys = ["AM", "tickspeed", "AD", "IP", "ID", "infinities", "replicanti",
+    "EP", "TD", "eternities", "DT", "gamespeed", "RS", "ARS"];
+  const values = Object.fromEntries(keys.map(key => [key, { total: { isActive: true } }]));
+  global.GameDatabase = { multiplierTabValues: values };
+  player.options.multiplierTab.currTab = 12;
+  const tab = new Vue(loadSource(path.join(stats, "MultiplierBreakdownTab.vue")).default);
+  tab.update();
+  assert.equal(tab.pageCount, 2);
+  assert.equal(tab.menuPage, 1);
+  assert.equal(tab.visibleOptions.length, 7);
+  assert.ok(tab.visibleOptions.some(option => option.id === 12));
+  tab.changeMenuPage(-1);
+  assert.equal(tab.menuPage, 0);
+  assert.equal(tab.currentKey, "RS");
+  timestamp = 100;
+  tab.update();
+  assert.equal(tab.menuPage, 0);
+  tab.changeMenuPage(-1);
+  assert.equal(tab.menuPage, 0);
+  tab.changeMenuPage(1);
+  tab.changeMenuPage(1);
+  assert.equal(tab.menuPage, 1);
+  tab.clickSubtab(tab.visibleOptions[6].id);
+  assert.equal(tab.currentKey, "ARS");
+  assert.equal(player.options.multiplierTab.currTab, 13);
+  keys.slice(1).forEach(key => {
+    values[key].total.isActive = false;
+  });
+  timestamp = 200;
+  tab.update();
+  assert.equal(tab.pageCount, 1);
+  assert.equal(tab.menuPage, 0);
+  assert.equal(tab.visibleOptions.length, 1);
+  assert.equal(tab.currentKey, "AM");
+  assert.equal(player.options.multiplierTab.currTab, 0);
+  tab.$destroy();
+});
+
 test("Vue rendering reuses display calculations on hover and refreshes after resets and group changes", async() => {
   let mult = new Decimal("1e1000");
   let formatCalls = 0;

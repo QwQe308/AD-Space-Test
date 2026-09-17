@@ -10,19 +10,20 @@ export const RS = {
     name: "Global Space Research Speed (before Tier Bonuses)",
     multValue: () => globalResearchSpeed(),
     isActive: () => true,
-    overlay: ["Σ"],
+    overlay: ["Φ"],
+    icon: MultiplierTabIcons.SPACE,
   },
   base: {
     name: "Base Research Speed",
     multValue: () => getBaseResearchSpeed(),
     isActive: () => true,
-    // This spawns only a sigma symbol.
-    icon: MultiplierTabIcons.SPACE_RESEARCH(),
+    icon: MultiplierTabIcons.SPACE,
   },
   // --these extends the base one
   space: {
     name: "Effective Space - Research Speed Formula",
-    displayOverride: () => `${format(getEffectiveSpace(), 2, 2)} Effective Space`,
+    displayOverride: () =>
+      `${format(getEffectiveSpace(), 2, 2)} Effective Space ➜ ${formatX(RS.space.multValue(), 2, 2)}`,
     fakeValue: () => getEffectiveSpace(),
     multValue: () => DC.E1.pow(getEffectiveSpace().add(1).log10().add(1).pow(2.5).sub(1)),
     isActive: () => true,

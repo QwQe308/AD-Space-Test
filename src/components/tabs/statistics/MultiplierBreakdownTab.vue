@@ -5,6 +5,7 @@ import { createEntryInfo } from "./breakdown-entry-info";
 import MultiplierBreakdownEntry from "./MultiplierBreakdownEntry";
 
 const REFRESH_INTERVAL = 100;
+const OPTIONS_PER_PAGE = 7;
 
 const MULT_TAB_OPTIONS = [
   { id: 0, key: "AM", text: "Antimatter Production" },
@@ -31,11 +32,19 @@ export default {
   data() {
     return {
       availableOptions: [],
+      menuPage: 0,
       refreshSchedule: Object.seal({ nextAt: null }),
       currentID: player.options.multiplierTab.currTab,
     };
   },
   computed: {
+    pageCount() {
+      return Math.max(1, Math.ceil(this.availableOptions.length / OPTIONS_PER_PAGE));
+    },
+    visibleOptions() {
+      const start = this.menuPage * OPTIONS_PER_PAGE;
+      return this.availableOptions.slice(start, start + OPTIONS_PER_PAGE);
+    },
     currentKey() {
       return MULT_TAB_OPTIONS.find(opt => opt.id === this.currentID).key;
     },
@@ -58,6 +67,12 @@ export default {
       if (availableOptions.length !== this.availableOptions.length ||
           availableOptions.some((opt, index) => opt !== this.availableOptions[index])) {
         this.availableOptions = availableOptions;
+        let selectedIndex = availableOptions.findIndex(opt => opt.id === this.currentID);
+        if (selectedIndex < 0 && availableOptions.length > 0) {
+          selectedIndex = 0;
+          this.clickSubtab(availableOptions[0].id);
+        }
+        this.menuPage = selectedIndex < 0 ? 0 : Math.floor(selectedIndex / OPTIONS_PER_PAGE);
       }
     },
     checkActiveKey(key) {
@@ -73,9 +88,12 @@ export default {
         "c-multiplier-subtab-btn--active": option.key === this.currentKey,
       };
     },
-    clickSubtab(index) {
-      this.currentID = this.availableOptions[index].id;
-      player.options.multiplierTab.currTab = MULT_TAB_OPTIONS.find(opt => opt.key === this.currentKey).id;
+    changeMenuPage(direction) {
+      this.menuPage = Math.max(0, Math.min(this.pageCount - 1, this.menuPage + direction));
+    },
+    clickSubtab(id) {
+      this.currentID = id;
+      player.options.multiplierTab.currTab = id;
     }
   }
 };
@@ -85,12 +103,39 @@ export default {
   <div class="c-stats-tab">
     <div class="l-multiplier-subtab-btn-container">
       <button
-        v-for="(option, index) in availableOptions"
+        v-if="pageCount > 1"
+        class="c-multiplier-page-btn"
+        :disabled="menuPage === 0"
+        aria-label="Previous menu page"
+        title="Previous menu page"
+        @click="changeMenuPage(-1)"
+      >
+        ◀
+      </button>
+      <button
+        v-for="option in visibleOptions"
         :key="option.key"
         :class="subtabClassObject(option)"
-        @click="clickSubtab(index)"
+        @click="clickSubtab(option.id)"
       >
         {{ option.text }}
+      </button>
+      <span
+        v-if="pageCount > 1"
+        class="c-multiplier-page-number"
+        aria-live="polite"
+      >
+        {{ menuPage + 1 }} / {{ pageCount }}
+      </span>
+      <button
+        v-if="pageCount > 1"
+        class="c-multiplier-page-btn"
+        :disabled="menuPage === pageCount - 1"
+        aria-label="Next menu page"
+        title="Next menu page"
+        @click="changeMenuPage(1)"
+      >
+        ▶
       </button>
     </div>
     <div class="c-list-container">
@@ -138,7 +183,8 @@ export default {
 }
 
 .c-multiplier-subtab-btn {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 4rem;
   margin: 0 0.5rem -0.1rem;
   z-index: 1;
@@ -151,6 +197,29 @@ export default {
   border: var(--var-border-width, 0.2rem) solid;
   border-radius: var(--var-border-radius, 0.5rem) var(--var-border-radius, 0.5rem) 0 0;
   cursor: pointer;
+}
+
+.c-multiplier-page-btn {
+  flex: 0 0 3rem;
+  margin: 0 0.3rem;
+  color: var(--color-text);
+  background-color: var(--color-base);
+  border: var(--var-border-width, 0.2rem) solid;
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.c-multiplier-page-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.c-multiplier-page-number {
+  align-self: center;
+  flex: 0 0 4.5rem;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  text-align: center;
 }
 
 .c-multiplier-subtab-btn--active {
