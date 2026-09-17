@@ -23,6 +23,7 @@ export class BreakdownEntryInfo {
     this._isDilated = createGetter(dbEntry.isDilated, args);
     this._isBase = createGetter(dbEntry.isBase, args);
     this._ignoresNerfPowers = createGetter(dbEntry.ignoresNerfPowers, args);
+    this._isVisible = memoizeBreakdown(() => this.isActive && (Decimal.neq(this.pow, 1) || this.mult.neq(1)));
     this.data = Vue.observable({
       mult: Object.freeze(new Decimal(0)),
       pow: Object.freeze(new Decimal(1)),
@@ -93,7 +94,7 @@ export class BreakdownEntryInfo {
   }
 
   get isVisible() {
-    return this.isActive && (Decimal.neq(this.pow, 1) || this.mult.neq(1));
+    return this._isVisible();
   }
 }
 

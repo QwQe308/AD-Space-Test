@@ -1,3 +1,4 @@
+import { cacheSnapshotGetters } from "../read-only-snapshot";
 import { DC } from "../constants";
 
 import { DimensionState } from "./dimension";
@@ -548,9 +549,12 @@ class AntimatterDimensionState extends DimensionState {
   }
 
   get isAvailableForPurchase() {
-    if (!EternityMilestone.unlockAllND.isReached && DimBoost.totalBoosts.add(4).lt(this.tier)) return false;
-    const hasPrevTier = this.tier === 1 || AntimatterDimension(this.tier - 1).totalAmount.gt(0);
-    if (!EternityMilestone.unlockAllND.isReached && !hasPrevTier) return false;
+    if (!EternityMilestone.unlockAllND.isReached) {
+      if (DimBoost.totalBoosts.add(4).lt(this.tier)) return false;
+      // Reading the previous tier can recursively calculate Continuum for every lower dimension.
+      // Once all dimensions are unlocked neither this check nor the boost requirement is needed.
+      if (this.tier > 1 && !AntimatterDimension(this.tier - 1).totalAmount.gt(0)) return false;
+    }
     if (isSCRunningOnTier(2, 1)) return this.tier <= 4;
     if (isSCRunningOnTier(2, 2)) return this.tier <= 4;
     return this.tier <= 6 || !NormalChallenge(10).isRunning;
@@ -629,6 +633,10 @@ class AntimatterDimensionState extends DimensionState {
     return production;
   }
 }
+
+cacheSnapshotGetters(AntimatterDimensionState.prototype, [
+  "costScale", "continuumValue", "continuumAmount", "totalAmount", "isProducing"
+]);
 
 /**
  * @function

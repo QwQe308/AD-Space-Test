@@ -1,4 +1,4 @@
-// Preserve an approximately 300 ms smoothing window at the breakdown's 10 Hz refresh rate.
+// Smooth adjacent samples; the bar's transform transition handles interpolation between UI updates.
 const MAX_DATA_POINTS = 3;
 
 export class PercentageRollingAverage {

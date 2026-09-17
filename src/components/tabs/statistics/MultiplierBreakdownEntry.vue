@@ -14,6 +14,12 @@ function padPercents(percents) {
   return percents.padStart(7, "\xa0");
 }
 
+function retainEqualArray(previous, next) {
+  return previous.length === next.length && next.every((value, index) => value === previous[index])
+    ? previous
+    : next;
+}
+
 export default {
   name: "MultiplierBreakdownEntry",
   components: {
@@ -71,18 +77,19 @@ export default {
     totalMultiplier() {
       return Decimal.pow10(this.logTotalMultiplier);
     },
+    barLayout() {
+      return breakdownBarLayout(this.averagedPercentList);
+    },
+    barTransition() {
+      return this.isRecent(this.lastLayoutChange) ? "0s" : "0.2s";
+    },
     barStyles() {
-      const layout = breakdownBarLayout(this.averagedPercentList);
-      const transition = this.isRecent(this.lastLayoutChange) ? undefined : "0.2s";
-      return layout.map((position, index) => {
+      return this.barLayout.map((position, index) => {
         const percent = this.averagedPercentList[index];
         const icon = this.entries[index].icon;
         return {
-          position: "absolute",
-          top: `${position.top.toFixed(3)}%`,
-          height: `${position.height.toFixed(3)}%`,
-          width: "100%",
-          "transition-duration": transition,
+          transform: `translateY(${position.top}%) scaleY(${position.height / 100})`,
+          "transition-duration": this.barTransition,
           border: percent === 0 ? "" : "0.1rem solid var(--color-text)",
           color: icon?.textColor ?? "black",
           background: percent < 0
@@ -90,6 +97,14 @@ export default {
             : icon?.color,
         };
       });
+    },
+    barLabelStyles() {
+      // Labels translate separately from the scaled background so glyphs never stretch.
+      return this.barLayout.map((position, index) => ({
+        transform: `translateY(${position.top + position.height * 0.45 - 50}%)`,
+        "transition-duration": this.barTransition,
+        color: this.entries[index].icon?.textColor ?? "black",
+      }));
     },
     containerClass() {
       return {
@@ -177,9 +192,9 @@ export default {
     calculatePercents() {
       const result = calculateBreakdownPercentages(this.entries, this.resource.fakeValue ?? this.resource.mult);
       if (!result.isEmpty) this.lastNotEmptyAt = this.now;
-      this.percentList = result.percents;
+      this.percentList = retainEqualArray(this.percentList, result.percents);
       this.rollingAverage.add(result.isEmpty ? undefined : result.percents);
-      this.averagedPercentList = this.rollingAverage.average;
+      this.averagedPercentList = retainEqualArray(this.averagedPercentList, this.rollingAverage.average);
       if (this.logTotalMultiplier.neq(result.log10Mult)) {
         this.logTotalMultiplier = Object.freeze(new Decimal(result.log10Mult));
       }
@@ -189,8 +204,8 @@ export default {
     },
     updateDisplayText() {
       this.totalText = this.totalString();
-      this.entryTexts = this.entries.map((entry, index) =>
-        (!this.isEmpty && this.shouldShowEntry(entry) ? this.entryString(index) : ""));
+      this.entryTexts = retainEqualArray(this.entryTexts, this.entries.map((entry, index) =>
+        (!this.isEmpty && this.shouldShowEntry(entry) ? this.entryString(index) : "")));
       this.dilationText = this.isDilated && !this.isEmpty ? this.dilationString() : "";
     },
     singleEntryClass(index) {
@@ -352,20 +367,28 @@ export default {
       v-if="!isEmpty"
       class="c-stacked-bars"
     >
-      <div
-        v-for="(perc, index) in averagedPercentList"
-        :key="100 + index"
-        :style="barStyles[index]"
-        :class="{ 'c-bar-highlight' : mouseoverIndex === index }"
-        @mouseover="mouseoverIndex = index"
-        @mouseleave="mouseoverIndex = -1"
-        @click="toggleGroup(index)"
-      >
-        <span
-          class="c-bar-overlay"
-          v-html="barSymbol(index)"
+      <template v-for="(perc, index) in averagedPercentList">
+        <div
+          :key="`bar-${index}`"
+          class="c-bar-fill"
+          :style="barStyles[index]"
+          :class="{ 'c-bar-highlight' : mouseoverIndex === index }"
+          @mouseover="mouseoverIndex = index"
+          @mouseleave="mouseoverIndex = -1"
+          @click="toggleGroup(index)"
         />
-      </div>
+        <div
+          :key="`label-${index}`"
+          class="c-bar-label"
+          :style="barLabelStyles[index]"
+        >
+          <span
+            class="c-bar-overlay"
+            :style="{ maxHeight: `${barLayout[index].height}%` }"
+            v-html="barSymbol(index)"
+          />
+        </div>
+      </template>
     </div>
     <div />
     <div class="c-info-list">
@@ -470,39 +493,67 @@ export default {
 }
 
 .c-stacked-bars {
-  position: relative;
+  overflow: hidden;
   width: 5rem;
+  position: relative;
   background-color: var(--color-disabled);
   margin-right: 1.5rem;
 }
 
-.c-bar-overlay {
-  display: flex;
+.c-bar-fill,
+.c-bar-label {
   width: 100%;
   height: 100%;
-  top: -5%;
   position: absolute;
+  top: 0;
+  left: 0;
+  transition-timing-function: ease;
+  transition-property: transform;
+}
+
+.c-bar-fill {
+  transform-origin: top;
+}
+
+.c-bar-label {
+  display: flex;
+  z-index: 1;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.c-bar-overlay {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
+  opacity: 0.8;
   pointer-events: none;
   user-select: none;
-  overflow: hidden;
-  opacity: 0.8;
-  z-index: 1;
 }
 
-.c-bar-highlight {
+.c-bar-fill::after {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  background-color: white;
+  pointer-events: none;
+}
+
+.c-bar-highlight::after {
   animation: a-glow-bar 2s infinite;
 }
 
 @keyframes a-glow-bar {
-  0% { box-shadow: inset 0 0 0.3rem 0; }
-  50% {
-    box-shadow: inset 0 0 0.6rem 0;
-    filter: brightness(130%);
-  }
-  100% { box-shadow: inset 0 0 0.3rem 0; }
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.3; }
 }
 
 .c-info-list {

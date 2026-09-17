@@ -1,6 +1,7 @@
 import { DC } from "../../constants";
 
 import { memoizeBreakdown } from "./cache";
+import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
 
 const boostFactors = memoizeBreakdown(() => {
@@ -27,8 +28,7 @@ function normalBoosts(tier) {
 
 function acrossDimensions(dim, calculate) {
   if (dim) return calculate(dim);
-  return AntimatterDimensions.all.reduce((mult, ad) =>
-    (ad.isProducing ? mult.mul(calculate(ad.tier)) : mult), DC.D1);
+  return MultiplierTabHelper.producingADs().reduce((mult, ad) => mult.mul(calculate(ad.tier)), DC.D1);
 }
 
 // Research grants imaginary boosts, including their Imaginary Upgrade 23 scaling. Green light

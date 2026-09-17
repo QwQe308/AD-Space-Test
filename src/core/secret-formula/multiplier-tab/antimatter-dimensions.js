@@ -9,8 +9,7 @@ import { MultiplierTabIcons } from "./icons";
 
 const baseADProduction = memoizeBreakdown(() => {
   const maxTier = EternityChallenge(7).isRunning ? 7 : MultiplierTabHelper.activeDimCount("AD");
-  return AntimatterDimensions.all
-    .filter(ad => ad.isProducing)
+  return MultiplierTabHelper.producingADs()
     .reduce((mult, ad) => mult.times(ad.multiplier), DC.D1)
     .times(AntimatterDimension(maxTier).totalAmount);
 });
@@ -70,10 +69,10 @@ export const AD = {
         ? AntimatterDimension(ad).continuumValue
         : Decimal.floor(AntimatterDimension(ad).bought.div(10))
       );
-      if (dim) return Decimal.pow(AntimatterDimensions.buyTenMultiplier, getPurchases(dim));
-      return AntimatterDimensions.all
-        .filter(ad => ad.isProducing)
-        .map(ad => Decimal.pow(AntimatterDimensions.buyTenMultiplier, getPurchases(ad.tier)))
+      const buyTen = MultiplierTabHelper.adBuyTenMultiplier();
+      if (dim) return Decimal.pow(buyTen, getPurchases(dim));
+      return MultiplierTabHelper.producingADs()
+        .map(ad => Decimal.pow(buyTen, getPurchases(ad.tier)))
         .reduce((x, y) => x.times(y), DC.D1);
     },
     isActive: () => !EternityChallenge(11).isRunning,
@@ -97,8 +96,7 @@ export const AD = {
     name: dim => (dim ? `Dimboosts on AD ${dim}` : "Dimboosts"),
     multValue: dim => (dim
       ? DimBoost.multiplierToNDTier(dim)
-      : AntimatterDimensions.all
-        .filter(ad => ad.isProducing)
+      : MultiplierTabHelper.producingADs()
         .map(ad => DimBoost.multiplierToNDTier(ad.tier))
         .reduce((x, y) => x.times(y), DC.D1)),
     isActive: true,

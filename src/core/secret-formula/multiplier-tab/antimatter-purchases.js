@@ -1,14 +1,14 @@
 import { DC } from "../../constants";
 
 import { memoizeBreakdown } from "./cache";
+import { MultiplierTabHelper } from "./helper-functions";
 import { MultiplierTabIcons } from "./icons";
 
 const purchaseCounts = memoizeBreakdown(() => {
   const counts = AntimatterDimensions.all.map(ad => (Laitela.continuumActive
     ? ad.continuumValue
     : ad.bought.div(10).floor()));
-  const total = AntimatterDimensions.all.reduce((sum, ad) =>
-    (ad.isProducing ? sum.add(counts[ad.tier - 1]) : sum), DC.D0);
+  const total = MultiplierTabHelper.producingADs().reduce((sum, ad) => sum.add(counts[ad.tier - 1]), DC.D0);
   return { counts, total };
 });
 

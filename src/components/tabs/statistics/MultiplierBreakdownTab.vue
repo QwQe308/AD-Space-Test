@@ -4,7 +4,6 @@ import { beginBreakdownUpdate } from "@/core/secret-formula/multiplier-tab/cache
 import { createEntryInfo } from "./breakdown-entry-info";
 import MultiplierBreakdownEntry from "./MultiplierBreakdownEntry";
 
-const REFRESH_INTERVAL = 100;
 const OPTIONS_PER_PAGE = 7;
 
 const MULT_TAB_OPTIONS = [
@@ -33,7 +32,6 @@ export default {
     return {
       availableOptions: [],
       menuPage: 0,
-      refreshSchedule: Object.seal({ nextAt: null }),
       currentID: player.options.multiplierTab.currTab,
     };
   },
@@ -57,11 +55,6 @@ export default {
   },
   methods: {
     update() {
-      const now = performance.now();
-      const nextAt = this.refreshSchedule.nextAt ?? now;
-      if (now < nextAt) return;
-      // Keep a 100 ms cadence even when game ticks do not divide evenly into it; skip missed samples.
-      this.refreshSchedule.nextAt = nextAt + (Math.floor((now - nextAt) / REFRESH_INTERVAL) + 1) * REFRESH_INTERVAL;
       beginBreakdownUpdate();
       const availableOptions = MULT_TAB_OPTIONS.filter(opt => this.checkActiveKey(opt.key));
       if (availableOptions.length !== this.availableOptions.length ||

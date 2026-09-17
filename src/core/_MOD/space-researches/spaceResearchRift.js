@@ -1,3 +1,4 @@
+import { cacheSnapshotGetters } from "../../read-only-snapshot";
 import { DC } from "../../constants";
 import { GameMechanicState } from "../../utils";
 
@@ -192,6 +193,8 @@ class SpaceResearchRiftClass extends GameMechanicState {
     }
   }
 }
+
+cacheSnapshotGetters(SpaceResearchRiftClass.prototype, ["costScale", "level", "effectValue", "maxLevel"]);
 
 export const SpaceResearchRifts = mapGameDataToObject(
   GameDatabase.space.spaceResearches,

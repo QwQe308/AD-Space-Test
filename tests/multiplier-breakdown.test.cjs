@@ -335,7 +335,7 @@ test("Base AD Production shares its aggregate and active dimension count within 
   assert.equal(multiplierReads, 15);
 });
 
-test("the breakdown refreshes at 10 Hz while grouping, power display and expansion remain immediate", async t => {
+test("the breakdown follows every UI update while grouping, power display and expansion remain immediate", async t => {
   let timestamp = 0;
   t.mock.method(performance, "now", () => timestamp);
   let mult = new Decimal(1000);
@@ -371,18 +371,18 @@ test("the breakdown refreshes at 10 Hz while grouping, power display and expansi
   view.update();
   const firstText = view.totalText;
   mult = new Decimal(10000);
-  for (const time of [33, 66, 99]) {
+  for (const time of [5, 10, 16]) {
     timestamp = time;
+    mult = mult.mul(10);
     tab.update();
     view.update();
-    assert.equal(view.totalText, firstText);
-    assert.equal(calls, 1);
+    assert.notEqual(view.totalText, firstText);
+    assert.ok(view.totalText.includes(String(mult)));
+    const reads = calls;
+    view.update();
+    assert.equal(calls, reads, "child updates share one generation");
   }
-  timestamp = 100;
-  tab.update();
-  view.update();
-  assert.notEqual(view.totalText, firstText);
-  assert.equal(calls, 2);
+  assert.equal(calls, 4);
   view.changeGroup();
   assert.ok(view.entryTexts[0].includes("^2"));
   view.replacePowers = true;
@@ -396,19 +396,19 @@ test("the breakdown refreshes at 10 Hz while grouping, power display and expansi
   await Vue.nextTick();
   assert.equal(expanded, true);
   view.changeGroup();
-  // A 33 ms game tick should average 10 Hz, rather than drifting down to one sample every 132 ms.
-  for (timestamp = 132; timestamp < 1000; timestamp += 33) {
+  // Neither rapid updates nor a stalled tab require a time-based cache expiry.
+  for (timestamp = 20; timestamp < 100; timestamp += 5) {
     tab.update();
     view.update();
   }
-  assert.equal(calls, 10);
+  assert.equal(calls, 20);
   timestamp = 5000;
   tab.update();
   view.update();
-  assert.equal(calls, 11);
+  assert.equal(calls, 21);
   tab.update();
   view.update();
-  assert.equal(calls, 11);
+  assert.equal(calls, 22);
   view.$destroy();
   tab.$destroy();
 });
@@ -938,7 +938,10 @@ test("Space Nerf uses base-space fakeValue and renders its divisor as a striped 
     assert.match(view.entryTexts[0], /Base Space: 1000000 \(\^\(1\//u);
     assert.match(view.entryTexts[1], /Space Divisor: \(Space \/ 100 ➜ \^\(1\//u);
     assert.match(view.barStyles[1].background, /repeating-linear-gradient/u);
-    assert.equal(view.barStyles[1].height, "33.333%");
+    assert.equal(view.barStyles[1].height, undefined);
+    assert.equal(view.barStyles[1].top, undefined);
+    assert.match(view.barStyles[1].transform, /translateY\(.+\) scaleY\(.+\)/u);
+    close(view.barLayout[1].height, 100 / 3);
 
     divisor = new Decimal("1e6");
     beginBreakdownUpdate();
@@ -952,3 +955,188 @@ test("Space Nerf uses base-space fakeValue and renders its divisor as a striped 
     assert.equal(view.entries[1].data.isVisible, false);
     view.$destroy();
   });
+
+// Load the real state class and its snapshot registration, without initializing the rest of the game.
+function productionStateClass(file, name, exportName) {
+  const source = fs.readFileSync(path.join(root, "src", file), "utf8");
+  const body = source.slice(source.indexOf(`class ${name} `), source.indexOf(`export const ${exportName} =`));
+  const { cacheSnapshotGetters } = loadSource(path.join(root, "src/core/read-only-snapshot.js"));
+  return compileFunction(`${body}\nreturn ${name};`,
+    ["DC", "cacheSnapshotGetters", "DimensionState", "GameMechanicState"])(
+    DC, cacheSnapshotGetters, class {}, class {});
+}
+
+test("snapshots share reads, isolate owners and restore live getters after nesting or errors", () => {
+  const { ReadOnlySnapshot, cacheSnapshotGetters } = loadSource(path.join(root, "src/core/read-only-snapshot.js"));
+  class State {
+    constructor(value) {
+      this.current = value;
+      this.reads = 0;
+    }
+
+    get value() {
+      this.reads++;
+      return this.current;
+    }
+  }
+  cacheSnapshotGetters(State.prototype, ["value"]);
+  const first = new State(2);
+  const second = new State(undefined);
+  const snapshot = new ReadOnlySnapshot();
+  snapshot.run(() => {
+    assert.equal(first.value, 2);
+    assert.equal(first.value, 2);
+    assert.equal(second.value, undefined);
+    assert.equal(second.value, undefined);
+    new ReadOnlySnapshot().run(() => assert.equal(first.value, 2));
+    assert.equal(first.value, 2);
+  });
+  assert.equal(first.reads, 2);
+  assert.equal(second.reads, 1);
+  first.current = 3;
+  assert.equal(first.value, 3);
+  assert.throws(() => snapshot.run(() => {
+    throw new Error("read failed");
+  }), /read failed/u);
+  first.current = 4;
+  assert.equal(first.value, 4);
+  assert.equal(new ReadOnlySnapshot().run(() => first.value), 4);
+});
+
+test("research effects share level and cost calculations only inside the current breakdown snapshot", () => {
+  const State = productionStateClass("core/_MOD/space-researches/spaceResearchRift.js",
+    "SpaceResearchRiftClass", "SpaceResearchRifts");
+  const { memoizeBreakdown } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/cache.js"));
+  const research = Object.create(State.prototype);
+  let costs = 0;
+  let levels = 0;
+  let effects = 0;
+  let scale = new Decimal(2);
+  research.config = {
+    key: "snapshotTest",
+    costScale: () => {
+      costs++;
+      return { getMaxBought: (start, progress) => {
+        levels++;
+        return { quantity: progress.div(scale) };
+      } };
+    },
+    effectValue: level => {
+      effects++;
+      return Decimal.pow10(level);
+    },
+  };
+  player.spaceResearches = { snapshotTest: { progress: new Decimal(20), pendingProgress: new Decimal(20) } };
+  const readActive = memoizeBreakdown(() => research.canBeApplied);
+  const readEffect = memoizeBreakdown(() => research.effectValue);
+  const readOtherEntry = memoizeBreakdown(() => research.effectValue.mul(2));
+  beginBreakdownUpdate();
+  assert.equal(readActive(), true);
+  assert.ok(readEffect().eq("1e10"));
+  assert.ok(readOtherEntry().eq("2e10"));
+  assert.deepEqual([costs, levels, effects], [1, 1, 1]);
+  // Changes in simulation are visible immediately, even before the next UI update.
+  research.progress = new Decimal(40);
+  assert.ok(research.level.eq(20));
+  scale = new Decimal(4);
+  assert.ok(research.level.eq(10));
+  research.reset();
+  assert.ok(research.level.eq(0));
+  beginBreakdownUpdate();
+  assert.equal(readActive(), false);
+  assert.ok(readEffect().eq(1));
+  // Large progress remains Decimal, including when the level itself exceeds Number's range.
+  research.progress = new Decimal("1e400");
+  beginBreakdownUpdate();
+  assert.ok(readEffect().log10().eq(new Decimal("1e400").div(4)));
+});
+
+test("unlocked dimensions avoid lower-tier Continuum reads without bypassing challenge restrictions", t => {
+  const available = productionMethod("core/dimensions/antimatter-dimension.js", "isAvailableForPurchase");
+  const originals = new Map([
+    "EternityMilestone", "DimBoost", "AntimatterDimension", "NormalChallenge", "isSCRunningOnTier"
+  ]
+    .map(key => [key, global[key]]));
+  t.after(() => {
+    for (const [key, value] of originals) global[key] = value;
+  });
+  let unlocked = true;
+  let boosts = 4;
+  let previous = new Decimal(0);
+  let previousReads = 0;
+  let nc10 = false;
+  let spaceChallenge = 0;
+  global.EternityMilestone = { unlockAllND: {
+    get isReached() { return unlocked; }
+  } };
+  global.DimBoost = { get totalBoosts() {
+    assert.equal(unlocked, false, "the milestone also skips the boost requirement");
+    return new Decimal(boosts);
+  } };
+  global.AntimatterDimension = () => ({ get totalAmount() {
+    previousReads++;
+    return previous;
+  } });
+  global.NormalChallenge = id => ({ isRunning: id === 10 && nc10 });
+  global.isSCRunningOnTier = (tier, id) => tier === 2 && id === spaceChallenge;
+  assert.equal(available.call({ tier: 8 }), true);
+  assert.equal(previousReads, 0);
+  nc10 = true;
+  assert.equal(available.call({ tier: 8 }), false);
+  assert.equal(available.call({ tier: 6 }), true);
+  nc10 = false;
+  for (spaceChallenge of [1, 2]) {
+    assert.equal(available.call({ tier: 5 }), false);
+    assert.equal(available.call({ tier: 4 }), true);
+  }
+  spaceChallenge = 0;
+  unlocked = false;
+  assert.equal(available.call({ tier: 1 }), true);
+  assert.equal(available.call({ tier: 8 }), false);
+  previous = new Decimal(1);
+  assert.equal(available.call({ tier: 8 }), true);
+  boosts = 0;
+  assert.equal(available.call({ tier: 8 }), false);
+});
+
+test("AD snapshot shares Continuum across entries and reads current currency outside the display", t => {
+  const State = productionStateClass("core/dimensions/antimatter-dimension.js",
+    "AntimatterDimensionState", "AntimatterDimension");
+  const { memoizeBreakdown } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/cache.js"));
+  const originals = new Map(["EternityMilestone", "Laitela", "Enslaved", "Currency", "NormalChallenge",
+    "EternityChallenge", "isSCRunningOnTier"].map(key => [key, global[key]]));
+  t.after(() => {
+    for (const [key, value] of originals) global[key] = value;
+  });
+  global.EternityMilestone = { unlockAllND: { isReached: true } };
+  global.Laitela = { continuumActive: true, isRunning: false, matterExtraPurchaseFactor: new Decimal(1) };
+  global.Enslaved = { isRunning: false };
+  global.Currency = { antimatter: { value: new Decimal("1e1000") } };
+  global.NormalChallenge = () => ({ isRunning: false });
+  global.EternityChallenge = () => ({ isRunning: false });
+  global.isSCRunningOnTier = () => false;
+  let continuumReads = 0;
+  const dim = Object.create(State.prototype);
+  Object.defineProperties(dim, {
+    tier: { value: 8 },
+    amount: { value: new Decimal(0) },
+    costScale: { value: { getContinuumValue: currency => {
+      continuumReads++;
+      return currency.log10();
+    } } },
+  });
+  const first = memoizeBreakdown(() => [dim.isProducing, dim.totalAmount]);
+  const second = memoizeBreakdown(() => dim.continuumValue);
+  beginBreakdownUpdate();
+  assert.equal(first()[0], true);
+  assert.ok(first()[1].eq(10000));
+  assert.ok(second().eq(1000));
+  assert.equal(continuumReads, 1);
+  Currency.antimatter.value = new Decimal("1e2000");
+  assert.ok(dim.continuumValue.eq(2000));
+  assert.equal(continuumReads, 2);
+  beginBreakdownUpdate();
+  assert.ok(first()[1].eq(20000));
+  assert.ok(second().eq(2000));
+  assert.equal(continuumReads, 3);
+});
