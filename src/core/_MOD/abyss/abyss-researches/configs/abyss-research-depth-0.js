@@ -500,7 +500,7 @@ const baseConfig = {
       },
       {
         description() {
-          return `Reach 30 Time Theorems`;
+          return `Reach 30 total Time Theorems`;
         },
         requirement() {
           return player.timestudy.maxTheorem.gte(30);
