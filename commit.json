@@ -1,1 +1,1 @@
-{"sha":"89fd0133c9ace02c2746c889e243f91bbf280345","message":"fix: fix an implicit conversion from Decimal to number","author":"QwQe308"}
+{"sha":"f79bfd69779f55f0a069c067ef9663c6d8f0052e","message":"perf: better mulitiplier breakdown performance","author":"QwQe308"}
