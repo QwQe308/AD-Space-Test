@@ -31,6 +31,7 @@ export default {
       newGameKey: "",
       maxConcurrent: 1,
       activeNodesInfo: [],
+      researchPanelCollapsed: false,
       abyssResearchSpeed: new Decimal(0),
     };
   },
@@ -124,18 +125,39 @@ export default {
         <div
           v-if="activeNodesInfo.length > 0 || inAbyssResearchTab"
           class="active-research-info"
+          :class="{ 'active-research-info--collapsed': researchPanelCollapsed }"
         >
-          <h3>Researching ({{ activeNodesInfo.length }}/{{ maxConcurrent }})</h3>
-          <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
-          <div class="active-list">
-            <div
-              v-for="(info, index) in activeNodesInfo"
-              :key="index"
-              class="active-item"
+          <div class="active-research-header">
+            <h3 v-if="!researchPanelCollapsed">
+              Researching ({{ activeNodesInfo.length }}/{{ maxConcurrent }})
+            </h3>
+            <button
+              type="button"
+              class="active-research-toggle"
+              :aria-expanded="!researchPanelCollapsed"
+              :aria-label="researchPanelCollapsed ? 'Expand research panel' : 'Minimize research panel'"
+              :title="researchPanelCollapsed ? 'Expand research panel' : 'Minimize research panel'"
+              @click="researchPanelCollapsed = !researchPanelCollapsed"
             >
-              {{ info }}
-            </div>
+              <i
+                class="fas"
+                :class="researchPanelCollapsed ? 'fa-flask' : 'fa-minus'"
+                aria-hidden="true"
+              />
+            </button>
           </div>
+          <template v-if="!researchPanelCollapsed">
+            <div>Base ARS: {{ format(abyssResearchSpeed, 2, 3) }}</div>
+            <div class="active-list">
+              <div
+                v-for="(info, index) in activeNodesInfo"
+                :key="index"
+                class="active-item"
+              >
+                {{ info }}
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -149,14 +171,64 @@ export default {
   right: 20px;
   background: rgba(20, 21, 30, 0.9);
   padding: 15px;
+  padding-top: 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 5;
 }
 
-.active-research-info h3 {
+.active-research-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 10px;
+}
+
+.active-research-info h3 {
+  margin: 0;
   color: rgba(80, 160, 255, 0.9);
+}
+
+.active-research-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(80, 160, 255, 0.9);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.active-research-toggle:hover {
+  background: rgba(80, 160, 255, 0.15);
+  color: #ffffff;
+}
+
+.active-research-toggle:focus-visible {
+  outline: 2px solid rgba(80, 160, 255, 0.9);
+  outline-offset: 2px;
+}
+
+.active-research-info--collapsed {
+  padding: 0;
+  border-radius: 50%;
+}
+
+.active-research-info--collapsed .active-research-header {
+  margin-bottom: 0;
+}
+
+.active-research-info--collapsed .active-research-toggle {
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
 }
 
 .active-list {
