@@ -62,8 +62,8 @@ export const TP = {
   },
   dilationGlyphSacrifice: {
     name: "Dilation Glyph Sacrifice",
-    multValue: () => GlyphSacrifice.dilation.effectValue,
-    isActive: () => Decimal.gt(GlyphSacrifice.dilation.effectValue, 1),
+    multValue: () => GlyphInfo.dilation.sacrificeInfo.effect(),
+    isActive: () => Decimal.gt(GlyphInfo.dilation.sacrificeInfo.effect(), 1),
     icon: MultiplierTabIcons.SACRIFICE("dilation"),
   },
 

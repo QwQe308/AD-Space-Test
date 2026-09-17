@@ -810,6 +810,107 @@ test("all reachable breakdown tree references resolve and mod research is reacha
   }
 });
 
+test("Time Dimensions breakdown accepts Decimal purchases and effects without implicit numeric conversion", t => {
+  t.mock.method(Decimal.prototype, "valueOf", () => {
+    throw new Error("Implicit conversion from Decimal to number");
+  });
+  assert.throws(() => new Decimal(2) * 3, /Implicit conversion/u);
+  const { TD } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/time-dimensions.js"));
+  const dimensions = Array.from({ length: 8 }, (_, i) => ({
+    tier: i + 1, bought: new Decimal(i === 7 ? "1e400" : i + 1),
+    powerMultiplier: new Decimal(4), isProducing: true,
+  }));
+  global.TimeDimensions = { all: dimensions };
+  global.TimeDimension = tier => dimensions[tier - 1];
+  assert.equal(typeof global.GlyphSacrifice, "undefined");
+  let sacrificeEffect = new Decimal("1e400");
+  global.GlyphInfo = { time: { sacrificeInfo: { effect: () => sacrificeEffect } } };
+  global.ImaginaryUpgrade = () => mockEffect(1, false);
+  global.EternityChallenge = id => ({ isRunning: id === 9, completions: 1, reward: mockEffect(1) });
+  global.Currency = { infinityPower: { value: new Decimal("1e1000") } };
+  global.InfinityDimensions = { powerConversionRate: new Decimal(14) };
+  global.Effects = loadSource(path.join(root, "src/core/game-mechanics/effects.js")).Effects;
+  beginBreakdownUpdate();
+
+  for (const bought of [new Decimal(123), new Decimal("1e400")]) {
+    dimensions[7].bought = bought;
+    const capped = bought.min(1e8);
+    assertDecimalClose(TD.purchase.multValue(8), Decimal.pow(4, capped));
+    assertDecimalClose(TD.basePurchase.multValue(8), Decimal.pow(4, capped));
+    assertDecimalClose(TD.purchase.multValue(), Decimal.pow(4, capped.add(28)));
+    assertDecimalClose(TD.basePurchase.multValue(), Decimal.pow(4, capped.add(28)));
+    assertDecimalClose(TD.timeGlyphSacrifice.multValue(), sacrificeEffect.pow(capped));
+  }
+  assert.equal(TD.basePurchase.isActive(8), true);
+  assert.equal(TD.timeGlyphSacrifice.isActive(), true);
+  sacrificeEffect = new Decimal(1);
+  assert.equal(TD.basePurchase.isActive(8), false);
+  assert.equal(TD.timeGlyphSacrifice.isActive(), false);
+
+  global.player.dilation = { active: true };
+  global.DilationUpgrade = { dilationPenalty: mockEffect(0.8) };
+  global.Effarig = { isRunning: true, multDilation: new Decimal(0.7) };
+  assertDecimalClose(TD.total.dilationEffect(), 0.42);
+  player.dilation.active = false;
+  assertDecimalClose(TD.total.dilationEffect(), 0.7);
+  Effarig.isRunning = false;
+  assertDecimalClose(TD.total.dilationEffect(), 1);
+
+  global.getAdjustedGlyphEffect = key => new Decimal(key === "curseddimensions" ? 1 : "1e400");
+  global.AlchemyResource = { time: mockEffect("1e400") };
+  global.Ra = { momentumValue: new Decimal(2) };
+  global.PelleRifts = { paradox: mockEffect("1e400") };
+  assertDecimalClose(TD.glyph.powValue(), "1e800");
+  assertDecimalClose(TD.alchemy.powValue(), "2e400");
+  assertDecimalClose(TD.pelle.powValue(), "1e400");
+  assert.equal(TD.nerfCursed.isActive(), false);
+  global.getAdjustedGlyphEffect = () => new Decimal(0.8);
+  assert.equal(TD.nerfCursed.isActive(), true);
+
+  for (const infinityPower of [new Decimal(0), new Decimal("1e1000")]) {
+    Currency.infinityPower.value = infinityPower;
+    const expected = infinityPower.max(1).pow(2).log2().clampMin(1).pow(4);
+    assertDecimalClose(TD.eternityChallenge.multValue(1), expected);
+    assertDecimalClose(TD.eternityChallenge.multValue(), expected.pow(8));
+  }
+});
+
+test("glyph sacrifice breakdowns use the live GlyphInfo API with no legacy GlyphSacrifice global", t => {
+  assert.equal(typeof global.GlyphSacrifice, "undefined");
+  t.mock.method(Decimal.prototype, "valueOf", () => {
+    throw new Error("Implicit conversion from Decimal to number");
+  });
+  global.ALCHEMY_RESOURCE = Object.fromEntries(
+    ["REALITY", "EFFARIG", "POWER", "INFINITY", "REPLICATION", "TIME", "DILATION"].map((key, i) => [key, i]));
+  global.GlyphInfo = loadSource(path.join(root, "src/core/secret-formula/reality/core-glyph-info.js")).GlyphInfo;
+  global.GlyphSacrificeHandler = { maxSacrificeForEffects: new Decimal("1e100") };
+  let disabled = false;
+  global.Pelle = { isDisabled: () => disabled };
+  player.reality = { glyphs: { sac: { time: new Decimal(0), dilation: new Decimal(0) } } };
+  global.TimeDimension = () => ({ isProducing: true, bought: new Decimal(3) });
+  global.ImaginaryUpgrade = () => mockEffect(1, false);
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { TD } = loadSource(path.join(base, "time-dimensions.js"));
+  const { TP } = loadSource(path.join(base, "tachyon-particles.js"));
+  for (const amount of [0, "1e50", "1e400"]) {
+    player.reality.glyphs.sac.time = new Decimal(amount);
+    player.reality.glyphs.sac.dilation = new Decimal(amount);
+    const time = GlyphInfo.time.sacrificeInfo.effect();
+    const dilation = GlyphInfo.dilation.sacrificeInfo.effect();
+    assertDecimalClose(TD.timeGlyphSacrifice.multValue(), time.pow(3));
+    assertDecimalClose(TP.dilationGlyphSacrifice.multValue(), dilation);
+    assert.equal(TD.timeGlyphSacrifice.isActive(), time.gt(1));
+    assert.equal(TD.basePurchase.isActive(8), time.gt(1));
+    assert.equal(TP.dilationGlyphSacrifice.isActive(), dilation.gt(1));
+  }
+  disabled = true;
+  assert.equal(TD.timeGlyphSacrifice.isActive(), false);
+  assert.equal(TD.basePurchase.isActive(8), false);
+  assert.equal(TP.dilationGlyphSacrifice.isActive(), false);
+  assertDecimalClose(TD.timeGlyphSacrifice.multValue(), 1);
+  assertDecimalClose(TP.dilationGlyphSacrifice.multValue(), 1);
+});
+
 test("Space Nerf uses base-space fakeValue and renders its divisor as a striped nerf while preserving exponent text",
   () => {
     const { AM } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/antimatter.js"));
