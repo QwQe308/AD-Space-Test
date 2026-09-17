@@ -129,19 +129,24 @@ export default {
         >
           <div class="active-research-header">
             <h3 v-if="!researchPanelCollapsed">
-              Researching ({{ activeNodesInfo.length }}/{{ maxConcurrent }})
+              <button
+                type="button"
+                class="active-research-title"
+                aria-expanded="true"
+                @click="researchPanelCollapsed = true"
+              >
+                Researching ({{ activeNodesInfo.length }}/{{ maxConcurrent }})
+              </button>
             </h3>
             <button
+              v-else
               type="button"
               class="active-research-toggle"
-              :aria-expanded="!researchPanelCollapsed"
-              :aria-label="researchPanelCollapsed ? 'Expand research panel' : 'Minimize research panel'"
-              :title="researchPanelCollapsed ? 'Expand research panel' : 'Minimize research panel'"
-              @click="researchPanelCollapsed = !researchPanelCollapsed"
+              aria-expanded="false"
+              @click="researchPanelCollapsed = false"
             >
               <i
-                class="fas"
-                :class="researchPanelCollapsed ? 'fa-flask' : 'fa-minus'"
+                class="fas fa-flask"
                 aria-hidden="true"
               />
             </button>
@@ -171,17 +176,12 @@ export default {
   right: 20px;
   background: rgba(20, 21, 30, 0.9);
   padding: 15px;
-  padding-top: 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 5;
 }
 
 .active-research-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   margin-bottom: 10px;
 }
 
@@ -190,45 +190,57 @@ export default {
   color: rgba(80, 160, 255, 0.9);
 }
 
+.active-research-title {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.active-research-title:hover {
+  color: var(--color-space);
+}
+
 .active-research-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: 100%;
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: transparent;
-  color: rgba(80, 160, 255, 0.9);
-  font-size: 14px;
+  background: rgb(20, 21, 30);
+  color: var(--color-space);
+  font-size: 20px;
   cursor: pointer;
 }
 
 .active-research-toggle:hover {
-  background: rgba(80, 160, 255, 0.15);
-  color: #ffffff;
+  background: rgba(80, 160, 255, 0.12);
+  color: var(--color-space);
 }
 
-.active-research-toggle:focus-visible {
+.active-research-toggle:focus-visible,
+.active-research-title:focus-visible {
   outline: 2px solid rgba(80, 160, 255, 0.9);
   outline-offset: 2px;
 }
 
 .active-research-info--collapsed {
+  width: 48px;
+  height: 48px;
   padding: 0;
   border-radius: 50%;
 }
 
 .active-research-info--collapsed .active-research-header {
   margin-bottom: 0;
-}
-
-.active-research-info--collapsed .active-research-toggle {
-  width: 48px;
-  height: 48px;
-  font-size: 20px;
 }
 
 .active-list {
