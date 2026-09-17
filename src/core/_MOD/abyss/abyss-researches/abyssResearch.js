@@ -346,6 +346,8 @@ class AbyssResearchHelper {
     if (player.records.thisReality.maxSpace.lt(player.space)) {
       player.records.thisReality.maxSpace = player.space;
     }
+    player.records.thisReality.maxEffectiveSpace =
+      player.records.thisReality.maxEffectiveSpace.max(getEffectiveSpace());
 
     player.activeAbyssResearches.forEach(research => {
       AbyssResearches[research].addProgress(AbyssResearches[research].researchSpeed.mul(diff).div(1000));

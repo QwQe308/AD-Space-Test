@@ -384,7 +384,7 @@ const baseConfig = {
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
-      cost: new Decimal(7500),
+      cost: new Decimal(10000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -400,7 +400,7 @@ const baseConfig = {
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
-      cost: new Decimal(15000),
+      cost: new Decimal(20000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -420,7 +420,7 @@ const baseConfig = {
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
-      cost: new Decimal(7500),
+      cost: new Decimal(10000),
       costIncrease: new Decimal(2),
     },
     description(level) {
@@ -438,7 +438,7 @@ const baseConfig = {
   A21: {
     position: [0, 6],
     type: NODE_TYPE.SINGLE,
-    cost: new Decimal(1e4),
+    cost: new Decimal(1.5e4),
     description(level) {
       return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.`;
     },
@@ -449,7 +449,7 @@ const baseConfig = {
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
-    cost: new Decimal(4e5),
+    cost: new Decimal(6e5),
     description(level) {
       return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },

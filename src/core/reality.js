@@ -672,6 +672,7 @@ export function finishProcessReality(realityProps) {
     Player.resetRequirements("reality");
   }
   player.records.thisReality.maxSpace = DC.D0; // MOD
+  player.records.thisReality.maxEffectiveSpace = DC.D0;
   player.records.thisReality.time = DC.D0;
   player.records.thisReality.realTime = DC.D0;
   player.records.thisReality.maxReplicanti = DC.D0;

@@ -467,6 +467,7 @@ window.player = {
       bestRSmin: DC.D0,
       bestRSminVal: DC.D0,
       maxSpace: DC.D0,
+      maxEffectiveSpace: DC.D0,
     },
     bestReality: {
       time: DC.BEMAX,

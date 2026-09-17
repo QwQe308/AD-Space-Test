@@ -11,11 +11,10 @@ export const ARS = {
     overlay: ["∏"],
   },
   base: {
-    name: "Maximum Space this Reality (Square Root / 10)",
-    multValue: () => player.records.thisReality.maxSpace.pow(0.5).div(10),
+    name: "Maximum Effective Space this Reality (Square Root / 10)",
+    multValue: () => player.records.thisReality.maxEffectiveSpace.pow(0.5).div(10),
     isActive: true,
     icon: MultiplierTabIcons.SPACE,
   },
   A5: abyssResearch("A5", "Research Speed from Tickspeed Upgrades"),
-  A9: abyssResearch("A9", "Abyss Research Speed"),
 };

@@ -681,6 +681,48 @@ test("dimension boost research and green light match production with Mirror clam
   }
 });
 
+test("Abyss records effective space peaks independently before awarding research progress", () => {
+  const update = productionMethod("core/_MOD/abyss/abyss-researches/abyssResearch.js", "update");
+  const { globalAbyssResearchSpeed } = loadSource(path.join(root,
+    "src/core/_MOD/abyss/abyss-researches/abyssResearchSpawner.js"));
+  const space = loadSource(path.join(root, "src/core/_MOD/space.js"));
+  global.getEffectiveSpace = space.getEffectiveSpace;
+  global.getEffectiveSpaceMult = space.getEffectiveSpaceMult;
+  global.SpaceResearchRifts = { r42: mockEffect(2) };
+  let cyan = 3;
+  global.light = { cyan: { effectValue: () => new Decimal(cyan) } };
+  global.player.records = { thisReality: { maxSpace: new Decimal(0), maxEffectiveSpace: new Decimal(0) } };
+  global.player.activeAbyssResearches = new Set(["A1"]);
+  let progress = new Decimal(0);
+  global.AbyssResearches = {
+    A5: mockEffect(1), A9: mockEffect(1),
+    A1: {
+      get researchSpeed() { return globalAbyssResearchSpeed(); },
+      addProgress: value => { progress = progress.add(value); }
+    }
+  };
+  global.player.space = new Decimal(150);
+  update.call({}, 1000);
+  assertDecimalClose(player.records.thisReality.maxSpace, 150);
+  assertDecimalClose(player.records.thisReality.maxEffectiveSpace, 900);
+  assertDecimalClose(progress, 3);
+
+  // Effective-space bonuses can fall even while raw space increases.
+  cyan = 1;
+  player.space = new Decimal(200);
+  update.call({}, 1000);
+  assertDecimalClose(player.records.thisReality.maxSpace, 200);
+  assertDecimalClose(player.records.thisReality.maxEffectiveSpace, 900);
+  assertDecimalClose(progress, 6);
+
+  // Bonus changes alone must also update the effective-space record.
+  cyan = 4;
+  update.call({}, 1000);
+  assertDecimalClose(player.records.thisReality.maxSpace, 200);
+  assertDecimalClose(player.records.thisReality.maxEffectiveSpace, 1600);
+  assertDecimalClose(progress, 10);
+});
+
 test("space, research speed and conversion breakdowns reconstruct the live formulas", () => {
   global.PlayerProgress.imaginaryUnlocked = () => true;
   global.AbyssResearches = { A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5) };
@@ -698,7 +740,9 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   global.isSCRunningOnTier = (id, tier) => id === 3 && tier === 2;
   global.player.space = new Decimal(1000);
   global.player.spaceDivisiorActivePercentage = new Decimal(0.75);
-  global.player.records = { thisReality: { maxSpace: new Decimal(10000) } };
+  global.player.records = {
+    thisReality: { maxSpace: new Decimal(10000), maxEffectiveSpace: new Decimal(40000) }
+  };
   global.DimBoost = { totalBoosts: new Decimal(8) };
   const space = loadSource(path.join(root, "src/core/_MOD/space.js"));
   Object.assign(global, space);
@@ -715,7 +759,9 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   assertDecimalClose(breakdownProduct(Object.fromEntries(
     ["base", "achievementMult", "SR21", "infinityUpgrade", "timeStudy", "A3"].map(k => [k, RS[k]]))),
   speed.globalResearchSpeed());
-  assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5, A9: ARS.A9 }), ARS.total.multValue());
+  assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5 }), ARS.total.multValue());
+  assertDecimalClose(ARS.base.multValue(), 20);
+  assertDecimalClose(ARS.total.multValue(), 80);
   assertDecimalClose(breakdownProduct(Object.fromEntries(
     ["SR22", "A9", "spaceDilation", "lightWhite", "spaceChallenge3", "spaceDivisorPercentage"]
       .map(k => [k, AM[k]]))), space.getSpaceDivisor());
@@ -748,6 +794,8 @@ test("all reachable breakdown tree references resolve and mod research is reacha
     groups.flat().forEach(visit);
   }
   Object.keys(values).filter(key => values[key].total).forEach(key => visit(`${key}_total`));
+  assert.ok(!tree.ARS_total.flat().includes("ARS_A9"));
+  assert.ok(tree.AM_spaceDivisor.flat().includes("AM_A9"));
   assert.ok(tree.DT_total[0].includes("DT_SR54"));
   assert.ok(tree.EP_total[0].includes("EP_B0"));
   assert.ok(tree.infinities_total[0].includes("infinities_A12"));

@@ -82,8 +82,8 @@ export function abyssResearchSafetyChecker(config, layer) {
 }
 
 export function globalAbyssResearchSpeed() {
-  let abyssResearchSpeed = player.records.thisReality.maxSpace.pow(0.5).div(10);
-  abyssResearchSpeed = abyssResearchSpeed.timesEffectsOf(AbyssResearches.A5, AbyssResearches.A9);
+  let abyssResearchSpeed = player.records.thisReality.maxEffectiveSpace.pow(0.5).div(10);
+  abyssResearchSpeed = abyssResearchSpeed.timesEffectsOf(AbyssResearches.A5);
   return abyssResearchSpeed;
 }
 

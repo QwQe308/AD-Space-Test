@@ -114,7 +114,7 @@ export const multiplierTabTree = {
   RS_base: [["RS_space", "RS_dimBoost", "RS_Abyss"]],
   RS_space: [["RS_spaceAmount", "RS_SR42", "RS_lightCyan"]],
   RS_timeStudy: [[91, 92, 102, 222].map(id => `general_timeStudy_${id}`)],
-  ARS_total: [["ARS_base", "ARS_A5", "ARS_A9"]],
+  ARS_total: [["ARS_base", "ARS_A5"]],
   ID_powerConversion: [["ID_conversionBase", "ID_conversionSR45", "ID_conversionPelle"]],
 };
 
