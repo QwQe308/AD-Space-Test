@@ -108,6 +108,37 @@ test("power contributions and nerf-exempt multipliers keep their original weight
   [1 / 3, 2 / 3, -0.25].forEach((value, index) => close(nerfs.percents[index], value));
 });
 
+test("Abyss combines its divisor and power nerf using the production order", () => {
+  const { RS } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/space-research-speed.js"));
+  for (const logBase of [new Decimal(2), new Decimal(100), new Decimal("1e400")]) {
+    const base = Decimal.pow10(logBase);
+    const multiplier = RS.Abyss.multValue();
+    const power = RS.Abyss.powValue();
+    const final = base.mul(multiplier).pow(power);
+    const expectedLoss = new Decimal(1).sub(final.log10().div(logBase)).toNumber();
+    const combined = calculateBreakdownPercentages([entry(base), entry(multiplier, power)], final);
+    close(combined.percents[0], 1);
+    close(combined.percents[1], -expectedLoss);
+    const layout = breakdownBarLayout(combined.percents);
+    close(layout[1].height, expectedLoss * 100);
+    const split = calculateBreakdownPercentages([entry(base), entry(multiplier), entry(1, power)], final);
+    close(split.percents[1] + split.percents[2], combined.percents[1]);
+  }
+});
+
+test("power nerfs apply once, share their total loss and respect exempt multipliers", () => {
+  const pure = calculateBreakdownPercentages([entry("1e100"), entry(1, 0.9)], "1e90");
+  close(pure.percents[1], -0.1);
+  const multiple = calculateBreakdownPercentages([
+    entry("1e100"), entry(0.1, 0.9), entry(1, 0.8)
+  ], Decimal.pow10(99 * 0.9 * 0.8));
+  close(multiple.percents[1] + multiple.percents[2], -(1 - 99 * 0.9 * 0.8 / 100));
+  const exempt = calculateBreakdownPercentages([
+    entry("1e100"), entry("1e100", 1, { ignoresNerfPowers: true }), entry(0.1, 0.9)
+  ], Decimal.pow10(99 * 0.9 + 100));
+  close(exempt.percents[2], -(200 - (99 * 0.9 + 100)) / 200);
+});
+
 test("multiplicative divisors retain a negative share without power nerfs, including layered values", () => {
   for (const exponent of [new Decimal(6), new Decimal("1e400")]) {
     const base = Decimal.pow10(exponent);
@@ -136,7 +167,8 @@ test("huge and tiny powers stay Decimal until normalization; tiny percentages ke
   assert.ok(result.percents[0] > 0 && result.percents[0] < 0.001);
   close(result.percents[1], 1);
   const nerfed = calculateBreakdownPercentages([entry("1e1000"), entry(1, new Decimal("1e-400"))], 10);
-  assert.deepEqual(nerfed.percents, [1, -1]);
+  close(nerfed.percents[0], 1);
+  close(nerfed.percents[1], -1);
   const base = calculateBreakdownPercentages([entry(0.1, 1, { key: "IP_base" })], 10);
   assert.equal(base.percents[0], 1);
 });

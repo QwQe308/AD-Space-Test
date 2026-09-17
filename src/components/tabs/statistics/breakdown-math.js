@@ -4,6 +4,7 @@ import { DC } from "@/core/constants";
 export const nerfBlacklist = ["IP_base", "EP_base", "TP_base"];
 
 function toPercentage(value) {
+  if (value.eq(0)) return 0;
   const number = value.toNumber();
   if (Number.isNaN(number)) return 0;
   // Keep nonzero contributions distinguishable from inactive effects in the text display.
@@ -30,23 +31,16 @@ export function calculateBreakdownPercentages(entries, resourceMultiplier) {
   const logPosPow = totalPosPow.ln();
   const logNegPow = totalNegPow.ln();
   const powerShare = DC.D1.sub(totalPosPow.reciprocal());
-  const negativeShare = totalNegPow.sub(1);
   let totalPerc = DC.D0;
   let nerfedPerc = DC.D0;
+  let affectedDivisorPerc = DC.D0;
   const contributions = entries.map(entry => {
     const power = entry.data.pow;
-    let percent;
-    if (Decimal.gte(power, 1)) {
-      // Cancel totalPosPow before dividing; the logarithms themselves may exceed Number.MAX_VALUE.
-      percent = Decimal.log10(entry.data.mult).div(resourceLog);
-      if (Decimal.neq(power, 1) && totalPosPow.neq(1)) {
-        percent = percent.add(Decimal.ln(power).div(logPosPow).mul(powerShare));
-      }
-    } else if (totalNegPow.eq(0)) {
-      // A zero power cancels the affected production completely. Avoid log(0) / log(0).
-      percent = Decimal.eq(power, 0) ? DC.DM1 : DC.D0;
-    } else {
-      percent = Decimal.ln(power).div(logNegPow).mul(negativeShare);
+    // A source can contain both a multiplier and a power. Keep their contributions separate
+    // until normalization so a negative power does not discard the multiplier on the same row.
+    let percent = Decimal.log10(entry.data.mult).div(resourceLog);
+    if (Decimal.gt(power, 1) && totalPosPow.neq(1)) {
+      percent = percent.add(Decimal.ln(power).div(logPosPow).mul(powerShare));
     }
     if (nerfBlacklist.includes(entry.key)) percent = percent.clampMin(0.0001);
     const ignoresNerf = entry.ignoresNerfPowers;
@@ -54,21 +48,28 @@ export function calculateBreakdownPercentages(entries, resourceMultiplier) {
     if (percent.gt(0)) {
       totalPerc = totalPerc.add(percent);
       nerfedPerc = nerfedPerc.add(nerfed);
+    } else if (!ignoresNerf) {
+      affectedDivisorPerc = affectedDivisorPerc.sub(percent);
     }
-    return { percent, nerfed };
+    // Split the loss among negative powers logarithmically; zero powers are handled below.
+    const powerWeight = Decimal.lt(power, 1) && totalNegPow.gt(0)
+      ? Decimal.ln(power).div(logNegPow)
+      : DC.D0;
+    return { percent, nerfed, powerWeight, power };
   });
 
-  const lostPerc = totalPerc.sub(nerfedPerc);
-  const percents = contributions.map(({ percent, nerfed }) => {
-    if (totalPerc.eq(0) || percent.eq(0)) return 0;
-    if (percent.gt(0)) {
-      // Preserve the relative weights when every positive effect has been reduced to zero.
-      return toPercentage(nerfedPerc.eq(0) ? percent.div(totalPerc) : nerfed.div(nerfedPerc));
-    }
-    // Multiplicative divisors are still nerfs when no power effect reduces the positive sources.
-    if (lostPerc.eq(0)) return toPercentage(percent.div(totalPerc));
-    if (totalNegPow.eq(0)) return -1;
-    return toPercentage(percent.mul(lostPerc).div(totalPerc).div(totalNegPow));
+  // Divisors apply before powers: (base / divisor)^power. The power reduces the remaining
+  // logarithmic contribution, not the portion already removed by the divisor.
+  const lostPerc = totalPerc.sub(nerfedPerc)
+    .sub(affectedDivisorPerc.mul(DC.D1.sub(totalNegPow))).clampMin(0);
+  const percents = contributions.map(({ percent, nerfed, powerWeight, power }) => {
+    if (totalPerc.eq(0)) return 0;
+    if (Decimal.eq(power, 0)) return -1;
+    // Preserve the relative weights when every positive effect has been reduced to zero.
+    const multShare = percent.gt(0) && nerfedPerc.neq(0)
+      ? nerfed.div(nerfedPerc)
+      : percent.div(totalPerc);
+    return toPercentage(multShare.sub(powerWeight.mul(lostPerc).div(totalPerc)));
   });
   return { percents, log10Mult, totalPosPow, isEmpty };
 }
