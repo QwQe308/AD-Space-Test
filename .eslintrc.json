@@ -13,7 +13,8 @@
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module",
-    "parser": "@babel/eslint-parser"
+    "parser": "@babel/eslint-parser",
+    "requireConfigFile": false
   },
   "settings": {
     "import/resolver": {
@@ -21,7 +22,7 @@
         "map": [
           ["@", "./src"]
         ],
-        "extensions": [".js", ".vue"]
+        "extensions": [".js", ".mjs", ".vue"]
       }
     }
   },

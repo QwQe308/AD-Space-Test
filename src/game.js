@@ -1154,7 +1154,7 @@ export function simulateTime(seconds, real, fast) {
   }
 }
 
-window.onload = function() {
+export function showGameUI() {
   const supportedBrowser = browserCheck();
   GameUI.initialized = supportedBrowser;
   ui.view.initialized = supportedBrowser;
@@ -1167,7 +1167,7 @@ window.onload = function() {
     document.getElementById("loading").style.display = "none";
     document.getElementById("browser-warning").style.display = "flex";
   }
-};
+}
 
 window.onfocus = function() {
   setShiftKey(false);

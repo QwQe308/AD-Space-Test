@@ -1,4 +1,3 @@
-/* eslint-disable import/newline-after-import, import/first, import/order */
 function mergeIntoGlobal(object) {
   for (const key in object) {
     if (key === "default") {
@@ -15,31 +14,18 @@ function mergeIntoGlobal(object) {
   }
 }
 
-import * as Utils from "./core/utils";
-mergeIntoGlobal(Utils);
+export async function mergeGlobals() {
+  // Native ES modules evaluate static imports before this module's body. Load each
+  // stage only after the globals needed by the next stage have been installed.
+  mergeIntoGlobal(await import("./core/utils"));
+  mergeIntoGlobal(await import("./core/secret-formula"));
 
-import * as GameDB from "./core/secret-formula";
-mergeIntoGlobal(GameDB);
+  // Legacy component globals; do not add new globals to component files.
+  mergeIntoGlobal(await import("@/components/tabs/automator/AutomatorBlockEditor"));
+  mergeIntoGlobal(await import("@/components/tabs/automator/AutomatorBlocks"));
+  mergeIntoGlobal(await import("@/components/tabs/automator/AutomatorTextEditor"));
+  mergeIntoGlobal(await import("@/components/tabs/perks/PerksTab"));
 
-// This is a list of legacy stuff, please don't add
-// any more globals to the component files
-
-import * as AutomatorBlockEditor from "@/components/tabs/automator/AutomatorBlockEditor";
-mergeIntoGlobal(AutomatorBlockEditor);
-
-import * as AutomatorBlocks from "@/components/tabs/automator/AutomatorBlocks";
-mergeIntoGlobal(AutomatorBlocks);
-
-import * as AutomatorTextEditor from "@/components/tabs/automator/AutomatorTextEditor";
-mergeIntoGlobal(AutomatorTextEditor);
-
-import * as PerksTab from "@/components/tabs/perks/PerksTab";
-mergeIntoGlobal(PerksTab);
-
-// End of legacy stuff
-
-import * as core from "./core/globals";
-mergeIntoGlobal(core);
-
-import * as game from "./game";
-mergeIntoGlobal(game);
+  mergeIntoGlobal(await import("./core/globals"));
+  mergeIntoGlobal(await import("./game"));
+}
