@@ -106,5 +106,6 @@ export * from "./_MOD/abyss/abyss-researches/abyssResearchSpawner";
 export * from "./_MOD/empowers/present/presentEmpower";
 export * from "./_MOD/empowers/present/affix";
 export * from "./_MOD/empowers/present/pendingEvent";
+export * from "./_MOD/empowers/future/futureEmpower";
 
 export * from "./_MOD/imaginary/influence";

@@ -272,6 +272,11 @@ Currency.matter = new class extends DecimalCurrency {
   }
 }();
 
+Currency.insight = new class extends DecimalCurrency {
+  get value() { return player.empowers.future.insight; }
+  set value(value) { player.empowers.future.insight = value; }
+}();
+
 Currency.infinities = new class extends DecimalCurrency {
   get value() { return player.infinities; }
   set value(value) {

@@ -1,3 +1,4 @@
+import { futureEmpowerConfig } from "../_MOD/empowers/future/future-empower-config";
 import { space } from "../_MOD/space-data";
 
 import { imaginary } from "../_MOD/imaginary/imaginary-data";
@@ -48,6 +49,9 @@ export const GameDatabase = {
   tabs,
   space,
   imaginary,
+  empowers: {
+    future: futureEmpowerConfig,
+  },
 };
 
 window.GameDatabase = GameDatabase;

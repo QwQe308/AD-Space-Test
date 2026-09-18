@@ -8,6 +8,7 @@ import { deepmergeAll } from "@/utility/deepmerge";
 
 // Config data importing
 import { abyssResearches } from "./_MOD/abyss/abyss-researches/configs/abyss-research-index";
+import { createFutureEmpowerData } from "./_MOD/empowers/future/future-empower-config";
 import { RestrictionDefaultData } from "./_MOD/restrictionHandler";
 import { spaceResearches } from "./_MOD/space-researches/spaceResearches";
 
@@ -66,6 +67,7 @@ window.player = {
   // MOD
   // empowers
   empowers: {
+    future: createFutureEmpowerData(),
     past: {
       frozenCurrency: null,
       simulating: null,

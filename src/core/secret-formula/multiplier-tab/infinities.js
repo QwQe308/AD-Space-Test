@@ -33,6 +33,13 @@ export const infinities = {
   },
   A12: abyssResearch("A12", "Triple Infinities"),
   A18: abyssResearch("A18", "Infinities per Level"),
+  futureEmpower: {
+    name: "Future Empower - Infinite Future",
+    multValue: () => FutureEmpowerUpgrades.infinities.effectOrDefault(1),
+    isActive: () => FutureEmpowerUpgrades.infinities.canBeApplied && !isSCRunningOnTier(5, 1) &&
+      !EternityChallenge(4).isRunning && !Pelle.isDisabled("InfinitiedMults"),
+    icon: MultiplierTabIcons.UPGRADE("reality"),
+  },
   amplifierInf: {
     name: "Reality Upgrade - Boundless Amplifier",
     multValue: () => DC.D1.timesEffectsOf(RealityUpgrade(5)),

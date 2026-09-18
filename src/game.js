@@ -338,7 +338,8 @@ export function gainedInfinities() {
     Ra.unlocks.continuousTTBoost.effects.infinity,
     SpaceResearchRifts.r43,
     AbyssResearches.A12,
-    AbyssResearches.A18
+    AbyssResearches.A18,
+    FutureEmpowerUpgrades.infinities
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
 
