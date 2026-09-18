@@ -52,6 +52,7 @@ import AbyssResearchTab from "./_MOD/abyss/AbyssResearchTab.vue";
 
 import PastEmpowerTab from "./_MOD/empowers/past/PastEmpowerTab.vue";
 import PresentEmpowerTab from "./_MOD/empowers/present/PresentEmpowerTab.vue";
+import FutureEmpowerTab from "./_MOD/empowers/future/FutureEmpowerTab";
 
 const TabComponents = {
   AntimatterDimensionsTab,
@@ -109,6 +110,7 @@ const TabComponents = {
 
   PastEmpowerTab,
   PresentEmpowerTab,
+  FutureEmpowerTab,
 };
 
 export default TabComponents;
