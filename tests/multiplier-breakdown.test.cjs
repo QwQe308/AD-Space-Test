@@ -936,7 +936,7 @@ test("Space Nerf uses base-space fakeValue and renders its divisor as a striped 
     assert.ok(view.entries[1].fakeValue.eq(divisor));
     assert.ok(view.entries[1].data.mult.eq(divisor.recip()));
     assert.match(view.entryTexts[0], /Base Space: 1000000 \(\^\(1\//u);
-    assert.match(view.entryTexts[1], /Space Divisor: \(Space \/ 100 ➜ \^\(1\//u);
+    assert.match(view.entryTexts[1], /Space Divisor: \(Space \/ 100 = 10000 ➜ \^\(1\//u);
     assert.match(view.barStyles[1].background, /repeating-linear-gradient/u);
     assert.equal(view.barStyles[1].height, undefined);
     assert.equal(view.barStyles[1].top, undefined);

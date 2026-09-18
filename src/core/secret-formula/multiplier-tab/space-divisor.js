@@ -13,7 +13,11 @@ export const spaceDivisorBreakdown = {
   },
   spaceDivisor: {
     name: "Space Divisor:",
-    displayOverride: () => `Space / ${format(getSpaceDivisor(), 2, 2)} ➜ ^(1/${format(getSpaceNerf(), 2, 3)})`,
+    displayOverride: () => {
+      const divisor = getSpaceDivisor();
+      const space = player.space.div(divisor);
+      return `Space / ${format(divisor, 2, 2)} = ${format(space, 2, 2)} ➜ ^(1/${format(getSpaceNerf(space), 2, 3)})`;
+    },
     multValue: () => getSpaceDivisor().recip(),
     fakeValue: () => getSpaceDivisor(),
     isActive: true,
