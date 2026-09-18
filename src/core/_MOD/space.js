@@ -82,7 +82,9 @@ export function produceAM(proc, diff) {
   Currency.antimatter.value = pendingTrueAM;
   player.records.totalAntimatter = player.records.totalAntimatter.max(player.antimatter);
 
-  player.amProc = player.antimatter.sub(recordAM).div(diff.div(1000)).max(0);
+  player.amProc = player.antimatter.sub(recordAM).div(diff.div(1000));
+
+  if(player.amProc.lte(player.antimatter.div(1e15))) player.amProc = proc.root(getSpaceNerf())
 
   // Some precision bugs happened after using BE and has to do so
   if (player.dimensions.antimatter[0].amount.eq(0)) Currency.antimatter.bumpTo(10);
