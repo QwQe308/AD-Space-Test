@@ -199,7 +199,6 @@ export default {
                   aria-hidden="true"
                 >{{ orb.symbol }}</span>
                 <span class="future-orb-level">{{ orb.unlocked ? `Lv. ${orb.level}` : "Locked" }}</span>
-                <span class="future-orb-caption">{{ orb.name }}</span>
               </button>
             </div>
           </div>
@@ -292,7 +291,7 @@ export default {
 .future-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
-  align-items: center;
+  align-items: start;
 
   gap: 2rem;
 }
@@ -316,7 +315,7 @@ export default {
 }
 
 .future-orbit-viewport {
-  overflow-x: auto;
+  overflow: clip;
   width: 100%;
 }
 
@@ -436,13 +435,6 @@ export default {
   font-size: 1rem;
 }
 
-.future-orb-caption {
-  white-space: nowrap;
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  font-size: 1rem;
-}
-
 .future-milestone {
   display: flex;
   align-items: center;
@@ -503,6 +495,7 @@ export default {
 
 .future-upgrade-actions {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: auto;
   padding-top: 0.6rem;
 
@@ -512,16 +505,17 @@ export default {
 .future-upgrade-actions button {
   display: flex;
   overflow-wrap: anywhere;
+  flex-direction: column;
   height: auto;
   min-width: 0;
   min-height: 2.8rem;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   font-size: 1.1rem;
   line-height: 1.5;
   padding: 0.4rem 0.6rem;
 
-  gap: 0.5rem;
+  gap: 0.1rem;
 }
 
 .future-feedback {
@@ -589,8 +583,7 @@ export default {
     margin: 0.2rem 0;
   }
 
-  .future-orb-level,
-  .future-orb-caption {
+  .future-orb-level {
     font-size: 0.8rem;
   }
 }
