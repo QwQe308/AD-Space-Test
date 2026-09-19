@@ -183,7 +183,6 @@ export default {
               class="future-orb"
               :class="{
                 'future-orb--center': orb.id === selectedId,
-                'future-orb--ready': orb.canUpgrade,
                 'future-orb--locked': !orb.unlocked,
               }"
               :data-orb-id="orb.id"
@@ -320,6 +319,7 @@ export default {
 
 <style scoped>
 .future-tab {
+  --future-orb-base: var(--color-background);
   width: 95%;
   max-width: 110rem;
   text-align: center;
@@ -368,16 +368,23 @@ export default {
   aspect-ratio: 1;
 }
 
+.t-normal .future-tab,
+.t-s9 .future-tab,
+.t-s12 .future-tab {
+  --future-orb-base: #111014;
+}
+
 .future-orbit-track {
   position: absolute;
   inset: 11%;
-  opacity: 0.15;
+  opacity: 0.18;
   border: 1px solid var(--color-text);
   border-radius: 50%;
   pointer-events: none;
 }
 
 .future-orb {
+  --orb-muted-color: color-mix(in srgb, var(--orb-color) 80%, #808080);
   width: 14%;
   position: absolute;
   z-index: 2;
@@ -396,31 +403,37 @@ export default {
   overflow: hidden;
   position: absolute;
   inset: 0;
-  background: var(--color-base);
-  border: 2px solid var(--orb-color);
+  background: var(--future-orb-base);
   border-radius: 50%;
   pointer-events: none;
 }
 
-.future-orb--ready .future-orb-surface {
-  border-width: 3px;
+.future-orb-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid color-mix(in srgb, var(--orb-muted-color) 75%, var(--future-orb-base));
+  border-radius: 50%;
 }
 
-.future-orb--locked .future-orb-surface {
-  border-color: #888888;
+.future-orb--center .future-orb-surface::after {
+  border-color: color-mix(in srgb, var(--orb-muted-color) 95%, var(--future-orb-base));
+}
+
+.future-orb--locked .future-orb-surface::after {
+  border-color: color-mix(in srgb, var(--orb-muted-color) 40%, var(--future-orb-base));
 }
 
 .future-orb-fill {
   position: absolute;
   inset: 2px;
-  opacity: 0.3;
-  background: var(--orb-color);
+  background: color-mix(in srgb, var(--orb-muted-color) 24%, var(--future-orb-base));
   border-radius: 50%;
   transition: clip-path 0.25s ease;
 }
 
 .future-orb-fill--completed {
-  opacity: 0.1;
+  background: color-mix(in srgb, var(--orb-muted-color) 9%, var(--future-orb-base));
 }
 
 .future-satellite-orbit {
@@ -433,8 +446,8 @@ export default {
   width: 4px;
   height: 4px;
   position: absolute;
-  background: #ffffff;
-  border: 1px solid #888888;
+  opacity: 0.85;
+  background: var(--color-text);
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
@@ -480,6 +493,11 @@ export default {
   font-size: 2.4rem;
   line-height: 1.2;
   color: var(--orb-color);
+}
+
+.future-orb-symbol,
+.future-upgrade-title > span {
+  filter: saturate(0.8);
 }
 
 .future-orb-details {
