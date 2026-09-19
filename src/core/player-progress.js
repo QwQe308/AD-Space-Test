@@ -8,11 +8,8 @@ export class PlayerProgress {
   }
 
   get isEternityUnlocked() {
-    return new Decimal(this._player.eternities).gt(0) || this.isRealityUnlocked;
-  }
-
-  get isEternityUnlocked() {
-    return new Decimal(this._player.eternities).gt(0) || this.isRealityUnlocked;
+    // Spending all Eternities on Future Empower does not undo reaching Eternity.
+    return new Decimal(this._player.eternities).gt(0) || PlayerProgress.imaginaryUnlocked() || this.isRealityUnlocked;
   }
 
   get isRealityUnlocked() {

@@ -5,6 +5,11 @@ import { GameMechanicState } from "../../../game-mechanics/game-mechanic";
 import { futureEmpowerConfig } from "./future-empower-config";
 
 export class FutureEmpowerOrbState extends GameMechanicState {
+  constructor(config) {
+    super(config);
+    this.costScale = new ExponentialCostScaling(config.costScaling);
+  }
+
   get data() {
     return player.empowers.future.orbs[this.id];
   }
@@ -17,14 +22,37 @@ export class FutureEmpowerOrbState extends GameMechanicState {
   get isUnlocked() { return this.config.isUnlocked(); }
   get isSelected() { return FutureEmpower.selectedOrb.id === this.id; }
   get resourceAmount() { return this.config.resource(); }
-  get requirement() { return this.config.requirement(this.level); }
+  get requirement() { return this.costScale.calculateCost(this.level); }
   get insightGain() { return this.config.insightGain(this.level); }
 
-  // Like AbyssResearch, the fill scales from the center using a clamped 0..1 ratio.
-  // Read the live resource so resets immediately update progress and eligibility.
+  // Thresholds are checked against the same resource amount, never a running cost sum.
+  get bulkLevels() {
+    if (!this.isUnlocked || this.resourceAmount.lt(this.requirement)) return DC.D0;
+    const amount = this.resourceAmount;
+    const bought = this.costScale.getMaxBought(this.level, amount, DC.D1);
+    let target = this.level.add(bought?.quantity ?? DC.D0);
+    // Correct logarithm rounding at exact boundaries without looping through earned levels.
+    if (target.gt(this.level) && this.costScale.calculateCost(target.sub(1)).gt(amount)) target = target.sub(1);
+    if (target.add(1).gt(target) && this.costScale.calculateCost(target).lte(amount)) target = target.add(1);
+    return target.sub(this.level).max(0);
+  }
+
+  get bulkInsightGain() {
+    return this.config.insightGain(this.level, this.bulkLevels);
+  }
+
+  get nextRequirement() {
+    return this.costScale.calculateCost(this.level.add(this.bulkLevels));
+  }
+
+  get satelliteCount() {
+    return this.bulkLevels.min(futureEmpowerConfig.satellites.capacity).toNumber();
+  }
+
+  // Completed layers stay dimmed while the next unearned threshold fills above them.
   get percentage() {
     if (!this.isUnlocked) return 0;
-    return this.resourceAmount.div(this.requirement).clamp(0, 1).toNumber();
+    return this.resourceAmount.div(this.nextRequirement).clamp(0, 1).toNumber();
   }
 
   get fillStyle() {
@@ -32,7 +60,7 @@ export class FutureEmpowerOrbState extends GameMechanicState {
   }
 
   get canUpgrade() {
-    return this.isUnlocked && this.level.add(1).gt(this.level) && this.resourceAmount.gte(this.requirement);
+    return this.bulkLevels.gt(0);
   }
 
   select() {
@@ -40,9 +68,12 @@ export class FutureEmpowerOrbState extends GameMechanicState {
   }
 
   upgrade() {
-    if (!this.canUpgrade) return false;
-    const reward = this.insightGain;
-    this.data.level = this.level.add(1);
+    const count = this.bulkLevels;
+    if (count.lte(0)) return false;
+    const reward = this.config.insightGain(this.level, count);
+    // A reset must also clear a resource frozen by Past Empower; it is not a currency purchase.
+    this.config.resetResource();
+    this.data.level = this.level.add(count);
     Currency.insight.add(reward);
     return true;
   }

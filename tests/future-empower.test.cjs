@@ -11,6 +11,7 @@ const Decimal = require("break_eternity.js");
 
 global.Decimal = Decimal;
 global.window = global;
+Array.range = (start, count) => Array.from({ length: count }, (_, index) => start + index);
 global.mapGameDataToObject = (config, create) => {
   const states = Object.fromEntries(Object.entries(config).map(([id, entry]) => [id, create(entry)]));
   return { all: Object.values(states), ...states };
@@ -37,14 +38,16 @@ function loadSource(filename) {
 }
 
 const { Currency } = loadSource(path.join(root, "core/currency.js"));
+loadSource(path.join(root, "core/math.js"));
 global.Currency = Currency;
 const { createFutureEmpowerData, futureEmpowerConfig } = loadSource(
   path.join(root, "core/_MOD/empowers/future/future-empower-config.js")
 );
-const { FutureEmpower, FutureEmpowerOrbs, FutureEmpowerUpgrades } = loadSource(
+const { FutureEmpower, FutureEmpowerOrbs, FutureEmpowerOrbState, FutureEmpowerUpgrades } = loadSource(
   path.join(root, "core/_MOD/empowers/future/futureEmpower.js")
 );
 const { deepmergeAll } = loadSource(path.join(root, "utility/deepmerge.js"));
+const { PlayerProgress } = loadSource(path.join(root, "core/player-progress.js"));
 
 beforeEach(() => {
   global.player = {
@@ -57,7 +60,7 @@ beforeEach(() => {
   global.PlayerProgress = { infinityUnlocked: () => true, eternityUnlocked: () => true };
 });
 
-test("each orb uses live resources, grants insight once per level, and spends no source resource", () => {
+test("each orb uses live thresholds and resets only its source resource after upgrading", () => {
   for (const orb of FutureEmpower.orbs) {
     const resource = Currency[orb.id];
     assert.equal(orb.upgrade(), false);
@@ -67,9 +70,10 @@ test("each orb uses live resources, grants insight once per level, and spends no
     assert.equal(orb.fillStyle.transform, `scale(${orb.percentage})`);
     assert.equal(orb.canUpgrade, false);
     resource.value = requirement;
-    assert.equal(orb.percentage, 1);
+    assert.ok(orb.bulkLevels.eq(1));
+    assert.ok(orb.percentage >= 0 && orb.percentage < 1);
     assert.equal(orb.upgrade(), true);
-    assert.ok(resource.value.eq(requirement));
+    assert.ok(resource.value.eq(0));
     assert.ok(orb.level.eq(1));
     assert.equal(orb.upgrade(), false);
     resource.value = new Decimal(0);
@@ -87,9 +91,115 @@ test("locked resources cannot earn insight and huge values produce a finite fill
   assert.equal(orb.percentage, 0);
   assert.equal(orb.upgrade(), false);
   player.replicanti.unl = true;
-  assert.equal(orb.percentage, 1);
+  assert.ok(Number.isFinite(orb.percentage));
+  assert.equal(orb.satelliteCount, futureEmpowerConfig.satellites.capacity);
   assert.equal(orb.upgrade(), true);
+  assert.ok(orb.level.eq(new Decimal("1e998")));
+  assert.ok(player.replicanti.amount.eq(0));
   assert.equal(FutureEmpowerOrbs.infinities.canUpgrade, false, "banked Infinities do not count");
+});
+
+test("bulk upgrades use one resource snapshot rather than summed costs, and clear frozen resources", () => {
+  for (const orb of FutureEmpower.orbs) {
+    const resource = Currency[orb.id];
+    resource.value = orb.costScale.calculateCost(new Decimal(2));
+    assert.ok(orb.bulkLevels.eq(3));
+    assert.ok(orb.bulkInsightGain.eq(3));
+    assert.equal(orb.satelliteCount, 3);
+    const banked = player.infinitiesBanked;
+    player.empowers.past.frozenCurrency = orb.id;
+    assert.equal(orb.upgrade(), true);
+    assert.ok(resource.value.eq(0));
+    assert.ok(orb.level.eq(3));
+    assert.ok(player.infinitiesBanked.eq(banked));
+    assert.equal(orb.satelliteCount, 0);
+    assert.equal(orb.upgrade(), false);
+    player.empowers.past.frozenCurrency = null;
+  }
+  assert.ok(Currency.insight.value.eq(9));
+});
+
+test("completed layers expose the next threshold and update immediately when resources fall", () => {
+  const orb = FutureEmpowerOrbs.eternities;
+  for (const [amount, count, percentage, next] of [
+    [5, 0, 0.5, 10], [10, 1, 0.1, 100], [50, 1, 0.5, 100],
+    [100, 2, 0.1, 1000], [500, 2, 0.5, 1000], [0, 0, 0, 10],
+  ]) {
+    Currency.eternities.value = new Decimal(amount);
+    assert.ok(orb.bulkLevels.eq(count));
+    assert.ok(Math.abs(orb.percentage - percentage) < 1e-12);
+    assert.ok(orb.nextRequirement.eq(next));
+    assert.equal(orb.satelliteCount, count);
+  }
+  orb.data.level = new Decimal(2);
+  Currency.eternities.value = new Decimal(10000);
+  assert.ok(orb.bulkLevels.eq(2));
+  assert.equal(orb.upgrade(), true);
+  assert.ok(orb.level.eq(4));
+  assert.ok(Currency.insight.value.eq(2));
+});
+
+test("threshold boundaries and the satellite display cap do not change earned levels", () => {
+  for (const orb of FutureEmpower.orbs) {
+    for (const target of [1, 2, 3, 10, 25, 100]) {
+      const threshold = orb.costScale.calculateCost(new Decimal(target - 1));
+      Currency[orb.id].value = threshold.mul(0.99999);
+      assert.ok(orb.bulkLevels.eq(target - 1), `${orb.id} below ${target}`);
+      Currency[orb.id].value = threshold;
+      assert.ok(orb.bulkLevels.eq(target), `${orb.id} at ${target}`);
+      Currency[orb.id].value = threshold.mul(1.00001);
+      assert.ok(orb.bulkLevels.eq(target), `${orb.id} above ${target}`);
+    }
+    assert.equal(orb.satelliteCount, futureEmpowerConfig.satellites.capacity);
+    assert.equal(orb.upgrade(), true);
+    assert.ok(orb.level.eq(100));
+  }
+  assert.ok(Currency.insight.value.eq(300));
+});
+
+test("clearing prestige counts preserves historical unlocks and access to the Future tab", () => {
+  global.PlayerProgress = PlayerProgress;
+  player.realities = new Decimal(0);
+  assert.equal(PlayerProgress.infinityUnlocked(), false);
+  assert.equal(PlayerProgress.eternityUnlocked(), false);
+  player.infinities = new Decimal(1000);
+  assert.equal(FutureEmpowerOrbs.infinities.upgrade(), true);
+  assert.ok(player.infinities.eq(0));
+  assert.equal(PlayerProgress.infinityUnlocked(), true);
+  assert.equal(PlayerProgress.eternityUnlocked(), false);
+  player.eternities = new Decimal(100);
+  assert.equal(FutureEmpowerOrbs.eternities.upgrade(), true);
+  assert.ok(player.eternities.eq(0));
+  assert.equal(PlayerProgress.eternityUnlocked(), true);
+  const legacy = { infinities: 1, eternities: 0, realities: 0 };
+  assert.equal(PlayerProgress.of(legacy).isInfinityUnlocked, true);
+  assert.equal(PlayerProgress.of(legacy).isEternityUnlocked, false);
+});
+
+test("orb requirements support accelerated math.js scaling and matching bulk levels", () => {
+  const orb = new FutureEmpowerOrbState({
+    ...futureEmpowerConfig.orbs.eternities,
+    costScaling: {
+      baseCost: new Decimal(10),
+      baseIncrease: new Decimal(10),
+      costScale: new Decimal(10),
+      purchasesBeforeScaling: new Decimal(2),
+    },
+  });
+  const thresholds = [10, 100, 1000, 1e5, 1e8, 1e12];
+  thresholds.forEach((threshold, level) => {
+    orb.data.level = new Decimal(level);
+    assert.ok(orb.requirement.eq(threshold));
+    orb.data.level = new Decimal(0);
+    Currency.eternities.value = new Decimal(threshold).mul(0.99999);
+    assert.ok(orb.bulkLevels.eq(level));
+    Currency.eternities.value = new Decimal(threshold);
+    assert.ok(orb.bulkLevels.eq(level + 1));
+  });
+  assert.equal(orb.upgrade(), true);
+  assert.ok(orb.level.eq(6));
+  assert.ok(Currency.eternities.value.eq(0));
+  assert.ok(Currency.insight.value.eq(6));
 });
 
 test("upgrades share one balance and refunds reverse each price without creating insight", () => {

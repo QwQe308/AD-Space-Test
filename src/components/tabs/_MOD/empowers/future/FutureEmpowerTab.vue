@@ -55,8 +55,10 @@ export default {
         description: orb.description,
         level: formatInt(orb.level),
         amount: format(orb.resourceAmount, 2, 0),
-        requirement: format(orb.requirement, 2, 0),
-        reward: format(orb.insightGain, 2, 0),
+        requirement: format(orb.nextRequirement, 2, 0),
+        bulkLevels: formatInt(orb.bulkLevels),
+        satellites: orb.satelliteCount,
+        tooltip: this.orbTooltip(orb),
         percentage: orb.percentage,
         progress: formatPercents(orb.percentage, 1),
         unlocked: orb.isUnlocked,
@@ -87,9 +89,25 @@ export default {
     },
     upgradeOrb() {
       const orb = FutureEmpower.selectedOrb;
-      const reward = format(orb.insightGain, 2, 0);
-      if (orb.upgrade()) this.feedback = `${orb.name} advanced. Gained ${reward} insight.`;
+      const count = formatInt(orb.bulkLevels);
+      const reward = format(orb.bulkInsightGain, 2, 0);
+      if (orb.upgrade()) {
+        this.feedback = `${orb.name}: +${count} levels, +${reward} insight. ${orb.name} reset to zero.`;
+      }
       this.update();
+    },
+    orbTooltip(orb) {
+      const count = formatInt(orb.bulkLevels);
+      const reward = format(orb.bulkInsightGain, 2, 0);
+      const instruction = orb.canUpgrade
+        ? "Click to upgrade."
+        : `Reach ${format(orb.requirement, 2, 0)} ${orb.name} to upgrade.`;
+      return `Available upgrades: ${count}<br>Gain: ${reward} insight<br>` +
+        `${orb.isUnlocked ? instruction : "Resource locked."}`;
+    },
+    satelliteStyle(index) {
+      const angle = (index - 1) * 2 * Math.PI / GameDatabase.empowers.future.satellites.capacity;
+      return { left: `${50 + 50 * Math.cos(angle)}%`, top: `${50 + 50 * Math.sin(angle)}%` };
     },
     purchase(id) {
       const upgrade = FutureEmpowerUpgrades[id];
@@ -127,6 +145,11 @@ export default {
         element.style.left = `${50 + position.x / radius * 39}%`;
         element.style.top = `${50 + position.y / radius * 39}%`;
       }
+      const period = GameDatabase.empowers.future.satellites.period;
+      const angle = ((this._orbitElapsed ?? 0) % period) / period * 360;
+      for (const element of this.$refs.satelliteOrbits ?? []) {
+        element.style.transform = `rotate(${angle}deg)`;
+      }
     },
   },
 };
@@ -137,7 +160,7 @@ export default {
     <div class="future-layout">
       <div class="future-resources">
         <div class="future-orbit-controls">
-          <span>Click a sphere to select its resource.</span>
+          <span>Select a sphere; click the center to upgrade.</span>
           <PrimaryButton
             class="future-motion-toggle"
             :aria-pressed="paused"
@@ -167,26 +190,48 @@ export default {
             >
               <div class="future-orb-surface">
                 <div
+                  v-if="orb.canUpgrade"
+                  class="future-orb-fill future-orb-fill--completed"
+                  aria-hidden="true"
+                />
+                <div
                   class="future-orb-fill"
                   :style="{ transform: `scale(${orb.percentage})` }"
                   aria-hidden="true"
                 />
               </div>
               <div
+                ref="satelliteOrbits"
+                class="future-satellite-orbit"
+                aria-hidden="true"
+              >
+                <span
+                  v-for="satellite in orb.satellites"
+                  :key="satellite"
+                  class="future-satellite"
+                  :style="satelliteStyle(satellite)"
+                />
+              </div>
+              <button
                 v-if="orb.id === selectedId"
+                v-tooltip="{ content: orb.tooltip, trigger: 'hover focus', hideOnTargetClick: false }"
+                type="button"
                 class="future-orb-details"
+                :aria-disabled="!orb.canUpgrade"
+                :aria-label="`${orb.name}: upgrade ${orb.bulkLevels} levels and reset this resource to zero`"
+                @click="upgradeOrb"
               >
                 <span
                   class="future-orb-symbol"
                   aria-hidden="true"
                 >{{ orb.symbol }}</span>
                 <b>{{ orb.name }}</b>
-                <span>Level {{ orb.level }}</span>
+                <span>Level: {{ orb.level }} (+{{ orb.bulkLevels }})</span>
                 <div class="future-orb-resource">
                   {{ orb.amount }} / {{ orb.requirement }}
                 </div>
-                <span>{{ !orb.unlocked ? "Locked" : orb.canUpgrade ? "Ready to upgrade" : orb.progress }}</span>
-              </div>
+                <span>{{ orb.unlocked ? orb.progress : "Locked" }}</span>
+              </button>
               <button
                 v-else
                 type="button"
@@ -207,17 +252,13 @@ export default {
           v-if="selectedOrb"
           class="future-milestone"
         >
-          <p>{{ selectedOrb.description }}</p>
-          <PrimaryButton
-            class="future-advance"
-            :enabled="selectedOrb.canUpgrade"
-            :disabled="!selectedOrb.canUpgrade"
-            @click="upgradeOrb"
-          >
-            {{ selectedOrb.unlocked ? "Upgrade" : "Resource locked" }}
+          <p>
+            Click the center sphere to upgrade all available levels.
             <br>
-            Gain {{ selectedOrb.reward }} insight
-          </PrimaryButton>
+            Requirements use current resources without per-level spending.
+            <br>
+            {{ selectedOrb.description }}
+          </p>
         </div>
       </div>
 
@@ -379,6 +420,26 @@ export default {
   transition: transform 0.25s ease;
 }
 
+.future-orb-fill--completed {
+  opacity: 0.1;
+}
+
+.future-satellite-orbit {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+}
+
+.future-satellite {
+  width: 4px;
+  height: 4px;
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #888888;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .future-orb-select,
 .future-orb-details {
   display: flex;
@@ -423,7 +484,14 @@ export default {
 }
 
 .future-orb-details {
+  padding: 0;
+  cursor: pointer;
+
   gap: 0.2rem;
+}
+
+.future-orb-details[aria-disabled="true"] {
+  cursor: default;
 }
 
 .future-orb-details .future-orb-symbol {
@@ -455,16 +523,6 @@ export default {
   flex: 1;
   line-height: 1.5;
   margin: 0;
-}
-
-.future-advance {
-  flex-shrink: 0;
-  width: 14rem;
-  height: auto;
-  max-width: 100%;
-  min-height: 4.5rem;
-  line-height: 1.5;
-  padding: 0.8rem;
 }
 
 .future-insight {
@@ -532,6 +590,7 @@ export default {
   margin: 0.6rem 0 0;
 }
 
+/* stylelint-disable order/order -- Responsive overrides must follow the base rules. */
 @media (min-width: 1001px) and (max-height: 850px) {
   .future-orbit-stage {
     max-width: 34rem;
