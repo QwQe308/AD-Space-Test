@@ -56,7 +56,7 @@ export class FutureEmpowerOrbState extends GameMechanicState {
   }
 
   get fillStyle() {
-    return { transform: `scale(${this.percentage})` };
+    return { clipPath: `inset(${(1 - this.percentage) * 100}% 0 0)` };
   }
 
   get canUpgrade() {

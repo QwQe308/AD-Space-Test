@@ -67,7 +67,7 @@ test("each orb uses live thresholds and resets only its source resource after up
     const requirement = orb.requirement;
     resource.value = requirement.div(2);
     assert.ok(Math.abs(orb.percentage - 0.5) < 1e-12);
-    assert.equal(orb.fillStyle.transform, `scale(${orb.percentage})`);
+    assert.equal(orb.fillStyle.clipPath, `inset(${(1 - orb.percentage) * 100}% 0 0)`);
     assert.equal(orb.canUpgrade, false);
     resource.value = requirement;
     assert.ok(orb.bulkLevels.eq(1));

@@ -60,6 +60,7 @@ export default {
         satellites: orb.satelliteCount,
         tooltip: this.orbTooltip(orb),
         percentage: orb.percentage,
+        fillStyle: orb.fillStyle,
         progress: formatPercents(orb.percentage, 1),
         unlocked: orb.isUnlocked,
         canUpgrade: orb.canUpgrade,
@@ -196,7 +197,7 @@ export default {
                 />
                 <div
                   class="future-orb-fill"
-                  :style="{ transform: `scale(${orb.percentage})` }"
+                  :style="orb.fillStyle"
                   aria-hidden="true"
                 />
               </div>
@@ -254,8 +255,6 @@ export default {
         >
           <p>
             Click the center sphere to upgrade all available levels.
-            <br>
-            Requirements use current resources without per-level spending.
             <br>
             {{ selectedOrb.description }}
           </p>
@@ -417,7 +416,7 @@ export default {
   opacity: 0.3;
   background: var(--orb-color);
   border-radius: 50%;
-  transition: transform 0.25s ease;
+  transition: clip-path 0.25s ease;
 }
 
 .future-orb-fill--completed {
