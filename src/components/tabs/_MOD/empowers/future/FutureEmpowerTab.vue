@@ -401,6 +401,15 @@ export default {
   cursor: pointer;
 }
 
+/* Optical alignment without moving the circular button's hit area. */
+.future-orb-select > span {
+  transform: translateY(-3px);
+}
+
+.future-orb-details > * {
+  transform: translateY(-8px);
+}
+
 .future-orb-select:hover,
 .future-tab button:focus-visible {
   outline: 2px solid var(--color-text);
