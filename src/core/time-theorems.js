@@ -1,5 +1,5 @@
-import { DC } from "./constants";
 import { Currency } from "./currency";
+import { DC } from "./constants";
 
 /**
  * @abstract
@@ -22,7 +22,12 @@ export class TimeTheoremPurchaseType {
   */
   get currency() { throw new NotImplementedError(); }
 
-  get cost() { return this.costBase.times(this.costIncrement.pow(this.amount)); }
+  get cost() { return this.costAt(this.amount); }
+
+  costAt(amount) {
+    // All theorem prices are integers, but Decimal powers can leave tiny fractional errors.
+    return this.costBase.times(this.costIncrement.pow(amount)).round();
+  }
 
   /**
    * @abstract
@@ -34,44 +39,46 @@ export class TimeTheoremPurchaseType {
    */
   get costIncrement() { throw new NotImplementedError(); }
 
+  get isFree() {
+    return Perk.ttFree.canBeApplied || this.currency.layer > 1 || this.currency.frozen;
+  }
+
   get bulkPossible() {
-    if (Perk.ttFree.canBeApplied) {
-      return this.currency.value.divide(this.cost).max(1).log10().div(this.costIncrement.max(1).log10()).add(1).floor();
+    if (!this.canAfford) return DC.D0;
+    const budget = this.currency.value;
+    let amount = this.isFree
+      ? budget.div(this.cost).log(this.costIncrement).add(1).floor()
+      : Decimal.affordGeometricSeries(budget, this.cost, this.costIncrement, 0);
+    amount = amount.max(1);
+
+    // Logarithms can round across an integer boundary. Verify against the actual price before spending.
+    // At huge counts, adding or subtracting one no longer changes the Decimal; stop correcting there.
+    while (amount.gt(1) && amount.sub(1).lt(amount) && this.bulkCost(amount).gt(budget)) {
+      amount = amount.sub(1);
     }
-    return Decimal.affordGeometricSeries(this.currency.value, this.cost, this.costIncrement, 0);
+    while (amount.add(1).gt(amount) && this.amount.add(amount.add(1)).gt(this.amount.add(amount)) &&
+      this.bulkCost(amount.add(1)).lte(budget)) {
+      amount = amount.add(1);
+    }
+    return amount;
   }
 
   // Note: This is actually just the cost of the largest term of the geometric series. If buying EP without the
   // perk that makes them free, this will be incorrect, but the EP object already overrides this anyway
   bulkCost(amount) {
-    return this.cost.times(this.costIncrement.pow(amount.sub(1)));
+    return this.costAt(this.amount.add(amount).sub(1));
   }
 
   purchase(bulk = false) {
     if (Currency.timeTheorems.gte(115) && Pelle.isDoomed) PelleStrikes.ECs.trigger();
     if (!this.canAfford) return false;
 
-    if (!bulk) {
-      if (!Perk.ttFree.canBeApplied && this.currency.layer <= 1) this.currency.subtract(this.cost);
-      Currency.timeTheorems.add(1);
-      this.add(1);
-      player.requirementChecks.reality.noPurchasedTT = false;
-      if (Currency.timeTheorems.gte(115) && Pelle.isDoomed) PelleStrikes.ECs.trigger();
-      return true;
-    }
-    const canBuy = this.currency.value.sub(this.costBase)
-      .clampMin(this.costIncrement.recip()).log(this.costIncrement);
-    let amntPur = canBuy.sub(this.amount).floor();
-    // We can definitely afford x - 1
-    amntPur = amntPur.sub(1).max(0);
-    Currency.timeTheorems.add(amntPur);
-    this.add(amntPur);
-    if (!Perk.ttFree.canBeApplied && this.currency.layer <= 1 && amntPur.neq(0)) this.currency.subtract(this.cost);
-    // Can we afford another? If not, just return that we definitely bought some already
-    if (this.currency.lt(this.cost) && amntPur.neq(0)) return true;
-    Currency.timeTheorems.add(1);
-    if (!Perk.ttFree.canBeApplied && this.currency.layer <= 1) this.currency.subtract(this.cost);
-    this.add(1);
+    const amount = bulk ? this.bulkPossible : DC.D1;
+    if (this.amount.add(amount).eq(this.amount)) return false;
+    const cost = bulk ? this.bulkCost(amount) : this.cost;
+    if (!this.isFree) this.currency.subtract(cost);
+    Currency.timeTheorems.add(amount);
+    this.add(amount);
     player.requirementChecks.reality.noPurchasedTT = false;
     if (Currency.timeTheorems.gte(115) && Pelle.isDoomed) PelleStrikes.ECs.trigger();
     return true;
@@ -113,8 +120,8 @@ TimeTheoremPurchaseType.ep = new class extends TimeTheoremPurchaseType {
   get costIncrement() { return DC.D2; }
 
   bulkCost(amount) {
-    if (Perk.ttFree.canBeApplied || this.currency.layer > 1) return this.cost.times(this.costIncrement.pow(amount));
-    return this.cost.times(this.costIncrement.pow(amount.sub(1)));
+    if (this.isFree) return super.bulkCost(amount);
+    return super.bulkCost(amount).times(2).sub(this.cost).round();
   }
 }();
 
