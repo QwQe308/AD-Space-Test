@@ -92,7 +92,7 @@ const baseConfig = {
         },
         requirement() {
           return (
-            AntimatterDimensions.all.filter(x => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8
+            AntimatterDimensions.all.filter((x) => (x.isAvailableForPurchase ? x.isAffordable : true)).length === 8
           );
         },
       },
@@ -440,7 +440,11 @@ const baseConfig = {
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1.5e4),
     description(level) {
-      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.<br>Replicanti galaxies divides your replicanti by ${format(Replicanti.galaxies.divisor,2,2)} instead of reset to 1.`;
+      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.<br>Replicanti galaxies divides your replicanti by ${format(
+        Replicanti.galaxies.divisor,
+        2,
+        2
+      )} instead of reset to 1.`;
     },
     next: [],
   },
@@ -448,7 +452,8 @@ const baseConfig = {
   // Row 10
   A22: {
     position: [-1, 6],
-    type: NODE_TYPE.UNLIMITED,
+    type: NODE_TYPE.LIMITED,
+    maxLevel: DC.D5,
     scaling: {
       type: "linear",
       cost: new Decimal(3e4),
@@ -467,19 +472,20 @@ const baseConfig = {
   },
   A23: {
     position: [1, 6],
-    type: NODE_TYPE.UNLIMITED,
+    type: NODE_TYPE.LIMITED,
+    maxLevel: DC.D2,
     scaling: {
       type: "linear",
       cost: new Decimal(1e5),
       costIncrease: new Decimal(2),
     },
     description(level) {
-      return `×1.5 Eternity Points<br>(×${format(this.effectValue(level))} → ×${format(
-        this.effectValue(level.add(1))
+      return `x2 Eternity Points<br>(×${format(this.effectValue(level), 2)} → ×${format(
+        this.effectValue(level.add(1)), 2
       )})`;
     },
     effectValue(level) {
-      return level.pow_base(1.5);
+      return level.pow_base(2);
     },
     next: ["C0"],
   },
@@ -488,7 +494,7 @@ const baseConfig = {
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
-    cost: new Decimal(2e6),
+    cost: new Decimal(5e6),
     description(level) {
       return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },

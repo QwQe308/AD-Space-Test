@@ -50,7 +50,7 @@ export default {
             tooltipContent += `<br>------------------------------`;
             break;
         }
-        tooltipContent += `<br>Progress: ${format(this.progress, 2, 2)}/${format(
+        tooltipContent += `<br>Progress: ${format(this.progress, 2, 2)}&thinsp;/&thinsp;${format(
           AbyssResearches[this.id].cost,
           2
         )}<br>`;
