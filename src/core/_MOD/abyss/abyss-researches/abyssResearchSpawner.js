@@ -121,6 +121,10 @@ export const extraAbyssResearchTooltips = {
   Permanent: `* Permanent nodes will never reset, most of them gives QOLs or Automations. They will be marked with *.`,
 
   Corruption: `* Corruptions nodes do not need to be researched. Instead, some resources are required to "Purchase" it.`,
+
+  Toturial: `Since then, the "toturial" has ended, and the path to reality has emerged.<br>Good luck for your... observation.`,
+
+  Empower: `Unlocking these Empowers costs... a huge number of Time Theorems, and seems cannot be refunded. <br>Choose wisely based on your playstyle.`,
 };
 
 export const NODE_TYPE = {

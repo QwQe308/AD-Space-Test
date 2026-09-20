@@ -77,14 +77,14 @@ const baseConfig = {
       costIncrease: new Decimal(2),
     },
     description(level) {
-      return `Since then, the "toturial" has ended, and the path to reality has emerged.<br>Multiplies EP gain by 2 for each level.<br>
+      return `Multiplies EP gain by 2 for each level.<br>
       (×${format(this.effectValue(level), 2, 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
     },
     effectValue(level) {
       return DC.D2.pow(level);
     },
     next: ["B1"],
-    tooltipTags: ["Permanent"],
+    tooltipTags: ["Permanent", "Toturial"],
   },
   B1: {
     position: [0, 1],
@@ -143,16 +143,17 @@ const baseConfig = {
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
-      baseInfo += `\n\n--------Difficultity--------\n\n`;
+      baseInfo += `<br><br>-------- Path Difficultity --------<br><br>`;
       switch (getEternityTotalState()) {
         // No empowers
         case 0:
-          baseInfo += `Time ----- ◆◆◇◇◇\n`;
-          baseInfo += `Strategy - ◆◆◇◇◇\n`;
-          baseInfo += `Active --- ◆◆◆◆◇\n`;
+          baseInfo += `Time ----- ◆◆◇◇◇<br>`;
+          baseInfo += `Strategy - ◆◆◇◇◇<br>`;
+          baseInfo += `Active --- ◆◆◆◆◇<br>`;
       }
       return baseInfo;
     },
+    tooltipTags: ["Empower"],
   },
 };
 
