@@ -738,7 +738,7 @@ export const Replicanti = {
       return new Decimal(player.replicanti.galaxies);
     },
     get divisor() {
-      if (Achievement(126).isUnlocked) return new Decimal(1e120);
+      if (AbyssResearches.A21B.completed || AbyssResearches.A21.completed || Achievement(126).isUnlocked) return new Decimal(1e120);
       return false;
     },
     get extra() {

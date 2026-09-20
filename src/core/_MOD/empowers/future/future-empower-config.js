@@ -24,7 +24,7 @@ export const futureEmpowerConfig = {
       },
       isUnlocked: () => player.replicanti.unl,
       costScaling: {
-        baseCost: DC.E600,
+        baseCost: DC.E2000,
         baseIncrease: DC.E200,
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,

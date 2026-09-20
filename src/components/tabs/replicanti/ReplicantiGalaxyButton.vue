@@ -46,7 +46,7 @@ export default {
       this.isAvailable = rg.canBuyMore;
       this.boughtGalaxies = rg.bought;
       this.extraGalaxies = rg.extra;
-      this.isDivideUnlocked = Achievement(126).isUnlocked;
+      this.isDivideUnlocked = AbyssResearches.A21B.completed || AbyssResearches.A21.completed || Achievement(126).isUnlocked;
       const auto = Autobuyer.replicantiGalaxy;
       this.isAutoUnlocked = auto.isUnlocked;
       this.isAutoActive = auto.isActive;

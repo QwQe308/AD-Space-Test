@@ -440,7 +440,7 @@ const baseConfig = {
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1.5e4),
     description(level) {
-      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.`;
+      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.<br>Replicanti galaxies divides your replicanti by ${format(Replicanti.galaxies.divisor,2,2)} instead of reset to 1.`;
     },
     next: ["C0"],
   },
@@ -449,7 +449,7 @@ const baseConfig = {
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
-    cost: new Decimal(6e5),
+    cost: new Decimal(1e6),
     description(level) {
       return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },
