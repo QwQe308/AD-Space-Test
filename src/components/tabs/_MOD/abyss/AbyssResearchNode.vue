@@ -242,7 +242,7 @@ export default {
       this.percentage = this.getNode.percentage;
       this.isMaxed = this.getNode.maxed;
       this.level.copyFrom(this.getNode.level);
-      this.maxLevel.copyFrom(this.getNode.maxLevel);
+      if (this.getNode.maxLevel) this.maxLevel.copyFrom(this.getNode.maxLevel);
 
       this.autoResearchEfficiency = this.getNode.autoResearchEfficiency;
       this.isAutoResearching = this.getNode.isAutoResearching;

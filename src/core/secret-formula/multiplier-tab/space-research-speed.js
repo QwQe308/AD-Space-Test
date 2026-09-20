@@ -39,7 +39,7 @@ export const RS = {
     name: "Imaginary Influence - Abyss",
     multValue: () => new Decimal(0.1),
     powValue: () => 0.9,
-    isActive: () => PlayerProgress.imaginaryUnlocked(),
+    isActive: () => PlayerProgress.imaginaryUnlocked() && !AbyssResearches.C0.completed,
     icon: MultiplierTabIcons.IMAGINARY_INFLUENCE,
   },
   // --ends

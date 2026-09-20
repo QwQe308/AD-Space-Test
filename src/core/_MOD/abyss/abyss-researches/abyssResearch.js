@@ -163,6 +163,14 @@ class AbyssResearchClass extends GameMechanicState {
     return !this.restrictions.map(x => x.completed).includes(false);
   }
 
+  get coreRestrictionCompleted() {
+    if (!this.hasRestriction) return false;
+    for (const restriction of this.restrictions) restriction.checkCompletionState();
+    // Completion can be checked before the next failure event, so also validate the current state.
+    return this.restrictionsAllCompleted && this.restrictions.every(restriction =>
+      restriction.type !== "failable" || restriction.config.noCheckOnCompletion || restriction.config.completable());
+  }
+
   updateScaling() {
     if (!this.scalingType) return;
     switch (this.scalingType) {
@@ -184,6 +192,7 @@ class AbyssResearchClass extends GameMechanicState {
         if (this.coreRestrictionCompleted || this.progress.gte(this.config.cost)) {
           this.level = DC.D1;
         } else return;
+        break;
       case "single":
         if (this.progress.gte(this.config.cost)) {
           this.level = DC.D1;
@@ -270,6 +279,7 @@ class AbyssResearchClass extends GameMechanicState {
   start() {
     if (!this.canResearch) return;
     player.activeAbyssResearches.add(this.id);
+    if (this.type === "core") this.updateLevel();
   }
 
   stop() {

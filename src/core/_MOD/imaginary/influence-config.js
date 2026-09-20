@@ -3,7 +3,7 @@ export const influence = {
     id: "abyss",
     name: "Abyss",
     info() {
-      if(AbyssResearches.C0.isBought) return `Disables Achievements, part of Time Studies, anddd$#∱?τ^%ɛ(@?`;
+      if (AbyssResearches.C0.completed) return `Disables Achievements, part of Time Studies, anddd$#∱?τ^%ɛ(@?`;
       return `Disables Achievements, part of Time Studies, nerfs Research Speeddd$#∱?τ^%ɛ(@?`;
     },
     influenceStat: 50,

@@ -9,7 +9,9 @@ export function getBaseResearchSpeed() {
   const dbFactor = DC.D2.pow(DimBoost.totalBoosts.pow(0.75));
 
   let baseResearchSpeed = spaceFactor.mul(dbFactor);
-  if (PlayerProgress.imaginaryUnlocked()) baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9);
+  if (PlayerProgress.imaginaryUnlocked() && !AbyssResearches.C0.completed) {
+    baseResearchSpeed = baseResearchSpeed.div(10).pow(0.9);
+  }
   return baseResearchSpeed;
 }
 

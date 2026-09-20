@@ -726,7 +726,8 @@ test("Abyss records effective space peaks independently before awarding research
 test("space, research speed and conversion breakdowns reconstruct the live formulas", () => {
   global.PlayerProgress.imaginaryUnlocked = () => true;
   global.AbyssResearches = {
-    A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5), A22: mockEffect(10000)
+    A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5), A22: mockEffect(10000),
+    C0: { completed: false }
   };
   global.SpaceResearchRifts = {
     r11: mockEffect(7), r21: mockEffect([3, 11]), r22: { ...mockEffect(1.5), level: new Decimal(4) },
@@ -780,6 +781,35 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   const { ID } = loadSource(path.join(base, "infinity-dimensions.js"));
   assertDecimalClose(breakdownProduct({ base: ID.conversionBase, research: ID.conversionSR45,
     pelle: ID.conversionPelle }).log10(), rate());
+});
+
+test("C0 removes both Abyss research speed penalties and their breakdown and influence descriptions", () => {
+  let inAbyss = false;
+  global.PlayerProgress.imaginaryUnlocked = () => inAbyss;
+  global.AbyssResearches = { C0: { completed: false } };
+  global.getEffectiveSpace = () => new Decimal(100);
+  global.DimBoost = { totalBoosts: new Decimal(8) };
+  global.GAME_EVENT = { ENTER_ABYSS: "enter-abyss" };
+  const { getBaseResearchSpeed } = loadSource(path.join(root, "src/core/_MOD/space-researches/spaceResearches.js"));
+  const { RS } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/space-research-speed.js"));
+  const { influence } = loadSource(path.join(root, "src/core/_MOD/imaginary/influence-config.js"));
+  const breakdown = { space: RS.space, dimBoost: RS.dimBoost, Abyss: RS.Abyss };
+  const unnerfedSpeed = getBaseResearchSpeed();
+  assert.equal(RS.Abyss.isActive(), false);
+  assertDecimalClose(breakdownProduct(breakdown), unnerfedSpeed);
+
+  inAbyss = true;
+  assert.equal(RS.Abyss.isActive(), true);
+  assertDecimalClose(getBaseResearchSpeed(), unnerfedSpeed.div(10).pow(0.9));
+  assertDecimalClose(breakdownProduct(breakdown), getBaseResearchSpeed());
+  assert.match(influence.abyss.info(), /nerfs Research Speed/);
+
+  AbyssResearches.C0.completed = true;
+  assertDecimalClose(getBaseResearchSpeed(), unnerfedSpeed);
+  assert.equal(RS.Abyss.isActive(), false);
+  assertDecimalClose(breakdownProduct(breakdown), unnerfedSpeed);
+  assert.doesNotMatch(influence.abyss.info(), /nerfs Research Speed/);
+  assert.match(influence.abyss.info(), /Disables Achievements, part of Time Studies/);
 });
 
 test("all reachable breakdown tree references resolve and mod research is reachable without double counting", () => {

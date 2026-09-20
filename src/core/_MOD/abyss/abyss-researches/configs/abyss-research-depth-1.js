@@ -12,17 +12,21 @@ function getEternityStateCompleted(id) {
 const baseConfig = {
   // ARs taken from depth 0.
   A21B: {
-    position: [-2, -1],
+    position: [-1, -2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1e4),
     permanent: true,
     description(level) {
-      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.`;
+      return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.<br>Replicanti galaxies divides your replicanti by ${format(
+        Replicanti.galaxies.divisor,
+        2,
+        2
+      )} instead of reset to 1.`;
     },
     next: [],
   },
   A6B: {
-    position: [2, -1],
+    position: [1, -2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(75),
     permanent: true,
@@ -35,7 +39,7 @@ const baseConfig = {
     next: [],
   },
   A7B: {
-    position: [-1, -2],
+    position: [-2, -1],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(50),
     permanent: true,
@@ -52,7 +56,7 @@ const baseConfig = {
     next: [],
   },
   A16B: {
-    position: [-1, 2],
+    position: [2, -1],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(5000),
     permanent: true,
@@ -82,12 +86,12 @@ const baseConfig = {
     next: ["B1"],
   },
   B1: {
-    position: [1, 1],
+    position: [0, 1],
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
       cost: new Decimal(1e4),
-      costIncrease: new Decimal(2),
+      costIncrease: new Decimal(1.5),
     },
     description(level) {
       return `Get ready for challenges.<br>Multiplies all TD multiplier by 2 for each level.<br>
@@ -118,7 +122,9 @@ const baseConfig = {
   B3: {
     position: [0, 2],
     type: NODE_TYPE.CORRUPTION,
-    cost: 30,
+    cost: {
+      timeTheorems: 30,
+    },
     description(level) {
       return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;
     },
@@ -129,9 +135,11 @@ const baseConfig = {
   PST: {
     position: [-2, 3],
     type: NODE_TYPE.CORRUPTION,
-    cost: () => 30 + 30 * getEternityTotalState(),
+    cost: {
+      timeTheorems: 100 + 50 * getEternityTotalState(),
+    },
     description(level) {
-      let baseInfo = `To complete the power of eternity, we need to revise the PAST.`;
+      let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
       baseInfo += `\n\n--------Difficultity--------\n\n`;
       switch (getEternityTotalState()) {
