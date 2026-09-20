@@ -1,3 +1,4 @@
+import { futureISUEntry, futureISUMultiplier, timeStudyISUEntry, timeStudyISUMultiplier } from "./future-empower";
 import { abyssResearch } from "./mod-research";
 import { MultiplierTabIcons } from "./icons";
 import { spaceDivisorBreakdown } from "./space-divisor";
@@ -65,6 +66,15 @@ export const AM = {
     isActive: () => InfinityUpgrade.dim45mult.canBeApplied,
     icon: MultiplierTabIcons.UPGRADE("infinity"),
   },
+  infinityUpgradeBase: {
+    name: "IU32 Base (ISU Power 1)",
+    multValue: () => Decimal.div(AM.infinityUpgrade.multValue(), AM.futureISU.multValue())
+      .div(AM.timeStudyISU.multValue()),
+    isActive: () => InfinityUpgrade.dim45mult.canBeApplied,
+    icon: MultiplierTabIcons.UPGRADE("infinity"),
+  },
+  futureISU: futureISUEntry(() => futureISUMultiplier(InfinityUpgrade.dim45mult.effectOrDefault(1))),
+  timeStudyISU: timeStudyISUEntry(() => timeStudyISUMultiplier(InfinityUpgrade.dim45mult.effectOrDefault(1))),
   timeStudy71: {
     name: "Time Study 71 - Direct Antimatter",
     multValue: () => TimeStudy(71).effectOrDefault(1),

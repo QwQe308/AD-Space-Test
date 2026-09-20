@@ -281,8 +281,7 @@ export function gainedEternities() {
   let esMult = new Decimal(getAdjustedGlyphEffect("timeetermult")).timesEffectsOf(
     RealityUpgrade(3),
     Achievement(113),
-    SpaceResearchRifts.r53,
-    FutureEmpowerOrbs.eternities
+    SpaceResearchRifts.r53
   );
   esMult = esMult.pow(AlchemyResource.eternity.effectValue);
   return esMult;

@@ -15,7 +15,7 @@ const propList = {
     "dilationUpgrade", "realityUpgrade", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "iap", "nerfV", "nerfCursed"],
   IP: ["base", "infinityUpgrade", "SR41", "A14", "achievement", "timeStudy", "glyph", "alchemy", "pelle", "iap",
     "nerfTeresa", "nerfV"],
-  EP: ["base", "eternityUpgrade", "SR51", "B0", "timeStudy", "glyph", "realityUpgrade", "pelle", "iap",
+  EP: ["base", "eternityUpgrade", "SR51", "B0", "futureEmpower", "timeStudy", "glyph", "realityUpgrade", "pelle", "iap",
     "nerfTeresa", "nerfV"],
 };
 
@@ -197,6 +197,17 @@ for (const prop of removedProps) {
 multiplierTabTree.AD_infinityPower = [["ID_total", "ID_powerConversion"]];
 for (let dim = 1; dim <= 8; dim++) {
   multiplierTabTree[`AD_infinityPower_${dim}`] = [["ID_total", "ID_powerConversion"]];
+}
+
+// ISU contributions are children of the upgrades which already contain them.
+multiplierTabTree.AM_infinityUpgrade = [["AM_infinityUpgradeBase", "AM_timeStudyISU", "AM_futureISU"]];
+for (const suffix of ["", ...Array.range(1, 8).map(dim => `_${dim}`)]) {
+  multiplierTabTree[`AD_infinityUpgrade${suffix}`] = [[
+    `AD_infinityUpgradeBase${suffix}`, `AD_timeStudyISU${suffix}`, `AD_futureISU${suffix}`
+  ]];
+  multiplierTabTree[`AD_breakInfinityUpgrade${suffix}`] = [[
+    `AD_breakInfinityUpgradeBase${suffix}`, `AD_timeStudyBreakISU${suffix}`, `AD_futureBreakISU${suffix}`
+  ]];
 }
 
 // Tesseracts are added one layer deep, but we don't want to override the existing ID_purchase entry

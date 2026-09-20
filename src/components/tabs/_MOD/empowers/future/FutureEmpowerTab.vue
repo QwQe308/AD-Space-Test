@@ -517,8 +517,8 @@ export default {
 
 .future-bonuses-empty {
   font-style: italic;
-  color: var(--color-text);
   opacity: 0.6;
+  color: var(--color-text);
 }
 
 .future-bonus {

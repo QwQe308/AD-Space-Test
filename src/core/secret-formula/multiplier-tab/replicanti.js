@@ -7,8 +7,8 @@ import { MultiplierTabIcons } from "./icons";
 // See index.js for documentation
 export const replicanti = {
   total: {
-    name: "Replicanti Speed",
-    multValue: () => totalReplicantiSpeedMult(Replicanti.amount.gt(replicantiCap())),
+    name: "Replicanti Speed (including Slowdown, before V)",
+    multValue: () => totalReplicantiSpeedMult(Replicanti.amount.gt(replicantiCap())).div(ReplicantiGrowth.slowdown),
     isActive: () => PlayerProgress.eternityUnlocked(),
     overlay: ["Ξ"],
   },
@@ -35,10 +35,20 @@ export const replicanti = {
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
   A19: abyssResearch("A19", "Replicanti Speed"),
+  slowdown: {
+    name: "Slowdown above Replicanti Cap (before Future Empower)",
+    multValue: () => Decimal.pow(ReplicantiGrowth.baseScaleFactor, ReplicantiGrowth.slowdownExponent.neg()),
+    isActive: () => Replicanti.amount.gt(replicantiCap()),
+    icon: MultiplierTabIcons.DIVISOR("Ξ"),
+  },
   futureEmpower: {
-    name: "Future Empower - Replicanti",
-    multValue: () => FutureEmpowerOrbs.replicanti.effectOrDefault(1),
-    isActive: () => FutureEmpowerOrbs.replicanti.canBeApplied && !Pelle.isDisabled("replicantiIntervalMult"),
+    name: "Future Empower - Replicanti Slowdown Reduction",
+    displayOverride: () => FutureEmpowerOrbs.replicanti.formattedEffect,
+    // Show the recovered speed, not the root applied to the slowdown factor.
+    multValue: () => Decimal.pow(ReplicantiGrowth.baseScaleFactor,
+      ReplicantiGrowth.slowdownExponent.mul(Decimal.sub(1, Decimal.div(1, ReplicantiGrowth.slowdownReduction)))),
+    isActive: () => FutureEmpowerOrbs.replicanti.canBeApplied && Replicanti.amount.gt(replicantiCap()) &&
+      !Pelle.isDisabled("replicantiIntervalMult"),
     icon: MultiplierTabIcons.UPGRADE("reality"),
   },
   glyph: {

@@ -94,7 +94,7 @@ test("locked resources cannot earn levels and huge values produce a finite fill"
   assert.ok(Number.isFinite(orb.percentage));
   assert.equal(orb.satelliteCount, futureEmpowerConfig.satellites.capacity);
   assert.equal(orb.upgrade(), true);
-  assert.ok(orb.level.eq(new Decimal("1e998")));
+  assert.ok(orb.level.eq(new Decimal("5e997")));
   assert.ok(player.replicanti.amount.eq(0));
   assert.equal(FutureEmpowerOrbs.infinities.canUpgrade, false, "banked Infinities do not count");
 });
@@ -110,7 +110,7 @@ test("bulk upgrades use one resource snapshot rather than summed costs, and clea
     assert.equal(orb.upgrade(), true);
     assert.ok(resource.value.eq(0));
     assert.ok(orb.level.eq(3));
-    assert.ok(orb.effectValue.eq_tolerance(8, 1e-12));
+    assert.ok(orb.effectValue.eq_tolerance(orb.config.effect(new Decimal(3)), 1e-12));
     assert.ok(player.infinitiesBanked.eq(banked));
     assert.equal(orb.satelliteCount, 0);
     assert.equal(orb.upgrade(), false);
@@ -119,7 +119,11 @@ test("bulk upgrades use one resource snapshot rather than summed costs, and clea
 });
 
 test("completed layers expose the next threshold and update immediately when resources fall", () => {
-  const orb = FutureEmpowerOrbs.eternities;
+  const orb = new FutureEmpowerOrbState({
+    ...futureEmpowerConfig.orbs.eternities,
+    costScaling: { baseCost: new Decimal(10), baseIncrease: new Decimal(10),
+      costScale: new Decimal(1), purchasesBeforeScaling: new Decimal(Infinity) },
+  });
   for (const [amount, count, percentage, next] of [
     [5, 0, 0.5, 10], [10, 1, 0.1, 100], [50, 1, 0.5, 100],
     [100, 2, 0.1, 1000], [500, 2, 0.5, 1000], [0, 0, 0, 10],
@@ -163,7 +167,7 @@ test("clearing prestige counts retains bonuses and unlocks at the Imaginary prog
     Currency[id].value = orb.requirement;
     assert.equal(orb.upgrade(), true);
     assert.ok(Currency[id].value.eq(0));
-    assert.ok(orb.effectValue.eq(2));
+    assert.ok(orb.effectValue.eq(orb.config.effect(new Decimal(1))));
     assert.equal(orb.canBeApplied, true);
   }
   assert.equal(PlayerProgress.infinityUnlocked(), true);
@@ -198,17 +202,17 @@ test("orb requirements support accelerated math.js scaling and matching bulk lev
 test("sphere bonuses are independent, immediate, and not capped at the former purchase limit", () => {
   for (const orb of FutureEmpower.orbs) {
     assert.equal(orb.effectOrDefault(1), 1);
-    assert.ok(orb.effectValue.eq(1));
+    assert.ok(orb.effectValue.eq(orb.config.effect(new Decimal(0))));
   }
   const orb = FutureEmpowerOrbs.eternities;
   Currency.eternities.value = orb.costScale.calculateCost(new Decimal(100));
   assert.equal(orb.upgrade(), true);
   assert.ok(orb.level.eq(101));
-  assert.ok(orb.effectOrDefault(1).eq(Decimal.pow(2, 101)));
+  assert.ok(orb.effectOrDefault(1).eq(Decimal.pow(1.5, 101)));
   assert.equal(FutureEmpowerOrbs.replicanti.effectOrDefault(1), 1);
   assert.equal(FutureEmpowerOrbs.infinities.effectOrDefault(1), 1);
   assert.equal(orb.upgrade(), false);
-  assert.ok(orb.effectValue.eq(Decimal.pow(2, 101)));
+  assert.ok(orb.effectValue.eq(Decimal.pow(1.5, 101)));
 });
 
 test("selecting an orb swaps the center without upgrading and orbit positions advance in real time", () => {
@@ -240,7 +244,7 @@ test("save merging restores sphere levels, bonuses, and selection without separa
   const saved = JSON.parse(JSON.stringify(player.empowers.future));
   player.empowers.future = deepmergeAll([createFutureEmpowerData(), saved]);
   assert.ok(FutureEmpowerOrbs.infinities.level.eq(5));
-  assert.ok(FutureEmpowerOrbs.infinities.effectValue.eq_tolerance(32, 1e-12));
+  assert.ok(FutureEmpowerOrbs.infinities.effectValue.eq_tolerance(0.05, 1e-12));
   assert.equal(FutureEmpower.selectedOrb.id, "infinities");
   player.empowers.future = createFutureEmpowerData();
   assert.ok(FutureEmpowerOrbs.infinities.level.eq(0));
@@ -265,16 +269,16 @@ test("migration removes obsolete insight data while preserving earned sphere pro
   assert.equal("insight" in future, false);
   assert.equal("upgrades" in future, false);
   assert.ok(FutureEmpowerOrbs.replicanti.level.eq(3));
-  assert.ok(FutureEmpowerOrbs.replicanti.effectValue.eq_tolerance(8, 1e-12));
+  assert.ok(FutureEmpowerOrbs.replicanti.effectValue.eq_tolerance(Decimal.log10(13), 1e-12));
   assert.equal(FutureEmpower.selectedOrb.id, "eternities");
   assert.doesNotThrow(() => migrate({}));
 });
 
-test("sphere upgrades update real production formulas while existing restrictions still apply", () => {
+test("revised sphere effects affect EP, ISU Power, and slowdown instead of prestige counts or flat speed", () => {
   function productionFunction(file, name) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     const ast = parseSync(source, { configFile: false, babelrc: false, sourceType: "module" });
-    const fn = ast.program.body.find(node => node.declaration?.id?.name === name).declaration;
+    const fn = ast.program.body.map(node => node.declaration ?? node).find(node => node.id?.name === name);
     return compileFunction(source.slice(fn.body.start + 1, fn.body.end - 1), fn.params.map(param => param.name));
   }
   global.DC = loadSource(path.join(root, "core/constants.js")).DC;
@@ -287,7 +291,8 @@ test("sphere upgrades update real production formulas while existing restriction
     isDisabled: () => restricted,
     specialGlyphEffect: { replication: new Decimal(1) },
   };
-  global.PelleRifts = { decay: identity };
+  global.PelleRifts = { decay: identity, vacuum: { milestones: [null, null, identity] } };
+  Pelle.specialGlyphEffect.time = new Decimal(1);
   global.isSCRunningOnTier = () => false;
   global.EternityChallenge = () => ({ isRunning: false });
   global.Achievement = () => Object.assign(new Effect(new Decimal(1)), {
@@ -298,11 +303,13 @@ test("sphere upgrades update real production formulas while existing restriction
   global.getAdjustedGlyphEffect = () => new Decimal(1);
   global.getPrismReplicantiNerf = () => new Decimal(1);
   global.GlyphAlteration = { isAdded: () => false };
-  global.SpaceResearchRifts = { r43: identity, r53: identity, r52: identity };
-  global.AbyssResearches = { A12: identity, A18: identity, A19: identity };
+  global.SpaceResearchRifts = { r43: identity, r53: identity, r52: identity, r51: identity };
+  global.AbyssResearches = { A12: identity, A18: identity, A19: identity, B0: identity };
   global.Ra = { unlocks: { continuousTTBoost: { effects: { infinity: identity, replicanti: identity } } } };
   global.SingularityMilestone = { infinitiedPow: identity };
   global.AlchemyResource = { eternity: identity, replication: identity };
+  global.EternityUpgrade = { epMult: identity };
+  global.GlyphEffect = { epMult: identity };
   player.records = { thisInfinity: { time: new Decimal(0) } };
   const formulas = {
     replicanti: productionFunction("core/replicanti.js", "totalReplicantiSpeedMult"),
@@ -314,10 +321,17 @@ test("sphere upgrades update real production formulas while existing restriction
     const orb = FutureEmpowerOrbs[id];
     Currency[id].value = orb.costScale.calculateCost(new Decimal(2));
     assert.equal(orb.upgrade(), true);
-    assert.ok(formula().eq_tolerance(8, 1e-12), id);
+    assert.ok(formula().eq(1), `${id} no obsolete multiplier`);
     restricted = true;
     assert.ok(formula().eq(1), `${id} restriction`);
     restricted = false;
-    assert.ok(formula().eq_tolerance(8, 1e-12), `${id} restored after restriction`);
+    assert.ok(formula().eq(1), `${id} no obsolete multiplier after restriction`);
   }
+  const totalEP = productionFunction("game.js", "totalEPMult");
+  assert.ok(totalEP().eq_tolerance(3.375, 1e-12));
+  restricted = true;
+  assert.ok(totalEP().eq(1));
+  restricted = false;
+  const isuPower = productionFunction("core/secret-formula/infinity/infinity-upgrades.js", "dimInfinityExponent");
+  assert.ok(isuPower().eq_tolerance(1.03, 1e-12));
 });

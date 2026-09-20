@@ -1,6 +1,7 @@
 import { DC } from "../../constants";
 import { PlayerProgress } from "../../player-progress";
 
+import { futureISUEntry, futureISUMultiplier, timeStudyISUEntry, timeStudyISUMultiplier } from "./future-empower";
 import { adBoostBreakdown } from "./antimatter-boosts";
 import { adPurchaseBreakdown } from "./antimatter-purchases";
 import { memoizeBreakdown } from "./cache";
@@ -13,6 +14,15 @@ const baseADProduction = memoizeBreakdown(() => {
     .reduce((mult, ad) => mult.times(ad.multiplier), DC.D1)
     .times(AntimatterDimension(maxTier).totalAmount);
 });
+
+function infinityBasedUpgradeMult(dim) {
+  if (dim) return AntimatterDimension(dim).infinityUpgrade.effectOrDefault(1);
+  let mult = DC.D1;
+  for (let tier = 1; tier <= MultiplierTabHelper.activeDimCount("AD"); tier++) {
+    mult = mult.timesEffectOf(AntimatterDimension(tier).infinityUpgrade);
+  }
+  return mult;
+}
 
 // See index.js for documentation
 export const AD = {
@@ -208,6 +218,28 @@ export const AD = {
     isActive: () => PlayerProgress.infinityUnlocked() && !EternityChallenge(11).isRunning,
     icon: MultiplierTabIcons.UPGRADE("infinity"),
   },
+  infinityUpgradeBase: {
+    name: "Infinity Upgrades Base (ISU Power 1)",
+    multValue: dim => AD.infinityUpgrade.multValue(dim).div(AD.futureISU.multValue(dim))
+      .div(AD.timeStudyISU.multValue(dim)),
+    powValue: dim => AD.infinityUpgrade.powValue(dim),
+    isActive: () => PlayerProgress.infinityUnlocked() && !EternityChallenge(11).isRunning,
+    icon: MultiplierTabIcons.UPGRADE("infinity"),
+  },
+  futureISU: futureISUEntry(dim => futureISUMultiplier(infinityBasedUpgradeMult(dim))),
+  timeStudyISU: timeStudyISUEntry(dim => timeStudyISUMultiplier(infinityBasedUpgradeMult(dim))),
+  breakInfinityUpgradeBase: {
+    name: "Break Infinity Upgrades Base (ISU Power 1)",
+    multValue: dim => AD.breakInfinityUpgrade.multValue(dim).div(AD.futureBreakISU.multValue(dim))
+      .div(AD.timeStudyBreakISU.multValue(dim)),
+    isActive: () => player.break && !EternityChallenge(11).isRunning,
+    icon: MultiplierTabIcons.BREAK_INFINITY,
+  },
+  futureBreakISU: futureISUEntry(dim => futureISUMultiplier(BreakInfinityUpgrade.infinitiedMult.effectOrDefault(1))
+    .pow(dim ? 1 : MultiplierTabHelper.activeDimCount("AD"))),
+  timeStudyBreakISU: timeStudyISUEntry(dim =>
+    timeStudyISUMultiplier(BreakInfinityUpgrade.infinitiedMult.effectOrDefault(1))
+      .pow(dim ? 1 : MultiplierTabHelper.activeDimCount("AD"))),
   breakInfinityUpgrade: {
     name: "Break Infinity Upgrades",
     multValue: dim => {
@@ -271,13 +303,7 @@ export const AD = {
 
       const dimMults = Array.repeat(DC.D1, 9);
       for (let tier = 1; tier <= 8; tier++) {
-        // We don't want to double-count the base effect that TS31 boosts
-        const infinitiedMult = DC.D1.timesEffectsOf(
-          AntimatterDimension(tier).infinityUpgrade,
-          BreakInfinityUpgrade.infinitiedMult
-        );
-        dimMults[tier] = dimMults[tier].times(infinitiedMult.pow(TimeStudy(31).effectOrDefault(1) - 1));
-
+        // ISU Power (TS31 and Future Empower) is already included in Infinity Upgrades.
         dimMults[tier] = dimMults[tier].timesEffectsOf(
           tier < 8 ? TimeStudy(71) : null,
           tier === 8 ? TimeStudy(214) : null,

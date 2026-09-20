@@ -1,7 +1,7 @@
 import { DC } from "../../constants";
 
 export function dimInfinityExponent() {
-  const exponent = TimeStudy(31).effectOrDefault(1);
+  const exponent = Decimal.add(TimeStudy(31).effectOrDefault(1), FutureEmpowerOrbs.infinities.effectOrDefault(0));
   return exponent;
 }
 

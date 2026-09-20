@@ -156,7 +156,8 @@ function totalEPMult() {
     RealityUpgrade(12),
     GlyphEffect.epMult,
     SpaceResearchRifts.r51,
-    AbyssResearches.B0
+    AbyssResearches.B0,
+    FutureEmpowerOrbs.eternities
   );
   return epMult;
 }
@@ -338,8 +339,7 @@ export function gainedInfinities() {
     Ra.unlocks.continuousTTBoost.effects.infinity,
     SpaceResearchRifts.r43,
     AbyssResearches.A12,
-    AbyssResearches.A18,
-    FutureEmpowerOrbs.infinities
+    AbyssResearches.A18
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
 

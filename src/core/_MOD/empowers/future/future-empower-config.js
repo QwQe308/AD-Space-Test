@@ -24,19 +24,19 @@ export const futureEmpowerConfig = {
       },
       isUnlocked: () => player.replicanti.unl,
       costScaling: {
-        baseCost: DC.E100,
-        baseIncrease: DC.E100,
+        baseCost: DC.E600,
+        baseIncrease: DC.E200,
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
       bonusDescription: "Replicanti slowdown is weakened.",
       effect: (level) => level.add(10).log10(),
       formatEffect: (value) =>
-        `x${format(Decimal.root(ReplicantiGrowth.scaleFactor, value), 2, 2)} / ${format(
+        `x${format(ReplicantiGrowth.baseScaleFactor, 2, 2)} / ${format(
           Number.MAX_VALUE,
           2,
           2
-        )} → x${format(ReplicantiGrowth.scaleFactor, 2, 2)} / ${format(Number.MAX_VALUE, 2, 2)} `,
+        )} → x${format(Decimal.root(ReplicantiGrowth.baseScaleFactor, value), 2, 2)} / ${format(Number.MAX_VALUE, 2, 2)} `,
     },
     eternities: {
       id: "eternities",
@@ -50,14 +50,14 @@ export const futureEmpowerConfig = {
       },
       isUnlocked: () => PlayerProgress.eternityUnlocked(),
       costScaling: {
-        baseCost: DC.E1,
-        baseIncrease: DC.E1,
+        baseCost: DC.E3,
+        baseIncrease: new Decimal(1.3),
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      bonusDescription: "Multiply Eternities gained by 2 per level.",
-      effect: (level) => Decimal.pow(2, level),
-      formatEffect: (value) => formatX(value, 2, 0),
+      bonusDescription: "Multiply Eternity Points gained by 1.5 per level.",
+      effect: (level) => Decimal.pow(1.5, level),
+      formatEffect: (value) => formatX(value, 2, 2),
     },
     infinities: {
       id: "infinities",
@@ -71,14 +71,14 @@ export const futureEmpowerConfig = {
       },
       isUnlocked: () => PlayerProgress.infinityUnlocked(),
       costScaling: {
-        baseCost: DC.E3,
-        baseIncrease: DC.E3,
+        baseCost: DC.E20,
+        baseIncrease: DC.D2,
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      bonusDescription: "Multiply Infinities gained by 2 per level.",
-      effect: (level) => Decimal.pow(2, level),
-      formatEffect: (value) => formatX(value, 2, 0),
+      bonusDescription: "Adds to ISU Power.",
+      effect: (level) => Decimal.mul(0.01, level),
+      formatEffect: (value) => formatAdd(value, 2, 2),
     },
   },
 };
@@ -89,4 +89,3 @@ export function createFutureEmpowerData() {
     orbs: Object.fromEntries(Object.keys(futureEmpowerConfig.orbs).map((id) => [id, { level: new Decimal(0) }])),
   };
 }
-

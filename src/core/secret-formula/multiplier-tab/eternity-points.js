@@ -59,6 +59,12 @@ export const EP = {
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
   B0: abyssResearch("B0", "Eternity Points"),
+  futureEmpower: {
+    name: "Future Empower - Eternity Points",
+    multValue: () => FutureEmpowerOrbs.eternities.effectOrDefault(1),
+    isActive: () => FutureEmpowerOrbs.eternities.canBeApplied && !Pelle.isDisabled("EPMults"),
+    icon: MultiplierTabIcons.UPGRADE("eternity"),
+  },
   timeStudy: {
     name: "Time Studies",
     multValue: () => DC.D1.timesEffectsOf(

@@ -8,11 +8,32 @@ export const ReplicantiGrowth = {
   get scaleLog10() {
     return Math.log10(Number.MAX_VALUE);
   },
-  get scaleFactor() {
+  get baseScaleFactor() {
     if (PelleStrikes.eternity.hasStrike && Replicanti.amount.gte(DC.E2000)) return 10;
     if (Pelle.isDoomed) return 2;
     if (!TimeStudy(192).isBought) return 3;
     return AlchemyResource.cardinality.effectValue;
+  },
+  get scaleFactor() {
+    return Decimal.root(this.baseScaleFactor, this.slowdownReduction);
+  },
+  get slowdownReduction() {
+    return Pelle.isDisabled("replicantiIntervalMult") ? DC.D1 : FutureEmpowerOrbs.replicanti.effectOrDefault(DC.D1);
+  },
+  get slowdownExponent() {
+    const amount = Replicanti.amount;
+    if (amount.lte(replicantiCap())) return DC.D0;
+    let increases = amount.max(1).log10().sub(replicantiCap().max(1).log10()).div(this.scaleLog10);
+    if (PelleStrikes.eternity.hasStrike && amount.gte(DC.E2000)) {
+      // Preserve the existing correction for the weaker slowdown below e2000 in Pelle.
+      increases = increases.sub(
+        Decimal.log10(5).times(DC.E2000.sub(replicantiCap()).max(1).log10()).div(this.scaleLog10)
+      );
+    }
+    return increases;
+  },
+  get slowdown() {
+    return Decimal.pow(this.scaleFactor, this.slowdownExponent);
   },
 };
 
@@ -115,15 +136,7 @@ export function getReplicantiInterval(overCapOverride, intervalIn) {
   }
 
   if (overCap) {
-    let increases = amount.max(1).log10().sub(replicantiCap().max(1).log10()).div(ReplicantiGrowth.scaleLog10);
-    if (PelleStrikes.eternity.hasStrike && amount.gte(DC.E2000)) {
-      // The above code assumes in this case there's 10x scaling for every 1e308 increase;
-      // in fact, before e2000 it's only 2x.
-      increases = increases.sub(
-        Decimal.log10(5).times(DC.E2000.sub(replicantiCap()).max(1).log10()).div(ReplicantiGrowth.scaleLog10)
-      );
-    }
-    interval = interval.times(Decimal.pow(ReplicantiGrowth.scaleFactor, increases));
+    interval = interval.times(ReplicantiGrowth.slowdown);
   }
 
   interval = interval.divide(totalReplicantiSpeedMult(overCap)).div(4);
@@ -157,7 +170,6 @@ export function totalReplicantiSpeedMult(overCap) {
     RealityUpgrade(23),
     SpaceResearchRifts.r52,
     AbyssResearches.A19,
-    FutureEmpowerOrbs.replicanti,
   );
 
   if (TimeStudy(21).isBought) {

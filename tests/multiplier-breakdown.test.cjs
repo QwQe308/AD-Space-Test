@@ -1140,3 +1140,146 @@ test("AD snapshot shares Continuum across entries and reads current currency out
   assert.ok(second().eq(2000));
   assert.equal(continuumReads, 3);
 });
+
+test("Future Empower breakdown follows slowdown, EP, and additive ISU Power without double counting", () => {
+  const { parseSync } = require("@babel/core");
+  const source = fs.readFileSync(path.join(root, "src/core/replicanti.js"), "utf8");
+  const ast = parseSync(source, { configFile: false, babelrc: false, sourceType: "module" });
+  const growth = ast.program.body.find(node => node.declaration?.declarations?.[0]?.id.name === "ReplicantiGrowth")
+    .declaration.declarations[0].init;
+  const effect = value => ({
+    canBeApplied: true,
+    effectValue: new Decimal(value),
+    effectOrDefault() { return this.effectValue; },
+    applyEffect(fn) { fn(this.effectValue); },
+  });
+  let disabled = false;
+  let study31 = 1;
+  global.DC = { ...DC, E2000: new Decimal("1e2000") };
+  global.FutureEmpowerOrbs = {
+    replicanti: { ...effect(2), formattedEffect: "3 → sqrt(3)" },
+    eternities: effect(3.375),
+    infinities: { ...effect(0.1), formattedEffect: "+0.10" },
+  };
+  global.Pelle = { isDoomed: false, isDisabled: () => disabled };
+  global.PelleStrikes = { eternity: { hasStrike: false } };
+  global.TimeStudy = id => ({ ...effect(id === 31 ? study31 : 1), isBought: false });
+  global.Replicanti = { amount: new Decimal("1e400") };
+  global.replicantiCap = () => new Decimal("1e100");
+  global.ReplicantiGrowth = compileFunction(`return (${source.slice(growth.start, growth.end)});`)();
+  global.totalReplicantiSpeedMult = () => new Decimal(10);
+  const { replicanti } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/replicanti.js"));
+  const { EP } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/eternity-points.js"));
+  const { infinities } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/infinities.js"));
+  const { eternities } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/eternities.js"));
+  for (const amount of ["1e50", "1e100", "1e400", "ee20"]) {
+    Replicanti.amount = new Decimal(amount);
+    const product = replicanti.slowdown.multValue().mul(replicanti.futureEmpower.multValue()).mul(10);
+    assert.ok(product.eq_tolerance(replicanti.total.multValue(), 1e-10), amount);
+    assert.equal(replicanti.futureEmpower.isActive(), Replicanti.amount.gt(replicantiCap()));
+  }
+  const intervalNode = ast.program.body.find(node => node.declaration?.id?.name === "getReplicantiInterval").declaration;
+  const interval = compileFunction(source.slice(intervalNode.body.start + 1, intervalNode.body.end - 1),
+    ["overCapOverride", "intervalIn"]);
+  global.Achievement = () => ({ isUnlocked: false });
+  global.V = { isRunning: false };
+  Replicanti.amount = new Decimal("1e400");
+  assert.ok(interval(true, 40).eq_tolerance(ReplicantiGrowth.slowdown, 1e-12));
+  assert.ok(interval(false, 40).eq(1));
+  assert.ok(ReplicantiGrowth.scaleFactor.eq_tolerance(Math.sqrt(3), 1e-12));
+  disabled = true;
+  assert.ok(ReplicantiGrowth.scaleFactor.eq(3));
+  assert.ok(replicanti.futureEmpower.multValue().eq(1));
+  assert.equal(replicanti.futureEmpower.isActive(), false);
+  assert.equal(EP.futureEmpower.isActive(), false);
+  disabled = false;
+  assert.ok(EP.futureEmpower.multValue().eq(3.375));
+  assert.equal(EP.futureEmpower.isActive(), true);
+  assert.equal(infinities.futureEmpower, undefined);
+  assert.equal(eternities.futureEmpower, undefined);
+
+  const { AD } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/antimatter-dimensions.js"));
+  const { AM } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/antimatter.js"));
+  const { MultiplierTabHelper } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/helper-functions.js"));
+  const originalCount = MultiplierTabHelper.activeDimCount;
+  MultiplierTabHelper.activeDimCount = () => 2;
+  const identity = effect(1);
+  identity.chargedEffect = identity;
+  global.InfinityUpgrade = { totalTimeMult: identity, thisInfinityTimeMult: identity, unspentIPMult: identity };
+  global.BreakInfinityUpgrade = { totalAMMult: identity, currentAMMult: identity,
+    achievementMult: identity, slowestChallengeMult: identity };
+  try {
+    for (study31 of [1, 2]) {
+      const powered = effect(Decimal.pow(100, study31 + 0.1));
+      global.AntimatterDimension = () => ({ infinityUpgrade: powered });
+      InfinityUpgrade.dim45mult = powered;
+      BreakInfinityUpgrade.infinitiedMult = powered;
+      for (const dim of [undefined, 1, 8]) {
+        const count = dim ? 1 : 2;
+        assert.ok(AD.futureISU.multValue(dim).eq_tolerance(Decimal.pow(100, 0.1 * count), 1e-10));
+        assert.ok(AD.infinityUpgradeBase.multValue(dim).mul(AD.timeStudyISU.multValue(dim)).mul(AD.futureISU.multValue(dim))
+          .eq_tolerance(AD.infinityUpgrade.multValue(dim), 1e-10));
+        assert.ok(AD.breakInfinityUpgradeBase.multValue(dim).mul(AD.timeStudyBreakISU.multValue(dim)).mul(AD.futureBreakISU.multValue(dim))
+          .eq_tolerance(AD.breakInfinityUpgrade.multValue(dim), 1e-10));
+        assert.ok(AD.timeStudy.multValue(dim).eq(1), "TS31 is already counted by Infinity Upgrades");
+      }
+      assert.ok(AM.infinityUpgradeBase.multValue().mul(AM.timeStudyISU.multValue()).mul(AM.futureISU.multValue())
+        .eq_tolerance(AM.infinityUpgrade.multValue(), 1e-10));
+    }
+  } finally {
+    MultiplierTabHelper.activeDimCount = originalCount;
+  }
+});
+
+test("ISU breakdown expands with TS31 alone and updates when Future Empower is earned", () => {
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { multiplierTabValues } = loadSource(path.join(base, "values.js"));
+  const { multiplierTabTree } = loadSource(path.join(base, "tree.js"));
+  global.GameDatabase = { multiplierTabValues, multiplierTabTree };
+  global.player = { infinities: new Decimal(1000), break: true };
+  global.EternityChallenge = () => ({ isRunning: false });
+  global.TimeStudy = () => ({ canBeApplied: true, effectOrDefault: () => 2 });
+  global.formatAdd = value => `+${value}`;
+  let bonus = 0;
+  global.FutureEmpowerOrbs = {
+    infinities: {
+      get canBeApplied() { return bonus > 0; },
+      get formattedEffect() { return `+${bonus}`; },
+      effectOrDefault: () => new Decimal(bonus),
+    },
+  };
+  const identity = mockEffect(1);
+  identity.chargedEffect = identity;
+  const powered = {
+    ...mockEffect(100),
+    effectOrDefault: () => Decimal.pow(10, 2 + bonus),
+    applyEffect: fn => fn(Decimal.pow(10, 2 + bonus)),
+    chargedEffect: identity,
+  };
+  global.InfinityUpgrade = { totalTimeMult: identity, thisInfinityTimeMult: identity,
+    unspentIPMult: identity, dim45mult: powered };
+  global.AntimatterDimension = () => ({ infinityUpgrade: powered });
+  global.BreakInfinityUpgrade = { totalAMMult: identity, currentAMMult: identity,
+    achievementMult: identity, slowestChallengeMult: identity, infinitiedMult: powered };
+  const groups = ["AM_infinityUpgrade", "AD_infinityUpgrade_1", "AD_breakInfinityUpgrade_1"]
+    .map(key => new BreakdownEntryInfoGroup(multiplierTabTree[key][0]));
+  beginBreakdownUpdate();
+  for (const group of groups) {
+    assert.equal(group.hasVisibleEntries, true, "TS31 must allow expansion before earning any Future levels");
+    assert.equal(group.entries.filter(entry => entry.isVisible).length, 2);
+    const study = group.entries.find(entry => entry.key.includes("timeStudy"));
+    assert.match(study.displayOverride, /Total: \^2/);
+    assert.ok(group.entries.filter(entry => entry.isVisible).reduce((mult, entry) => mult.mul(entry.mult), new Decimal(1))
+      .eq_tolerance(100, 1e-12));
+  }
+  bonus = 0.1;
+  beginBreakdownUpdate();
+  for (const group of groups) {
+    assert.equal(group.hasVisibleEntries, true);
+    assert.equal(group.entries.filter(entry => entry.isVisible).length, 3);
+    const future = group.entries.find(entry => entry.key.includes("future"));
+    assert.match(future.displayOverride, /Total: \^2.1/);
+    assert.ok(group.entries.reduce((mult, entry) => mult.mul(entry.mult), new Decimal(1))
+      .eq_tolerance(Decimal.pow(10, 2.1), 1e-12));
+  }
+});
