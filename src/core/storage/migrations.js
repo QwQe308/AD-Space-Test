@@ -463,6 +463,12 @@ export const migrations = {
       player.options.breakPlaceHolder = false;
       player.reality.initialSeed = Math.floor(Date.now() * Math.random() + 1);
     },
+    104: player => {
+      // Bonuses now come directly from the retained sphere levels.
+      if (!player.empowers?.future) return;
+      delete player.empowers.future.insight;
+      delete player.empowers.future.upgrades;
+    },
   },
 
   normalizeTimespans(player) {

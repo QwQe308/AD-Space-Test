@@ -157,7 +157,7 @@ export function totalReplicantiSpeedMult(overCap) {
     RealityUpgrade(23),
     SpaceResearchRifts.r52,
     AbyssResearches.A19,
-    FutureEmpowerUpgrades.replicanti,
+    FutureEmpowerOrbs.replicanti,
   );
 
   if (TimeStudy(21).isBought) {

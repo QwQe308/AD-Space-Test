@@ -43,7 +43,7 @@ global.Currency = Currency;
 const { createFutureEmpowerData, futureEmpowerConfig } = loadSource(
   path.join(root, "core/_MOD/empowers/future/future-empower-config.js")
 );
-const { FutureEmpower, FutureEmpowerOrbs, FutureEmpowerOrbState, FutureEmpowerUpgrades } = loadSource(
+const { FutureEmpower, FutureEmpowerOrbs, FutureEmpowerOrbState } = loadSource(
   path.join(root, "core/_MOD/empowers/future/futureEmpower.js")
 );
 const { deepmergeAll } = loadSource(path.join(root, "utility/deepmerge.js"));
@@ -53,6 +53,7 @@ beforeEach(() => {
   global.player = {
     empowers: { past: { frozenCurrency: null }, future: createFutureEmpowerData() },
     replicanti: { amount: new Decimal(0), unl: true },
+    imaginaryInfluence: [],
     eternities: new Decimal(0),
     infinities: new Decimal(0),
     infinitiesBanked: new Decimal("1e1000"),
@@ -81,10 +82,9 @@ test("each orb uses live thresholds and resets only its source resource after up
     assert.equal(orb.canUpgrade, false);
     assert.ok(orb.level.eq(1));
   }
-  assert.ok(FutureEmpower.insight.eq(3));
 });
 
-test("locked resources cannot earn insight and huge values produce a finite fill", () => {
+test("locked resources cannot earn levels and huge values produce a finite fill", () => {
   const orb = FutureEmpowerOrbs.replicanti;
   player.replicanti.amount = new Decimal("ee1000");
   player.replicanti.unl = false;
@@ -104,19 +104,18 @@ test("bulk upgrades use one resource snapshot rather than summed costs, and clea
     const resource = Currency[orb.id];
     resource.value = orb.costScale.calculateCost(new Decimal(2));
     assert.ok(orb.bulkLevels.eq(3));
-    assert.ok(orb.bulkInsightGain.eq(3));
     assert.equal(orb.satelliteCount, 3);
     const banked = player.infinitiesBanked;
     player.empowers.past.frozenCurrency = orb.id;
     assert.equal(orb.upgrade(), true);
     assert.ok(resource.value.eq(0));
     assert.ok(orb.level.eq(3));
+    assert.ok(orb.effectValue.eq_tolerance(8, 1e-12));
     assert.ok(player.infinitiesBanked.eq(banked));
     assert.equal(orb.satelliteCount, 0);
     assert.equal(orb.upgrade(), false);
     player.empowers.past.frozenCurrency = null;
   }
-  assert.ok(Currency.insight.value.eq(9));
 });
 
 test("completed layers expose the next threshold and update immediately when resources fall", () => {
@@ -136,7 +135,6 @@ test("completed layers expose the next threshold and update immediately when res
   assert.ok(orb.bulkLevels.eq(2));
   assert.equal(orb.upgrade(), true);
   assert.ok(orb.level.eq(4));
-  assert.ok(Currency.insight.value.eq(2));
 });
 
 test("threshold boundaries and the satellite display cap do not change earned levels", () => {
@@ -154,26 +152,22 @@ test("threshold boundaries and the satellite display cap do not change earned le
     assert.equal(orb.upgrade(), true);
     assert.ok(orb.level.eq(100));
   }
-  assert.ok(Currency.insight.value.eq(300));
 });
 
-test("clearing prestige counts preserves historical unlocks and access to the Future tab", () => {
+test("clearing prestige counts retains bonuses and unlocks at the Imaginary progression stage", () => {
   global.PlayerProgress = PlayerProgress;
   player.realities = new Decimal(0);
-  assert.equal(PlayerProgress.infinityUnlocked(), false);
-  assert.equal(PlayerProgress.eternityUnlocked(), false);
-  player.infinities = new Decimal(1000);
-  assert.equal(FutureEmpowerOrbs.infinities.upgrade(), true);
-  assert.ok(player.infinities.eq(0));
+  player.imaginaryInfluence = ["abyss"];
+  for (const id of ["infinities", "eternities"]) {
+    const orb = FutureEmpowerOrbs[id];
+    Currency[id].value = orb.requirement;
+    assert.equal(orb.upgrade(), true);
+    assert.ok(Currency[id].value.eq(0));
+    assert.ok(orb.effectValue.eq(2));
+    assert.equal(orb.canBeApplied, true);
+  }
   assert.equal(PlayerProgress.infinityUnlocked(), true);
-  assert.equal(PlayerProgress.eternityUnlocked(), false);
-  player.eternities = new Decimal(100);
-  assert.equal(FutureEmpowerOrbs.eternities.upgrade(), true);
-  assert.ok(player.eternities.eq(0));
   assert.equal(PlayerProgress.eternityUnlocked(), true);
-  const legacy = { infinities: 1, eternities: 0, realities: 0 };
-  assert.equal(PlayerProgress.of(legacy).isInfinityUnlocked, true);
-  assert.equal(PlayerProgress.of(legacy).isEternityUnlocked, false);
 });
 
 test("orb requirements support accelerated math.js scaling and matching bulk levels", () => {
@@ -199,49 +193,22 @@ test("orb requirements support accelerated math.js scaling and matching bulk lev
   assert.equal(orb.upgrade(), true);
   assert.ok(orb.level.eq(6));
   assert.ok(Currency.eternities.value.eq(0));
-  assert.ok(Currency.insight.value.eq(6));
 });
 
-test("upgrades share one balance and refunds reverse each price without creating insight", () => {
-  Currency.insight.value = new Decimal(10);
-  const upgrades = FutureEmpower.upgrades;
-  for (const upgrade of upgrades) {
-    assert.equal(upgrade.effectOrDefault(1), 1);
-    assert.equal(upgrade.purchase(), true);
-    assert.ok(upgrade.effectValue.eq(2));
-    assert.equal(upgrade.purchase(), true);
-    assert.ok(upgrade.effectValue.eq(4));
-    assert.ok(upgrade.refund.eq(2));
+test("sphere bonuses are independent, immediate, and not capped at the former purchase limit", () => {
+  for (const orb of FutureEmpower.orbs) {
+    assert.equal(orb.effectOrDefault(1), 1);
+    assert.ok(orb.effectValue.eq(1));
   }
-  assert.ok(Currency.insight.value.eq(1));
-  assert.equal(upgrades[0].purchase(), false);
-  for (const upgrade of upgrades) {
-    assert.equal(upgrade.downgrade(), true);
-    assert.ok(upgrade.effectValue.eq(2));
-    assert.equal(upgrade.downgrade(), true);
-    assert.equal(upgrade.downgrade(), false);
-    assert.ok(upgrade.refund.eq(0));
-    assert.ok(upgrade.level.eq(0));
-    assert.equal(upgrade.effectOrDefault(1), 1);
-  }
-  assert.ok(Currency.insight.value.eq(10));
-  for (let i = 0; i < 20; i++) {
-    assert.equal(upgrades[0].purchase(), true);
-    assert.equal(upgrades[0].downgrade(), true);
-  }
-  assert.ok(Currency.insight.value.eq(10));
-});
-
-test("maxed upgrades cannot charge insight and can still downgrade", () => {
-  const upgrade = FutureEmpowerUpgrades.eternities;
-  upgrade.data.level = upgrade.maxLevel;
-  Currency.insight.value = new Decimal("1e100");
-  const balance = Currency.insight.value;
-  assert.equal(upgrade.isMaxed, true);
-  assert.equal(upgrade.purchase(), false);
-  assert.ok(Currency.insight.value.eq(balance));
-  assert.equal(upgrade.downgrade(), true);
-  assert.equal(upgrade.isMaxed, false);
+  const orb = FutureEmpowerOrbs.eternities;
+  Currency.eternities.value = orb.costScale.calculateCost(new Decimal(100));
+  assert.equal(orb.upgrade(), true);
+  assert.ok(orb.level.eq(101));
+  assert.ok(orb.effectOrDefault(1).eq(Decimal.pow(2, 101)));
+  assert.equal(FutureEmpowerOrbs.replicanti.effectOrDefault(1), 1);
+  assert.equal(FutureEmpowerOrbs.infinities.effectOrDefault(1), 1);
+  assert.equal(orb.upgrade(), false);
+  assert.ok(orb.effectValue.eq(Decimal.pow(2, 101)));
 });
 
 test("selecting an orb swaps the center without upgrading and orbit positions advance in real time", () => {
@@ -258,33 +225,52 @@ test("selecting an orb swaps the center without upgrading and orbit positions ad
   const swapped = FutureEmpower.orbitLayout(0);
   assert.equal(swapped[0].id, "eternities");
   assert.equal(new Set(swapped.map(entry => entry.id)).size, 3);
-  assert.ok(FutureEmpower.insight.eq(0));
   assert.ok(FutureEmpowerOrbs.eternities.level.eq(0));
   assert.deepEqual(FutureEmpower.orbitLayout(Infinity), swapped);
 });
 
-test("save merging fills old saves and restores Decimal levels, balance, and selection", () => {
+test("save merging restores sphere levels, bonuses, and selection without separate upgrades", () => {
   const oldSave = { empowers: { past: { frozenCurrency: "infinities" } } };
   const merged = deepmergeAll([{ empowers: { future: createFutureEmpowerData() } }, oldSave]);
-  assert.ok(merged.empowers.future.insight.eq(0));
+  assert.equal("insight" in merged.empowers.future, false);
+  assert.equal("upgrades" in merged.empowers.future, false);
   assert.equal(merged.empowers.past.frozenCurrency, "infinities");
-  Currency.insight.value = new Decimal(8);
-  FutureEmpowerUpgrades.replicanti.purchase();
   FutureEmpower.selectOrb("infinities");
   player.empowers.future.orbs.infinities.level = new Decimal(5);
   const saved = JSON.parse(JSON.stringify(player.empowers.future));
   player.empowers.future = deepmergeAll([createFutureEmpowerData(), saved]);
-  assert.ok(FutureEmpower.insight.eq(7));
   assert.ok(FutureEmpowerOrbs.infinities.level.eq(5));
+  assert.ok(FutureEmpowerOrbs.infinities.effectValue.eq_tolerance(32, 1e-12));
   assert.equal(FutureEmpower.selectedOrb.id, "infinities");
-  assert.equal(FutureEmpowerUpgrades.replicanti.downgrade(), true);
-  assert.ok(FutureEmpower.insight.eq(8));
   player.empowers.future = createFutureEmpowerData();
-  assert.ok(FutureEmpowerUpgrades.replicanti.level.eq(0));
-  assert.ok(FutureEmpower.insight.eq(0));
+  assert.ok(FutureEmpowerOrbs.infinities.level.eq(0));
+  assert.equal(FutureEmpowerOrbs.infinities.effectOrDefault(1), 1);
 });
 
-test("purchases and refunds update real production formulas while existing restrictions still apply", () => {
+test("migration removes obsolete insight data while preserving earned sphere progress", () => {
+  const migrationSource = fs.readFileSync(path.join(root, "core/storage/migrations.js"), "utf8");
+  const ast = parseSync(migrationSource, { configFile: false, babelrc: false, sourceType: "module" });
+  const migrations = ast.program.body.find(node => node.declaration?.declarations?.[0]?.id.name === "migrations")
+    .declaration.declarations[0].init;
+  const patches = migrations.properties.find(node => node.key.name === "patches").value;
+  const patch = patches.properties.find(node => node.key.value === 104).value;
+  const migrate = compileFunction(migrationSource.slice(patch.body.start + 1, patch.body.end - 1), ["player"]);
+  const future = player.empowers.future;
+  future.insight = new Decimal(999);
+  future.upgrades = { replicanti: { level: new Decimal(10) } };
+  future.orbs.replicanti.level = new Decimal(3);
+  future.selectedOrb = "eternities";
+  migrate(player);
+  migrate(player);
+  assert.equal("insight" in future, false);
+  assert.equal("upgrades" in future, false);
+  assert.ok(FutureEmpowerOrbs.replicanti.level.eq(3));
+  assert.ok(FutureEmpowerOrbs.replicanti.effectValue.eq_tolerance(8, 1e-12));
+  assert.equal(FutureEmpower.selectedOrb.id, "eternities");
+  assert.doesNotThrow(() => migrate({}));
+});
+
+test("sphere upgrades update real production formulas while existing restrictions still apply", () => {
   function productionFunction(file, name) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     const ast = parseSync(source, { configFile: false, babelrc: false, sourceType: "module" });
@@ -296,7 +282,7 @@ test("purchases and refunds update real production formulas while existing restr
   const { Effect } = loadSource(path.join(root, "core/game-mechanics/effect.js"));
   const identity = new Effect(new Decimal(1));
   let restricted = false;
-  global.FutureEmpowerUpgrades = FutureEmpowerUpgrades;
+  global.FutureEmpowerOrbs = FutureEmpowerOrbs;
   global.Pelle = {
     isDisabled: () => restricted,
     specialGlyphEffect: { replication: new Decimal(1) },
@@ -323,15 +309,15 @@ test("purchases and refunds update real production formulas while existing restr
     eternities: productionFunction("core/eternity.js", "gainedEternities"),
     infinities: productionFunction("game.js", "gainedInfinities"),
   };
-  Currency.insight.value = new Decimal(10);
   for (const [id, formula] of Object.entries(formulas)) {
     assert.ok(formula().eq(1), id);
-    assert.equal(FutureEmpowerUpgrades[id].purchase(), true);
-    assert.ok(formula().eq(2), id);
+    const orb = FutureEmpowerOrbs[id];
+    Currency[id].value = orb.costScale.calculateCost(new Decimal(2));
+    assert.equal(orb.upgrade(), true);
+    assert.ok(formula().eq_tolerance(8, 1e-12), id);
     restricted = true;
     assert.ok(formula().eq(1), `${id} restriction`);
     restricted = false;
-    assert.equal(FutureEmpowerUpgrades[id].downgrade(), true);
-    assert.ok(formula().eq(1), `${id} refund`);
+    assert.ok(formula().eq_tolerance(8, 1e-12), `${id} restored after restriction`);
   }
 });

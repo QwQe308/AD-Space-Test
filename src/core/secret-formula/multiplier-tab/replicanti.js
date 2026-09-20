@@ -36,9 +36,9 @@ export const replicanti = {
   },
   A19: abyssResearch("A19", "Replicanti Speed"),
   futureEmpower: {
-    name: "Future Empower - Replicated Future",
-    multValue: () => FutureEmpowerUpgrades.replicanti.effectOrDefault(1),
-    isActive: () => FutureEmpowerUpgrades.replicanti.canBeApplied && !Pelle.isDisabled("replicantiIntervalMult"),
+    name: "Future Empower - Replicanti",
+    multValue: () => FutureEmpowerOrbs.replicanti.effectOrDefault(1),
+    isActive: () => FutureEmpowerOrbs.replicanti.canBeApplied && !Pelle.isDisabled("replicantiIntervalMult"),
     icon: MultiplierTabIcons.UPGRADE("reality"),
   },
   glyph: {

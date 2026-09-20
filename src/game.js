@@ -339,7 +339,7 @@ export function gainedInfinities() {
     SpaceResearchRifts.r43,
     AbyssResearches.A12,
     AbyssResearches.A18,
-    FutureEmpowerUpgrades.infinities
+    FutureEmpowerOrbs.infinities
   );
   infGain = infGain.times(getAdjustedGlyphEffect("infinityinfmult"));
 

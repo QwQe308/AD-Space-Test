@@ -282,7 +282,7 @@ export function gainedEternities() {
     RealityUpgrade(3),
     Achievement(113),
     SpaceResearchRifts.r53,
-    FutureEmpowerUpgrades.eternities
+    FutureEmpowerOrbs.eternities
   );
   esMult = esMult.pow(AlchemyResource.eternity.effectValue);
   return esMult;

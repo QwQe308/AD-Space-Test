@@ -1,5 +1,5 @@
 <script>
-import { FutureEmpower, FutureEmpowerOrbs, FutureEmpowerUpgrades } from "@/core/_MOD/empowers/future/futureEmpower";
+import { FutureEmpower } from "@/core/_MOD/empowers/future/futureEmpower";
 import PrimaryButton from "@/components/PrimaryButton";
 
 export default {
@@ -9,10 +9,8 @@ export default {
   },
   data() {
     return {
-      insight: "0",
       selectedId: "",
       orbs: [],
-      upgrades: [],
       paused: false,
       feedback: "",
     };
@@ -45,7 +43,6 @@ export default {
   methods: {
     update() {
       // Only display primitives enter Vue; game states and player Decimals stay unobserved.
-      this.insight = format(FutureEmpower.insight, 2, 0);
       this.selectedId = FutureEmpower.selectedOrb.id;
       this.orbs = FutureEmpower.orbs.map(orb => ({
         id: orb.id,
@@ -53,6 +50,8 @@ export default {
         symbol: orb.symbol,
         color: orb.color,
         description: orb.description,
+        bonusDescription: orb.bonusDescription,
+        effect: formatX(orb.effectValue, 2, 0),
         level: formatInt(orb.level),
         amount: format(orb.resourceAmount, 2, 0),
         requirement: format(orb.nextRequirement, 2, 0),
@@ -65,21 +64,6 @@ export default {
         unlocked: orb.isUnlocked,
         canUpgrade: orb.canUpgrade,
       }));
-      this.upgrades = FutureEmpower.upgrades.map(upgrade => ({
-        id: upgrade.id,
-        name: upgrade.name,
-        symbol: upgrade.symbol,
-        color: FutureEmpowerOrbs[upgrade.id]?.color ?? "#b5a2f5",
-        description: upgrade.description,
-        level: formatInt(upgrade.level),
-        maxLevel: formatInt(upgrade.maxLevel),
-        effect: formatX(upgrade.effectValue, 2, 0),
-        cost: format(upgrade.cost, 2, 0),
-        refund: format(upgrade.refund, 2, 0),
-        maxed: upgrade.isMaxed,
-        canPurchase: upgrade.canPurchase,
-        canDowngrade: upgrade.canDowngrade,
-      }));
       this.$nextTick(this.positionOrbs);
     },
     selectOrb(id) {
@@ -91,35 +75,23 @@ export default {
     upgradeOrb() {
       const orb = FutureEmpower.selectedOrb;
       const count = formatInt(orb.bulkLevels);
-      const reward = format(orb.bulkInsightGain, 2, 0);
       if (orb.upgrade()) {
-        this.feedback = `${orb.name}: +${count} levels, +${reward} insight. ${orb.name} reset to zero.`;
+        this.feedback = `${orb.name}: +${count} levels. Bonus: ${formatX(orb.effectValue, 2, 0)}. ` +
+          `${orb.name} reset to zero.`;
       }
       this.update();
     },
     orbTooltip(orb) {
       const count = formatInt(orb.bulkLevels);
-      const reward = format(orb.bulkInsightGain, 2, 0);
       const instruction = orb.canUpgrade
         ? "Click to upgrade."
         : `Reach ${format(orb.requirement, 2, 0)} ${orb.name} to upgrade.`;
-      return `Available upgrades: ${count}<br>Gain: ${reward} insight<br>` +
+      return `Available upgrades: ${count}<br>` +
         `${orb.isUnlocked ? instruction : "Resource locked."}`;
     },
     satelliteStyle(index) {
       const angle = (index - 1) * 2 * Math.PI / GameDatabase.empowers.future.satellites.capacity;
       return { left: `${50 + 50 * Math.cos(angle)}%`, top: `${50 + 50 * Math.sin(angle)}%` };
-    },
-    purchase(id) {
-      const upgrade = FutureEmpowerUpgrades[id];
-      if (upgrade.purchase()) this.feedback = `${upgrade.name} upgraded to level ${formatInt(upgrade.level)}.`;
-      this.update();
-    },
-    downgrade(id) {
-      const upgrade = FutureEmpowerUpgrades[id];
-      const refund = format(upgrade.refund, 2, 0);
-      if (upgrade.downgrade()) this.feedback = `${upgrade.name} downgraded. Refunded ${refund} insight.`;
-      this.update();
     },
     toggleOrbit() {
       this.paused = !this.paused;
@@ -260,49 +232,24 @@ export default {
         </div>
       </div>
 
-      <div class="future-upgrades">
-        <div class="future-insight">
-          You have <b>{{ insight }}</b> insight.
+      <div class="future-bonuses">
+        <div class="future-bonuses-heading">
+          Sphere bonuses
         </div>
-        <p>Downgrading an upgrade refunds its last level's cost.</p>
-        <div class="future-upgrade-grid">
+        <p>Each sphere level strengthens its corresponding bonus.</p>
+        <div class="future-bonus-list">
           <div
-            v-for="upgrade in upgrades"
-            :key="upgrade.id"
-            class="future-upgrade"
-            :data-upgrade-id="upgrade.id"
+            v-for="orb in orbs"
+            :key="orb.id"
+            class="future-bonus"
+            :data-bonus-id="orb.id"
           >
-            <div class="future-upgrade-title">
-              <span :style="{ color: upgrade.color }">{{ upgrade.symbol }}</span>
-              {{ upgrade.name }}
+            <div class="future-bonus-title">
+              <span :style="{ color: orb.color }">{{ orb.symbol }}</span>
+              {{ orb.name }} — Level {{ orb.level }}
             </div>
-            <div>Level {{ upgrade.level }} / {{ upgrade.maxLevel }}</div>
-            <div>{{ upgrade.description }}</div>
-            <div>Currently: {{ upgrade.effect }}</div>
-            <div class="future-upgrade-actions">
-              <PrimaryButton
-                class="future-downgrade"
-                :enabled="upgrade.canDowngrade"
-                :disabled="!upgrade.canDowngrade"
-                :aria-label="`Downgrade ${upgrade.name}, refund ${upgrade.refund} insight`"
-                @click="downgrade(upgrade.id)"
-              >
-                <span>Downgrade</span>
-                <span>Refund: {{ upgrade.refund }}</span>
-              </PrimaryButton>
-              <PrimaryButton
-                class="future-purchase"
-                :enabled="upgrade.canPurchase"
-                :disabled="!upgrade.canPurchase"
-                :aria-label="upgrade.maxed
-                  ? `${upgrade.name} is maxed`
-                  : `Upgrade ${upgrade.name} for ${upgrade.cost} insight`"
-                @click="purchase(upgrade.id)"
-              >
-                <span>{{ upgrade.maxed ? "Maxed" : "Upgrade" }}</span>
-                <span>{{ upgrade.maxed ? "" : `Cost: ${upgrade.cost}` }}</span>
-              </PrimaryButton>
-            </div>
+            <div>{{ orb.bonusDescription }}</div>
+            <div>Currently: <b>{{ orb.effect }}</b></div>
           </div>
         </div>
       </div>
@@ -337,7 +284,7 @@ export default {
 }
 
 .future-resources,
-.future-upgrades {
+.future-bonuses {
   min-width: 0;
 }
 
@@ -496,7 +443,7 @@ export default {
 }
 
 .future-orb-symbol,
-.future-upgrade-title > span {
+.future-bonus-title > span {
   filter: saturate(0.8);
 }
 
@@ -542,64 +489,28 @@ export default {
   margin: 0;
 }
 
-.future-insight {
+.future-bonuses-heading {
   font-size: 1.5rem;
   margin-bottom: 0.8rem;
 }
 
-.future-insight b {
-  font-size: 2rem;
-}
-
-.future-upgrades > p {
+.future-bonuses > p {
   margin: 0 0 1rem;
 }
 
-.future-upgrade-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-
-  gap: 1rem;
+.future-bonus-list {
+  text-align: left;
 }
 
-.future-upgrade {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.4;
-  border: 1px solid var(--color-text);
-  border-radius: var(--var-border-radius, 0.5rem);
-  padding: 0.8rem;
+.future-bonus {
+  line-height: 1.6;
+  border-bottom: 1px solid var(--color-disabled);
+  padding: 1rem 0;
 }
 
-.future-upgrade-title {
+.future-bonus-title {
   font-size: 1.4rem;
   font-weight: bold;
-}
-
-.future-upgrade-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: auto;
-  padding-top: 0.6rem;
-
-  gap: 0.5rem;
-}
-
-.future-upgrade-actions button {
-  display: flex;
-  overflow-wrap: anywhere;
-  flex-direction: column;
-  height: auto;
-  min-width: 0;
-  min-height: 2.8rem;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.1rem;
-  line-height: 1.5;
-  padding: 0.4rem 0.6rem;
-
-  gap: 0.1rem;
 }
 
 .future-feedback {
@@ -630,7 +541,7 @@ export default {
   }
 
   .future-resources,
-  .future-upgrades {
+  .future-bonuses {
     width: 100%;
     max-width: 52rem;
     margin: 0 auto;
@@ -638,10 +549,6 @@ export default {
 }
 
 @media (max-width: 600px) {
-  .future-upgrade-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .future-milestone {
     flex-direction: column;
   }

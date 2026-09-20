@@ -28,9 +28,9 @@ export const eternities = {
     icon: MultiplierTabIcons.UPGRADE("reality"),
   },
   futureEmpower: {
-    name: "Future Empower - Eternal Future",
-    multValue: () => FutureEmpowerUpgrades.eternities.effectOrDefault(1),
-    isActive: () => FutureEmpowerUpgrades.eternities.canBeApplied && !Pelle.isDisabled("eternityMults"),
+    name: "Future Empower - Eternities",
+    multValue: () => FutureEmpowerOrbs.eternities.effectOrDefault(1),
+    isActive: () => FutureEmpowerOrbs.eternities.canBeApplied && !Pelle.isDisabled("eternityMults"),
     icon: MultiplierTabIcons.UPGRADE("reality"),
   },
   glyph: {

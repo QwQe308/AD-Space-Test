@@ -1,6 +1,6 @@
 import { DC } from "../../../constants";
 
-// Reference balance values; level is the number of upgrades already earned or purchased.
+// Reference balance values; level is the number of upgrades earned by each sphere.
 export const futureEmpowerConfig = {
   defaultOrb: "replicanti",
   orbit: {
@@ -27,7 +27,8 @@ export const futureEmpowerConfig = {
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      insightGain: (level, count = DC.D1) => count,
+      bonusDescription: "Multiply Replicanti speed by 2 per level.",
+      effect: level => Decimal.pow(2, level),
     },
     eternities: {
       id: "eternities",
@@ -44,7 +45,8 @@ export const futureEmpowerConfig = {
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      insightGain: (level, count = DC.D1) => count,
+      bonusDescription: "Multiply Eternities gained by 2 per level.",
+      effect: level => Decimal.pow(2, level),
     },
     infinities: {
       id: "infinities",
@@ -61,45 +63,15 @@ export const futureEmpowerConfig = {
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      insightGain: (level, count = DC.D1) => count,
-    },
-  },
-  upgrades: {
-    replicanti: {
-      id: "replicanti",
-      name: "Replicated Future",
-      symbol: "Ξ",
-      description: "Multiply Replicanti speed by 2 per level.",
-      cost: level => Decimal.pow(2, level),
+      bonusDescription: "Multiply Infinities gained by 2 per level.",
       effect: level => Decimal.pow(2, level),
-      maxLevel: new Decimal(100),
-    },
-    eternities: {
-      id: "eternities",
-      name: "Eternal Future",
-      symbol: "Δ",
-      description: "Multiply Eternities gained by 2 per level.",
-      cost: level => Decimal.pow(2, level),
-      effect: level => Decimal.pow(2, level),
-      maxLevel: new Decimal(100),
-    },
-    infinities: {
-      id: "infinities",
-      name: "Infinite Future",
-      symbol: "∞",
-      description: "Multiply Infinities gained by 2 per level.",
-      cost: level => Decimal.pow(2, level),
-      effect: level => Decimal.pow(2, level),
-      maxLevel: new Decimal(100),
     },
   },
 };
 
 export function createFutureEmpowerData() {
   return {
-    insight: new Decimal(0),
     selectedOrb: futureEmpowerConfig.defaultOrb,
     orbs: Object.fromEntries(Object.keys(futureEmpowerConfig.orbs).map(id => [id, { level: new Decimal(0) }])),
-    upgrades: Object.fromEntries(Object.keys(futureEmpowerConfig.upgrades).map(id => [id, { level: new Decimal(0) }])),
   };
 }
