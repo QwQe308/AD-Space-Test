@@ -149,7 +149,7 @@ const baseConfig = {
         case 0:
           baseInfo += `Time ----- ◆◆◇◇◇<br>`;
           baseInfo += `Strategy - ◆◆◇◇◇<br>`;
-          baseInfo += `Active --- ◆◆◆◆◇<br>`;
+          baseInfo += `Active --- ◆◆◆◆◇`;
       }
       return baseInfo;
     },
