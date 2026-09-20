@@ -1,3 +1,5 @@
+import { DC } from "../constants";
+
 import { TimeStudy } from "./normal-time-study";
 import { TimeStudyState } from "./time-studies";
 
@@ -9,6 +11,10 @@ export class ECTimeStudyState extends TimeStudyState {
 
   get isBought() {
     return player.challenge.eternity.unlocked === this.id;
+  }
+
+  get cost() {
+    return this.id === 5 && AbyssResearches.B3.isEffectActive ? DC.D0 : super.cost;
   }
 
   purchase(auto) {
