@@ -2,7 +2,7 @@ import { NODE_TYPE, quickSpawnResearches } from "../abyssResearchSpawner";
 import { DC } from "../../../../constants";
 
 function getEternityTotalState() {
-  return AbyssResearches.PST.completed + AbyssResearches.PRS.completed + AbyssResearches.FTR.completed;
+  return ["PST", "PRS", "FTR"].filter(id => AbyssResearches[id]?.completed).length;
 }
 
 function getEternityStateCompleted(id) {
@@ -123,7 +123,7 @@ const baseConfig = {
     position: [0, 2],
     type: NODE_TYPE.CORRUPTION,
     cost: {
-      timeTheorems: 30,
+      timeTheorems: 50,
     },
     description(level) {
       return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;

@@ -22,12 +22,24 @@ export default {
       level: new Decimal(0),
       maxLevel: new Decimal(0),
       type: "",
+      canPurchase: false,
+      purchaseCosts: [],
       permanent: AbyssResearches[this.id].permanent,
     };
   },
   computed: {
     getMainInfosTooltip() {
       let tooltipContent = `${this.id}`;
+      if (this.type === "corruption") {
+        if (this.isMaxed) return `${tooltipContent}<br>----------[ Completed ]----------`;
+        tooltipContent += `<br>----------[ Corruption ]----------<br>Cost:`;
+        for (const cost of this.purchaseCosts) {
+          tooltipContent += `<br><span style="color:${cost.isAffordable ? "lime" : "red"}">${
+            format(cost.amount, 2, 2)
+          } ${cost.name}</span>`;
+        }
+        return `${tooltipContent}`;
+      }
       if (!this.isMaxed && this.type !== "sink") {
         switch (AbyssResearches[this.id].type) {
           case "single":
@@ -178,6 +190,7 @@ export default {
         active: this.isResearching,
         locked: !this.unlocked,
         completed: this.isMaxed,
+        unaffordable: this.type === "corruption" && !this.isMaxed && !this.canPurchase,
       };
     },
     getFillClass() {
@@ -237,12 +250,24 @@ export default {
       this.type = this.getNode.type;
       this.unlocked = this.getNode.unlocked;
       if (this.type === "sink") return;
-      this.timeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency + 1));
-      this.autoTimeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency));
       this.percentage = this.getNode.percentage;
       this.isMaxed = this.getNode.maxed;
       this.level.copyFrom(this.getNode.level);
       if (this.getNode.maxLevel) this.maxLevel.copyFrom(this.getNode.maxLevel);
+
+      if (this.type === "corruption") {
+        this.isResearching = false;
+        this.isAutoResearching = false;
+        this.canPurchase = this.getNode.canPurchase;
+        this.purchaseCosts = this.isMaxed ? [] : Object.entries(this.getNode.cost).map(([currency, cost]) => ({
+          name: currency.replace(/([A-Z])/gu, " $1").replace(/^./u, character => character.toUpperCase()),
+          amount: new Decimal(cost),
+          isAffordable: Currency[currency].gte(cost),
+        }));
+        return;
+      }
+      this.timeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency + 1));
+      this.autoTimeToNext = this.calcTimeToNext(this.abyssResearchSpeed.mul(this.autoResearchEfficiency));
 
       this.autoResearchEfficiency = this.getNode.autoResearchEfficiency;
       this.isAutoResearching = this.getNode.isAutoResearching;
@@ -356,6 +381,11 @@ export default {
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   }
 
+  .corruption & {
+    background-color: #9b59b6;
+    clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+  }
+
   .core & {
     -webkit-mask: radial-gradient(circle at 0% 0%, transparent 70%, black 70%) top left,
       radial-gradient(circle at 100% 0%, transparent 70%, black 70%) top right,
@@ -380,7 +410,8 @@ export default {
   }
 }
 
-.research-node-container.locked {
+.research-node-container.locked,
+.research-node-container.unaffordable {
   background-color: rgb(100, 100, 100) !important;
 }
 

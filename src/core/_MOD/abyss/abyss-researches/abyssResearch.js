@@ -55,7 +55,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get maxLevel() {
-    if (this.type === "single" || this.type === "core") return DC.D1;
+    if (this.type === "single" || this.type === "core" || this.type === "corruption") return DC.D1;
     if (this.type === "unlimited") return DC.BEMAX;
     return this.config.maxLevel;
   }
@@ -73,6 +73,10 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get cost() {
+    if (this.type === "corruption") {
+      return Object.fromEntries(Object.entries(this.config.cost)
+        .map(([currency, cost]) => [currency, typeof cost === "function" ? cost() : cost]));
+    }
     if (this.config.cost) return this.config.cost;
     if (this.config.costs) return this.config.costs[this.level];
     switch (this.scalingType) {
@@ -87,6 +91,7 @@ class AbyssResearchClass extends GameMechanicState {
 
   get percentage() {
     if (this.level.gte(this.maxLevel)) return 1;
+    if (this.type === "corruption") return 0;
     return this.progress.div(this.cost).min(1).toNumber();
   }
 
@@ -95,13 +100,20 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   set progress(data) {
+    if (this.type === "corruption") return;
     this.data.progress = data;
     if (!(this.type === "single")) this.updateScaling();
     this.updateLevel();
   }
 
   get canResearch() {
+    if (this.type === "corruption") return false;
     return player.activeAbyssResearches.size < this.maxConcurrent && this.unlocked && this.level.lt(this.maxLevel);
+  }
+
+  get canPurchase() {
+    return this.type === "corruption" && this.unlocked && !this.maxed &&
+      Object.entries(this.cost).every(([currency, cost]) => Currency[currency].gte(cost));
   }
 
   get permanent() {
@@ -129,6 +141,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get isAutoResearching() {
+    if (this.type === "corruption") return false;
     return this.linkedAbyssResearchCore ? this.linkedAbyssResearchCore.completed : false;
   }
 
@@ -185,6 +198,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   updateLevel() {
+    if (this.type === "corruption") return;
     const preLevel = this.level;
     const isFirstLevel = preLevel.eq(0);
     switch (this.type) {
@@ -286,9 +300,21 @@ class AbyssResearchClass extends GameMechanicState {
     player.activeAbyssResearches.delete(this.id);
   }
 
+  purchase() {
+    if (this.type !== "corruption" || !this.unlocked || this.maxed) return false;
+    // Resolve dynamic prices once and check every resource before spending any of them.
+    const costs = Object.entries(this.cost);
+    if (!costs.every(([currency, cost]) => Currency[currency].gte(cost))) return false;
+    for (const [currency, cost] of costs) Currency[currency].subtract(cost);
+    this.level = DC.D1;
+    this.updateCompletion();
+    return true;
+  }
+
   click() {
     if (!this.unlocked) return;
     if (this.type === "sink") player.abyssResearchCanvas.currentAbyssResearchDepth = this.target;
+    else if (this.type === "corruption") this.purchase();
     else if (this.isResearching) this.stop();
     else this.start();
   }
@@ -369,7 +395,7 @@ class AbyssResearchHelper {
       const Depth = Core.depth;
       const Efficiency = Core.effectValue;
       for (const research in this.sortByDepth[Depth]) {
-        if (AbyssResearches[research].maxed) continue;
+        if (AbyssResearches[research].maxed || AbyssResearches[research].type === "corruption") continue;
         AbyssResearches[research].addProgress(
           AbyssResearches[research].researchSpeed.mul(Efficiency).mul(diff).div(1000)
         );

@@ -62,7 +62,7 @@ export function abyssResearchSafetyChecker(config, layer) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No scaling defined)`);
         error = true;
       }
-    } else if (config[i].type === "core") {
+    } else if (config[i].type === "core" || config[i].type === "corruption") {
       if (!config[i].cost) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
         error = true;
@@ -124,6 +124,7 @@ export const NODE_TYPE = {
   LIMITED: "limited",
   UNLIMITED: "unlimited",
   CORE: "core",
+  CORRUPTION: "corruption",
   LINK: "link",
 };
 

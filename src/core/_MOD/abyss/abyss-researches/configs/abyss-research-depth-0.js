@@ -545,10 +545,10 @@ const baseConfig = {
       },
       {
         description() {
-          return `Reach 30 total Time Theorems`;
+          return `Reach 50 total Time Theorems`;
         },
         requirement() {
-          return player.timestudy.maxTheorem.gte(30);
+          return player.timestudy.maxTheorem.gte(50);
         },
       },
     ],
