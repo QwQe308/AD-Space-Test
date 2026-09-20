@@ -120,7 +120,7 @@ export default {
       let tooltipContent = "";
 
       // #FFFFAF yellow
-      tooltipContent += `<span style="color:#cccccc"><br><br>----------Restrictions----------<br></span>`;
+      tooltipContent += `<span style="color:#cccccc"><br><br>---------- Restrictions ----------<br></span>`;
       const restrictions = this.getNode.restrictions;
       for (let index = 0; index < restrictions.length; index++) {
         tooltipContent += `<br><span style="color:${this.restrictionStates[index] ? "lime" : "red"}">${restrictions[
@@ -140,7 +140,7 @@ export default {
       for (const tip of AbyssResearches[this.id].tooltipTags) {
         if (player.abyssResearchTooltipsShown.has(tip)) continue;
         tooltipContent = String(tooltipContent);
-        tooltipContent += `<span style="color:#bbffff"><br><br>----------Tip: ${tip}-----------<br>`;
+        tooltipContent += `<span style="color:#bbffff"><br><br>---------- Tip: ${tip} -----------<br>`;
         tooltipContent += extraAbyssResearchTooltips[tip];
         tooltipContent += `</span>`;
       }
