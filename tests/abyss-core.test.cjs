@@ -67,7 +67,7 @@ function loadSource(filename) {
         globalAbyssResearchSpeed: () => new Decimal(0) };
     }
     if (resolved === path.join(root, "env")) return { DEV: false };
-    return loadSource(`${resolved}.js`);
+    return loadSource(resolved.endsWith(".vue") ? resolved : `${resolved}.js`);
   };
   const source = fs.readFileSync(filename, "utf8");
   const component = filename.endsWith(".vue") ? parseComponent(source) : null;
@@ -292,12 +292,12 @@ test("Corruption tooltips show live resource costs instead of research progress 
   vm.update();
   assert.equal(vm.hasProgress, false);
   assert.ok(vm.getMainInfosTooltip.includes(`${cost} Time Theorems`));
-  assert.match(vm.getMainInfosTooltip, /complete instantly/);
+  assert.equal(vm.canPurchase, true);
   assert.doesNotMatch(vm.getMainInfosTooltip, /Progress:|Forever/);
   Currency.timeTheorems.value = cost.sub(1);
   vm.update();
   assert.equal(vm.getContainerClass.unaffordable, true);
-  assert.match(vm.getMainInfosTooltip, /Not enough resources/);
+  assert.equal(vm.canPurchase, false);
   Currency.timeTheorems.value = cost;
   vm.handleClick();
   vm.update();

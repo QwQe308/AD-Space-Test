@@ -12,7 +12,7 @@ function getEternityStateCompleted(id) {
 const baseConfig = {
   // ARs taken from depth 0.
   A21B: {
-    position: [-1, -2],
+    position: [1, 2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1e4),
     permanent: true,
@@ -26,7 +26,7 @@ const baseConfig = {
     next: [],
   },
   A6B: {
-    position: [1, -2],
+    position: [-1, 2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(75),
     permanent: true,
@@ -39,7 +39,7 @@ const baseConfig = {
     next: [],
   },
   A7B: {
-    position: [-2, -1],
+    position: [2, 1],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(50),
     permanent: true,
@@ -56,7 +56,7 @@ const baseConfig = {
     next: [],
   },
   A16B: {
-    position: [2, -1],
+    position: [-2, 1],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(5000),
     permanent: true,
@@ -101,10 +101,10 @@ const baseConfig = {
     effectValue(level) {
       return DC.D2.pow(level);
     },
-    next: ["B3"],
+    next: ["B2"],
   },
   B2: {
-    position: [-1, 1],
+    position: [0, 2],
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
@@ -121,7 +121,7 @@ const baseConfig = {
     next: ["B3"],
   },
   B3: {
-    position: [0, 2],
+    position: [0, 3],
     type: NODE_TYPE.CORRUPTION,
     cost: {
       timeTheorems: 50,
@@ -129,7 +129,7 @@ const baseConfig = {
     description(level) {
       return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;
     },
-    next: ["B1"],
+    next: ["B1", "A6B", "A21B", "A16B", "A7B", "PST"],
     tooltipTags: ["Corruption"],
   },
 
