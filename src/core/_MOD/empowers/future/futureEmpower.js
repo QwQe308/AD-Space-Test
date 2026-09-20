@@ -20,6 +20,7 @@ export class FutureEmpowerOrbState extends GameMechanicState {
   get bonusDescription() { return this.config.bonusDescription; }
   get isCustomEffect() { return true; }
   get effectValue() { return this.config.effect(this.level); }
+  get formattedEffect() { return this.config.formatEffect(this.effectValue); }
   get isEffectActive() { return this.level.gt(0); }
   get level() { return this.data.level; }
   get isUnlocked() { return this.config.isUnlocked(); }

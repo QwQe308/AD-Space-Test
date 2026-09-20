@@ -19,6 +19,9 @@ export default {
     selectedOrb() {
       return this.orbs.find(orb => orb.id === this.selectedId);
     },
+    earnedBonuses() {
+      return this.orbs.filter(orb => orb.hasBonus);
+    },
   },
   mounted() {
     this.update();
@@ -51,8 +54,9 @@ export default {
         color: orb.color,
         description: orb.description,
         bonusDescription: orb.bonusDescription,
-        effect: formatX(orb.effectValue, 2, 0),
+        effect: orb.formattedEffect,
         level: formatInt(orb.level),
+        hasBonus: orb.level.gt(0),
         amount: format(orb.resourceAmount, 2, 0),
         requirement: format(orb.nextRequirement, 2, 0),
         bulkLevels: formatInt(orb.bulkLevels),
@@ -76,7 +80,7 @@ export default {
       const orb = FutureEmpower.selectedOrb;
       const count = formatInt(orb.bulkLevels);
       if (orb.upgrade()) {
-        this.feedback = `${orb.name}: +${count} levels. Bonus: ${formatX(orb.effectValue, 2, 0)}. ` +
+        this.feedback = `${orb.name}: +${count} levels. Bonus: ${orb.formattedEffect}. ` +
           `${orb.name} reset to zero.`;
       }
       this.update();
@@ -237,9 +241,18 @@ export default {
           Sphere bonuses
         </div>
         <p>Each sphere level strengthens its corresponding bonus.</p>
-        <div class="future-bonus-list">
+        <p
+          v-if="earnedBonuses.length === 0"
+          class="future-bonuses-empty"
+        >
+          No bonuses yet. Upgrade a sphere to gain one.
+        </p>
+        <div
+          v-else
+          class="future-bonus-list"
+        >
           <div
-            v-for="orb in orbs"
+            v-for="orb in earnedBonuses"
             :key="orb.id"
             class="future-bonus"
             :data-bonus-id="orb.id"
@@ -280,7 +293,7 @@ export default {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   align-items: start;
 
-  gap: 2rem;
+  gap: 3rem;
 }
 
 .future-resources,
@@ -500,6 +513,12 @@ export default {
 
 .future-bonus-list {
   text-align: left;
+}
+
+.future-bonuses-empty {
+  font-style: italic;
+  color: var(--color-text);
+  opacity: 0.6;
 }
 
 .future-bonus {

@@ -19,7 +19,9 @@ export const futureEmpowerConfig = {
       color: "#03a9f4",
       description: "Upgrading resets Replicanti to zero.",
       resource: () => Currency.replicanti.value,
-      resetResource: () => { player.replicanti.amount = new Decimal(0); },
+      resetResource: () => {
+        player.replicanti.amount = new Decimal(0);
+      },
       isUnlocked: () => player.replicanti.unl,
       costScaling: {
         baseCost: DC.E100,
@@ -27,8 +29,14 @@ export const futureEmpowerConfig = {
         costScale: DC.D1,
         purchasesBeforeScaling: DC.BEMAX,
       },
-      bonusDescription: "Multiply Replicanti speed by 2 per level.",
-      effect: level => Decimal.pow(2, level),
+      bonusDescription: "Replicanti slowdown is weakened.",
+      effect: (level) => level.add(10).log10(),
+      formatEffect: (value) =>
+        `x${format(Decimal.root(ReplicantiGrowth.scaleFactor, value), 2, 2)} / ${format(
+          Number.MAX_VALUE,
+          2,
+          2
+        )} → x${format(ReplicantiGrowth.scaleFactor, 2, 2)} / ${format(Number.MAX_VALUE, 2, 2)} `,
     },
     eternities: {
       id: "eternities",
@@ -37,7 +45,9 @@ export const futureEmpowerConfig = {
       color: "#b341e0",
       description: "Upgrading resets Eternities to zero.",
       resource: () => Currency.eternities.value,
-      resetResource: () => { player.eternities = new Decimal(0); },
+      resetResource: () => {
+        player.eternities = new Decimal(0);
+      },
       isUnlocked: () => PlayerProgress.eternityUnlocked(),
       costScaling: {
         baseCost: DC.E1,
@@ -46,7 +56,8 @@ export const futureEmpowerConfig = {
         purchasesBeforeScaling: DC.BEMAX,
       },
       bonusDescription: "Multiply Eternities gained by 2 per level.",
-      effect: level => Decimal.pow(2, level),
+      effect: (level) => Decimal.pow(2, level),
+      formatEffect: (value) => formatX(value, 2, 0),
     },
     infinities: {
       id: "infinities",
@@ -55,7 +66,9 @@ export const futureEmpowerConfig = {
       color: "#b67f33",
       description: "Upgrading resets Infinities to zero. Banked Infinities do not count.",
       resource: () => Currency.infinities.value,
-      resetResource: () => { player.infinities = new Decimal(0); },
+      resetResource: () => {
+        player.infinities = new Decimal(0);
+      },
       isUnlocked: () => PlayerProgress.infinityUnlocked(),
       costScaling: {
         baseCost: DC.E3,
@@ -64,7 +77,8 @@ export const futureEmpowerConfig = {
         purchasesBeforeScaling: DC.BEMAX,
       },
       bonusDescription: "Multiply Infinities gained by 2 per level.",
-      effect: level => Decimal.pow(2, level),
+      effect: (level) => Decimal.pow(2, level),
+      formatEffect: (value) => formatX(value, 2, 0),
     },
   },
 };
@@ -72,6 +86,7 @@ export const futureEmpowerConfig = {
 export function createFutureEmpowerData() {
   return {
     selectedOrb: futureEmpowerConfig.defaultOrb,
-    orbs: Object.fromEntries(Object.keys(futureEmpowerConfig.orbs).map(id => [id, { level: new Decimal(0) }])),
+    orbs: Object.fromEntries(Object.keys(futureEmpowerConfig.orbs).map((id) => [id, { level: new Decimal(0) }])),
   };
 }
+
