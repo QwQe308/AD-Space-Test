@@ -68,6 +68,7 @@ export const RS = {
     icon: MultiplierTabIcons.TIME_STUDY,
   },
   A3: abyssResearch("A3", "Research Speed"),
+  A22: abyssResearch("A22", "Research Speed"),
   spaceAmount: {
     name: "Space Amount",
     multValue: () => player.space,

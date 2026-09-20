@@ -413,7 +413,7 @@ const baseConfig = {
     effectValue(level) {
       return level.pow_base(1.5);
     },
-    next: ["A21"],
+    next: ["A22", "A23"],
   },
   A20: {
     position: [1, 5],
@@ -442,6 +442,45 @@ const baseConfig = {
     description(level) {
       return `Infinity resets will keep your Replicanti, and only reset half your Replicanti Galaxies.<br>Replicanti galaxies divides your replicanti by ${format(Replicanti.galaxies.divisor,2,2)} instead of reset to 1.`;
     },
+    next: [],
+  },
+
+  // Row 10
+  A22: {
+    position: [-1, 6],
+    type: NODE_TYPE.UNLIMITED,
+    scaling: {
+      type: "linear",
+      cost: new Decimal(5e4),
+      costIncrease: new Decimal(1.5),
+    },
+    description(level) {
+      return `x10 Research Speed<br>(×${format(this.effectValue(level), 2)} → ×${format(
+        this.effectValue(level.add(1)),
+        2
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(10);
+    },
+    next: ["C0"],
+  },
+  A23: {
+    position: [1, 6],
+    type: NODE_TYPE.UNLIMITED,
+    scaling: {
+      type: "linear",
+      cost: new Decimal(1e5),
+      costIncrease: new Decimal(2),
+    },
+    description(level) {
+      return `×1.5 Eternity Points<br>(×${format(this.effectValue(level))} → ×${format(
+        this.effectValue(level.add(1))
+      )})`;
+    },
+    effectValue(level) {
+      return level.pow_base(1.5);
+    },
     next: ["C0"],
   },
 
@@ -449,7 +488,7 @@ const baseConfig = {
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
-    cost: new Decimal(1e6),
+    cost: new Decimal(2e6),
     description(level) {
       return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },
@@ -464,7 +503,7 @@ const baseConfig = {
       }
       AbyssResearches.B0.unlock();
       AbyssResearchHelperTools.updateStatus();
-      for (let i = 1; i <= 21; i++) {
+      for (let i = 1; i <= 23; i++) {
         player.activeAbyssResearches = new Set();
         player.abyssResearches[`A${i}`].unlocked = false;
         player.abyssResearches[`A${i}`].shown = false;

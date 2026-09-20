@@ -58,6 +58,10 @@ export const EP = {
     isActive: () => SpaceResearchRifts.r51.canBeApplied,
     icon: MultiplierTabIcons.SPACE_RESEARCH(4),
   },
+  A23: {
+    ...abyssResearch("A23", "Eternity Points"),
+    isActive: () => AbyssResearches.A23.canBeApplied && !Pelle.isDisabled("EPMults"),
+  },
   B0: abyssResearch("B0", "Eternity Points"),
   futureEmpower: {
     name: "Future Empower - Eternity Points",

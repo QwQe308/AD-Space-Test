@@ -156,6 +156,7 @@ function totalEPMult() {
     RealityUpgrade(12),
     GlyphEffect.epMult,
     SpaceResearchRifts.r51,
+    AbyssResearches.A23,
     AbyssResearches.B0,
     FutureEmpowerOrbs.eternities
   );

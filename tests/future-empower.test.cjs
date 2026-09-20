@@ -304,7 +304,7 @@ test("revised sphere effects affect EP, ISU Power, and slowdown instead of prest
   global.getPrismReplicantiNerf = () => new Decimal(1);
   global.GlyphAlteration = { isAdded: () => false };
   global.SpaceResearchRifts = { r43: identity, r53: identity, r52: identity, r51: identity };
-  global.AbyssResearches = { A12: identity, A18: identity, A19: identity, B0: identity };
+  global.AbyssResearches = { A12: identity, A18: identity, A19: identity, A23: identity, B0: identity };
   global.Ra = { unlocks: { continuousTTBoost: { effects: { infinity: identity, replicanti: identity } } } };
   global.SingularityMilestone = { infinitiedPow: identity };
   global.AlchemyResource = { eternity: identity, replication: identity };
@@ -329,9 +329,13 @@ test("revised sphere effects affect EP, ISU Power, and slowdown instead of prest
   }
   const totalEP = productionFunction("game.js", "totalEPMult");
   assert.ok(totalEP().eq_tolerance(3.375, 1e-12));
+  AbyssResearches.A23 = new Effect(new Decimal(2.25));
+  assert.ok(totalEP().eq_tolerance(7.59375, 1e-12));
   restricted = true;
   assert.ok(totalEP().eq(1));
   restricted = false;
+  AbyssResearches.A23 = identity;
+  assert.ok(totalEP().eq_tolerance(3.375, 1e-12));
   const isuPower = productionFunction("core/secret-formula/infinity/infinity-upgrades.js", "dimInfinityExponent");
   assert.ok(isuPower().eq_tolerance(1.03, 1e-12));
 });

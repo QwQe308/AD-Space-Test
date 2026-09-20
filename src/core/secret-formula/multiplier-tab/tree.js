@@ -15,8 +15,8 @@ const propList = {
     "dilationUpgrade", "realityUpgrade", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "iap", "nerfV", "nerfCursed"],
   IP: ["base", "infinityUpgrade", "SR41", "A14", "achievement", "timeStudy", "glyph", "alchemy", "pelle", "iap",
     "nerfTeresa", "nerfV"],
-  EP: ["base", "eternityUpgrade", "SR51", "B0", "futureEmpower", "timeStudy", "glyph", "realityUpgrade", "pelle", "iap",
-    "nerfTeresa", "nerfV"],
+  EP: ["base", "eternityUpgrade", "SR51", "A23", "B0", "futureEmpower", "timeStudy", "glyph", "realityUpgrade",
+    "pelle", "iap", "nerfTeresa", "nerfV"],
 };
 
 // Some of the props above would contain every entry except "total" in their respective value GameDB entry, so we
@@ -110,7 +110,8 @@ export const multiplierTabTree = {
   replicanti_total: [
     getProps("replicanti")
   ],
-  RS_total: [["RS_base", "RS_achievementMult", "RS_SR21", "RS_infinityUpgrade", "RS_timeStudy", "RS_A3", "RS_SC51"]],
+  RS_total: [["RS_base", "RS_achievementMult", "RS_SR21", "RS_infinityUpgrade", "RS_timeStudy",
+    "RS_A3", "RS_A22", "RS_SC51"]],
   RS_base: [["RS_space", "RS_dimBoost", "RS_Abyss"]],
   RS_space: [["RS_spaceAmount", "RS_SR42", "RS_lightCyan"]],
   RS_timeStudy: [[91, 92, 102, 222].map(id => `general_timeStudy_${id}`)],

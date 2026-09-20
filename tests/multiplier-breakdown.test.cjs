@@ -725,7 +725,9 @@ test("Abyss records effective space peaks independently before awarding research
 
 test("space, research speed and conversion breakdowns reconstruct the live formulas", () => {
   global.PlayerProgress.imaginaryUnlocked = () => true;
-  global.AbyssResearches = { A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5) };
+  global.AbyssResearches = {
+    A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5), A22: mockEffect(10000)
+  };
   global.SpaceResearchRifts = {
     r11: mockEffect(7), r21: mockEffect([3, 11]), r22: { ...mockEffect(1.5), level: new Decimal(4) },
     r42: mockEffect(2), r45: mockEffect(2.5),
@@ -757,8 +759,12 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   assertDecimalClose(breakdownProduct(Object.fromEntries(["space", "dimBoost", "Abyss"].map(k => [k, RS[k]]))),
     speed.getBaseResearchSpeed());
   assertDecimalClose(breakdownProduct(Object.fromEntries(
-    ["base", "achievementMult", "SR21", "infinityUpgrade", "timeStudy", "A3"].map(k => [k, RS[k]]))),
+    ["base", "achievementMult", "SR21", "infinityUpgrade", "timeStudy", "A3", "A22"].map(k => [k, RS[k]]))),
   speed.globalResearchSpeed());
+  const boostedSpeed = speed.globalResearchSpeed();
+  AbyssResearches.A22.canBeApplied = false;
+  assertDecimalClose(boostedSpeed.div(speed.globalResearchSpeed()), 10000);
+  assert.equal(RS.A22.isActive(), false);
   assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5 }), ARS.total.multValue());
   assertDecimalClose(ARS.base.multValue(), 20);
   assertDecimalClose(ARS.total.multValue(), 80);
@@ -798,6 +804,8 @@ test("all reachable breakdown tree references resolve and mod research is reacha
   assert.ok(tree.AM_spaceDivisor.flat().includes("AM_A9"));
   assert.ok(tree.DT_total[0].includes("DT_SR54"));
   assert.ok(tree.EP_total[0].includes("EP_B0"));
+  assert.ok(tree.EP_total[0].includes("EP_A23"));
+  assert.ok(tree.RS_total[0].includes("RS_A22"));
   assert.ok(tree.infinities_total[0].includes("infinities_A12"));
   assert.ok(tree.infinities_total[0].includes("infinities_A18"));
   assert.ok(tree.AD_purchase[0].includes("AD_buy10A10"));

@@ -24,7 +24,8 @@ export function globalResearchSpeed() {
     TimeStudy(92),
     TimeStudy(102),
     TimeStudy(222),
-    AbyssResearches.A3
+    AbyssResearches.A3,
+    AbyssResearches.A22
   );
   if (isSCRunningOnTier(5, 1)) otherFactors = otherFactors.div(SpaceChallenge(5).effectValue);
   return baseResearchSpeed.mul(researchFactor).mul(achievementFactor).mul(otherFactors);

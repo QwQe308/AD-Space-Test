@@ -251,7 +251,6 @@ export default {
 
 .active-item {
   padding: 5px 10px;
-  background: rgba(30, 31, 40, 0.8);
   border-radius: 5px;
 }
 
