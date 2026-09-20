@@ -15,7 +15,7 @@ const baseConfig = {
     },
     description(level) {
       return `Antimatter x2 per level<br>
-      (×${format(this.effectValue(level), 2)} → ×${format(this.effectValue(level.add(1)))})`;
+      (×${format(this.effectValue(level), 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
     },
     effectValue(level) {
       return level.pow_base(2);
