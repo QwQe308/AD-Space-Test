@@ -494,7 +494,7 @@ const baseConfig = {
   C0: {
     position: [0, 7],
     type: NODE_TYPE.CORE,
-    cost: new Decimal(5e6),
+    cost: new Decimal(3e6),
     description(level) {
       return `Sacrifice "all?" depth 0 researches.<br>Permanently disable Abyss's nerfs to research speed,<br>and collpase into depth 1...?`;
     },
