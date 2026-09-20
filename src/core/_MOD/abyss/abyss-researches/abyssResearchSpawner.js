@@ -117,6 +117,10 @@ export const extraAbyssResearchTooltips = {
 
   Link: `* Link nodes can serve as a "portal", connecting to another node, and do researches in the other side.
   If it connects to a new depth, it will be permanently shown in the left upper corner, and allows you to quick switch by clicking.`,
+
+  Permanent: `* Permanent nodes will never reset, most of them gives QOLs or Automations. They will be marked with *.`,
+
+  Corruption: `* Corruptions nodes do not need to be researched. Instead, some resources are required to "Purchase" it.`,
 };
 
 export const NODE_TYPE = {

@@ -84,6 +84,7 @@ const baseConfig = {
       return DC.D2.pow(level);
     },
     next: ["B1"],
+    tooltipTags: ["Permanent"],
   },
   B1: {
     position: [0, 1],
@@ -129,6 +130,7 @@ const baseConfig = {
       return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;
     },
     next: ["B1"],
+    tooltipTags: ["Corruption"],
   },
 
   // Empowers

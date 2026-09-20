@@ -96,6 +96,10 @@ export default {
         }
       }
 
+      if (this.permanent){
+        tooltipContent += `<br><span style="color:rgb(190, 233, 255)">Permanent</span>`
+      }
+
       if (
         !this.isMaxed &&
         AbyssResearches[this.id].hasRestriction &&
@@ -317,8 +321,10 @@ export default {
 <style scoped>
 .permanent-mark {
   position: absolute;
-  top: 0;
-  left: 0;
+  font-size: 2rem;
+  z-index: 10;
+  top: -5px;
+  left: -5px;
 }
 .locked .sink-animation-block {
   border-color: rgb(100, 100, 100);
@@ -383,7 +389,7 @@ export default {
 
   .corruption & {
     background-color: #9b59b6;
-    clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
   }
 
   .core & {
