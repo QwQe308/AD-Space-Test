@@ -127,7 +127,11 @@ const baseConfig = {
       timeTheorems: 50,
     },
     description(level) {
-      return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;
+      return `Set the Time Theorem costs of Time Studies to 0.<br />
+      You can select one additional Dimension path.`;
+    },
+    onLevelUp() {
+      GameCache.currentStudyTree.invalidate();
     },
     next: ["B1", "PST"],
     tooltipTags: ["Corruption"],

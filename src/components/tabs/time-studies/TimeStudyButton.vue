@@ -32,6 +32,7 @@ export default {
       isUseless: false,
       isBought: false,
       isAvailableForPurchase: false,
+      cost: new Decimal(0),
       STCost: 0,
       eternityChallengeRunning: false,
       isCompleteEC: false,
@@ -106,7 +107,11 @@ export default {
       return this.eternityChallengeRunning ? "o-time-study-eternity-challenge--running" : "";
     },
     config() {
-      return { ...this.study.config, formatCost: value => (value.gte(1e6) ? format(value) : formatInt(value)) };
+      return {
+        ...this.study.config,
+        cost: this.cost,
+        formatCost: value => (value.gte(1e6) ? format(value) : formatInt(value))
+      };
     },
     showDefaultCostDisplay() {
       const costCond = (this.showCost && !this.showStCost) || this.STCost === 0;
@@ -142,6 +147,7 @@ export default {
   methods: {
     update() {
       const study = this.study;
+      this.cost.copyFrom(study.cost);
       this.isUseless = Pelle.uselessTimeStudies.includes(this.study.id) && Pelle.isDoomed;
       this.isBought = study.isBought;
       this.eternityChallengeRunning = study.type === TIME_STUDY_TYPE.ETERNITY_CHALLENGE &&

@@ -263,13 +263,13 @@ export class TimeStudyTree {
     const hasST = this.spentTheorems[1] + stNeeded <= maxST;
     if (checkCosts) {
       const maxTT = Currency.timeTheorems.value.add(GameCache.currentStudyTree.value.spentTheorems[0]);
-      const hasTT = this.spentTheorems[0].add(config.cost.gte(maxTT));
+      const hasTT = this.spentTheorems[0].add(study.cost).lte(maxTT);
       if (!hasTT || !hasST) return;
     }
 
     // Don't add the costs nor add the study if it is one using ST and there are none
     if (maxST === 0 && stNeeded > 0) return;
-    this.spentTheorems[0] = this.spentTheorems[0].add(config.cost);
+    this.spentTheorems[0] = this.spentTheorems[0].add(study.cost);
     this.spentTheorems[1] += stNeeded;
 
     this.purchasedStudies.push(study);
@@ -281,8 +281,8 @@ export class TimeStudyTree {
 
   get allowedDimPathCount() {
     if (DilationUpgrade.timeStudySplit.isBought) return 3;
-    if (this.purchasedStudies.includes(TimeStudy(201))) return 2;
-    return 1;
+    const basePaths = this.purchasedStudies.includes(TimeStudy(201)) ? 2 : 1;
+    return Math.min(3, basePaths + (AbyssResearches.B3.isEffectActive ? 1 : 0));
   }
 
   get dimensionPaths() {

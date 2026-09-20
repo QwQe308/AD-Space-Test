@@ -1,3 +1,5 @@
+import { DC } from "../constants";
+
 import { TimeStudyState } from "./time-studies";
 
 export const NormalTimeStudies = {};
@@ -28,6 +30,10 @@ export class NormalTimeStudyState extends TimeStudyState {
 
   get isUnlocked() {
     return this.config.unlocked?.() ?? true;
+  }
+
+  get cost() {
+    return this.id <= 111 && AbyssResearches.B3.isEffectActive ? DC.D0 : super.cost;
   }
 
   get isTriad() {
@@ -150,6 +156,7 @@ TimeStudy.preferredPaths = {
     get usePriority() {
       return (
         this.path.length > 1 ||
+        AbyssResearches.B3.isEffectActive ||
         TimeStudy(201).isBought ||
         DilationUpgrade.timeStudySplit.isBought ||
         PlayerProgress.realityUnlocked()
