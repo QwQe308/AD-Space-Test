@@ -319,6 +319,7 @@ export default {
     <div class="research-node-container" :class="getContainerClass" @click="handleClick">
       <CorruptionNodeVisual
         v-if="type === 'corruption'"
+        :node-id="id"
         :completed="isMaxed"
       />
       <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass" />

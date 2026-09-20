@@ -129,13 +129,13 @@ const baseConfig = {
     description(level) {
       return `Set all Time Studies' cost to 0. You can select an extra study out of your path in the spilt.`;
     },
-    next: ["B1", "A6B", "A21B", "A16B", "A7B", "PST"],
+    next: ["B1", "PST"],
     tooltipTags: ["Corruption"],
   },
 
   // Empowers
   PST: {
-    position: [-2, 3],
+    position: [-3, 3],
     type: NODE_TYPE.CORRUPTION,
     cost: {
       timeTheorems: () => 100 + 50 * getEternityTotalState(),

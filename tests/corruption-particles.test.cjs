@@ -29,7 +29,7 @@ function loadSource(filename) {
   }
   return loaded.exports;
 }
-const { corruptionOrbitParticles, corruptionEscapeParticles, CORRUPTION_BURST_DURATION } =
+const { createCorruptionOrbits, corruptionOrbitParticles, corruptionEscapeParticles, CORRUPTION_BURST_DURATION } =
   loadSource(path.join(root, "corruption-particles.js"));
 const component = loadSource(path.join(root, "CorruptionNodeVisual.vue")).default;
 const Visual = Vue.extend(component);
@@ -44,7 +44,7 @@ function animateTest(t, completed) {
     return frameId;
   };
   global.cancelAnimationFrame = id => frames.delete(id);
-  const vm = new Visual({ propsData: { completed } });
+  const vm = new Visual({ propsData: { completed, nodeId: "D1" } });
   component.mounted.call(vm);
   t.after(() => {
     vm.$destroy();
@@ -60,6 +60,23 @@ function animateTest(t, completed) {
     },
   };
 }
+
+test("node IDs produce distinct, repeatable particle positions and velocities", () => {
+  const nodes = ["D1", "D2", "D1"].map(nodeId => new Visual({
+    propsData: { nodeId, completed: false },
+  }));
+  const positions = nodes.map(vm => vm.particles.find(p => p.id === 0));
+  assert.notDeepEqual(positions[0], positions[1]);
+  assert.deepEqual(positions[0], positions[2]);
+  for (const vm of nodes) vm.orbitTime = 100;
+  const velocities = nodes.map((vm, index) => {
+    const particle = vm.particles.find(p => p.id === 0);
+    return [particle.x - positions[index].x, particle.y - positions[index].y];
+  });
+  assert.notDeepEqual(velocities[0], velocities[1]);
+  assert.deepEqual(velocities[0], velocities[2]);
+  assert.deepEqual(nodes[0].orbits, createCorruptionOrbits("D1"));
+});
 
 test("3D orbits cross behind and in front with perspective scaling and depth sorting", () => {
   const near = corruptionOrbitParticles(1600).find(p => p.id === 0);
@@ -100,10 +117,12 @@ test("a real purchase adds a gold radial burst without interrupting the orbital 
   const { vm, advance } = animateTest(t, false);
   advance(0);
   advance(performance.now());
+  const orbits = vm.orbits;
   vm.completed = true;
   await Vue.nextTick();
   const start = vm._burstStartedAt;
   assert.equal(vm.burstElapsed, 0);
+  assert.equal(vm.orbits, orbits);
   assert.equal(vm._render().data.class["is-purchased"], true);
   // Sample expansion, contraction, and a frame crossing the end of the burst.
   for (const elapsed of [150, 350, 700, 1200, CORRUPTION_BURST_DURATION + 25]) {
@@ -115,6 +134,7 @@ test("a real purchase adds a gold radial burst without interrupting the orbital 
     if (elapsed === 350) assert.ok(vm.escapeParticles.length > 0);
   }
   assert.equal(vm.burstElapsed, null);
+  assert.equal(vm.orbits, orbits);
   assert.deepEqual(vm.escapeParticles, []);
   advance(start + CORRUPTION_BURST_DURATION + 100);
   assert.ok(Math.abs(vm.orbitTime - (start + CORRUPTION_BURST_DURATION + 100)) < 1e-8);

@@ -3,11 +3,16 @@ import {
   CORRUPTION_BURST_DURATION,
   corruptionEscapeParticles,
   corruptionOrbitParticles,
+  createCorruptionOrbits,
 } from "./corruption-particles";
 
 export default {
   name: "CorruptionNodeVisual",
   props: {
+    nodeId: {
+      type: String,
+      required: true,
+    },
     completed: {
       type: Boolean,
       required: true,
@@ -20,8 +25,11 @@ export default {
     };
   },
   computed: {
+    orbits() {
+      return createCorruptionOrbits(this.nodeId);
+    },
     particles() {
-      return corruptionOrbitParticles(this.orbitTime, this.burstElapsed);
+      return corruptionOrbitParticles(this.orbitTime, this.burstElapsed, this.orbits);
     },
     backParticles() {
       return this.particles.filter(particle => particle.z < 0);
@@ -30,7 +38,7 @@ export default {
       return this.particles.filter(particle => particle.z >= 0);
     },
     escapeParticles() {
-      return corruptionEscapeParticles(this.burstElapsed);
+      return corruptionEscapeParticles(this.burstElapsed, this.orbits[0].rotation);
     },
   },
   watch: {
