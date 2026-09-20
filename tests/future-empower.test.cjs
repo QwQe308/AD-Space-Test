@@ -199,7 +199,7 @@ test("orb requirements support accelerated math.js scaling and matching bulk lev
   assert.ok(Currency.eternities.value.eq(0));
 });
 
-test("sphere bonuses are independent, immediate, and not capped at the former purchase limit", () => {
+test("orb bonuses are independent, immediate, and not capped at the former purchase limit", () => {
   for (const orb of FutureEmpower.orbs) {
     assert.equal(orb.effectOrDefault(1), 1);
     assert.ok(orb.effectValue.eq(orb.config.effect(new Decimal(0))));
@@ -233,7 +233,7 @@ test("selecting an orb swaps the center without upgrading and orbit positions ad
   assert.deepEqual(FutureEmpower.orbitLayout(Infinity), swapped);
 });
 
-test("save merging restores sphere levels, bonuses, and selection without separate upgrades", () => {
+test("save merging restores orb levels, bonuses, and selection without separate upgrades", () => {
   const oldSave = { empowers: { past: { frozenCurrency: "infinities" } } };
   const merged = deepmergeAll([{ empowers: { future: createFutureEmpowerData() } }, oldSave]);
   assert.equal("insight" in merged.empowers.future, false);
@@ -251,7 +251,7 @@ test("save merging restores sphere levels, bonuses, and selection without separa
   assert.equal(FutureEmpowerOrbs.infinities.effectOrDefault(1), 1);
 });
 
-test("migration removes obsolete insight data while preserving earned sphere progress", () => {
+test("migration removes obsolete insight data while preserving earned orb progress", () => {
   const migrationSource = fs.readFileSync(path.join(root, "core/storage/migrations.js"), "utf8");
   const ast = parseSync(migrationSource, { configFile: false, babelrc: false, sourceType: "module" });
   const migrations = ast.program.body.find(node => node.declaration?.declarations?.[0]?.id.name === "migrations")
@@ -274,7 +274,7 @@ test("migration removes obsolete insight data while preserving earned sphere pro
   assert.doesNotThrow(() => migrate({}));
 });
 
-test("revised sphere effects affect EP, ISU Power, and slowdown instead of prestige counts or flat speed", () => {
+test("revised orb effects affect EP, ISU Power, and slowdown instead of prestige counts or flat speed", () => {
   function productionFunction(file, name) {
     const source = fs.readFileSync(path.join(root, file), "utf8");
     const ast = parseSync(source, { configFile: false, babelrc: false, sourceType: "module" });

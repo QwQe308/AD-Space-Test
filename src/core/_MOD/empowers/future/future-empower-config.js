@@ -1,6 +1,6 @@
 import { DC } from "../../../constants";
 
-// Reference balance values; level is the number of upgrades earned by each sphere.
+// Reference balance values; level is the number of upgrades earned by each orb.
 export const futureEmpowerConfig = {
   defaultOrb: "replicanti",
   orbit: {
@@ -30,7 +30,7 @@ export const futureEmpowerConfig = {
         purchasesBeforeScaling: DC.BEMAX,
       },
       bonusDescription: "Replicanti slowdown is weakened.",
-      effect: (level) => level.add(10).log10(),
+      effect: (level) => level.div(2).add(10).log10(),
       formatEffect: (value) =>
         `x${format(ReplicantiGrowth.baseScaleFactor, 2, 2)} / ${format(
           Number.MAX_VALUE,

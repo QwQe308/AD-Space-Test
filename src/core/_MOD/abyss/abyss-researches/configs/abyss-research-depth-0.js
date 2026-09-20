@@ -451,7 +451,7 @@ const baseConfig = {
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
-      cost: new Decimal(5e4),
+      cost: new Decimal(3e4),
       costIncrease: new Decimal(1.5),
     },
     description(level) {

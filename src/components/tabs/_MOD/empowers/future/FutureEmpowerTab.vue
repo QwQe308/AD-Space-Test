@@ -137,7 +137,7 @@ export default {
     <div class="future-layout">
       <div class="future-resources">
         <div class="future-orbit-controls">
-          <span>Select a sphere; click the center to upgrade.</span>
+          <span>Select a orb; click the center to upgrade.</span>
           <PrimaryButton
             class="future-motion-toggle"
             :aria-pressed="paused"
@@ -229,7 +229,7 @@ export default {
           class="future-milestone"
         >
           <p>
-            Click the center sphere to upgrade all available levels.
+            Click the center orb to upgrade all available levels.
             <br>
             {{ selectedOrb.description }}
           </p>
@@ -238,14 +238,14 @@ export default {
 
       <div class="future-bonuses">
         <div class="future-bonuses-heading">
-          Sphere bonuses
+          Orb bonuses
         </div>
-        <p>Each sphere level strengthens its corresponding bonus.</p>
+        <p>Each orb level strengthens its corresponding bonus.</p>
         <p
           v-if="earnedBonuses.length === 0"
           class="future-bonuses-empty"
         >
-          No bonuses yet. Upgrade a sphere to gain one.
+          No bonuses yet. Upgrade a orb to gain one.
         </p>
         <div
           v-else
@@ -267,13 +267,6 @@ export default {
         </div>
       </div>
     </div>
-    <p
-      class="future-feedback"
-      role="status"
-      aria-live="polite"
-    >
-      {{ feedback }}
-    </p>
   </div>
 </template>
 
@@ -530,11 +523,6 @@ export default {
 .future-bonus-title {
   font-size: 1.4rem;
   font-weight: bold;
-}
-
-.future-feedback {
-  min-height: 1.8rem;
-  margin: 0.6rem 0 0;
 }
 
 /* stylelint-disable order/order -- Responsive overrides must follow the base rules. */
