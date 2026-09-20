@@ -133,7 +133,7 @@ const baseConfig = {
     onLevelUp() {
       GameCache.currentStudyTree.invalidate();
     },
-    next: ["B1", "PST"],
+    next: ["PST", "PRS", "FTR"],
     tooltipTags: ["Corruption"],
   },
 
@@ -147,13 +147,57 @@ const baseConfig = {
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
-      baseInfo += `<br><br>-------- Path Difficultity --------<br><br>`;
+      baseInfo += `<br><br>-------- Path Difficultity (Active) --------<br><br>`;
       switch (getEternityTotalState()) {
         // No empowers
         case 0:
           baseInfo += `Time ----- ◆◆◇◇◇<br>`;
           baseInfo += `Strategy - ◆◆◇◇◇<br>`;
           baseInfo += `Active --- ◆◆◆◆◇`;
+      }
+      return baseInfo;
+    },
+    tooltipTags: ["Empower"],
+  },
+
+  PRS: {
+    position: [0, 5],
+    type: NODE_TYPE.CORRUPTION,
+    cost: {
+      timeTheorems: () => 100 + 50 * getEternityTotalState(),
+    },
+    description(level) {
+      let baseInfo = `To complete the power of eternity, we need to inspect the PRESENT.`;
+      if (getEternityStateCompleted("PST")) return baseInfo;
+      baseInfo += `<br><br>-------- Path Difficultity (Strategy) --------<br><br>`;
+      switch (getEternityTotalState()) {
+        // No empowers
+        case 0:
+          baseInfo += `Time ----- ◆◇◇◇◇<br>`;
+          baseInfo += `Strategy - ◆◆◆◇◇<br>`;
+          baseInfo += `Active --- ◆◆◆◇◇`;
+      }
+      return baseInfo;
+    },
+    tooltipTags: ["Empower"],
+  },
+
+  FTR: {
+    position: [3, 3],
+    type: NODE_TYPE.CORRUPTION,
+    cost: {
+      timeTheorems: () => 100 + 50 * getEternityTotalState(),
+    },
+    description(level) {
+      let baseInfo = `To complete the power of eternity, we need to forecast the FUTURE.`;
+      if (getEternityStateCompleted("PST")) return baseInfo;
+      baseInfo += `<br><br>-------- Path Difficultity (Idle) --------<br><br>`;
+      switch (getEternityTotalState()) {
+        // No empowers
+        case 0:
+          baseInfo += `Time ----- ◆◆◆◆◇<br>`;
+          baseInfo += `Strategy - ◆◆◇◇◇<br>`;
+          baseInfo += `Active --- ◆◇◇◇◇`;
       }
       return baseInfo;
     },
