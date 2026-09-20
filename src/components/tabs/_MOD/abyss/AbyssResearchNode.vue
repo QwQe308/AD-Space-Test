@@ -306,6 +306,18 @@ export default {
   >
     <div v-if="permanent" class="permanent-mark">*</div>
     <div class="research-node-container" :class="getContainerClass" @click="handleClick">
+      <svg
+        v-if="type === 'corruption'"
+        class="corruption-outline"
+        viewBox="0 0 40 40"
+        aria-hidden="true"
+      >
+        <!-- Draw both concentric equilateral triangles in one path so neither fill covers the other's edges. -->
+        <path
+          d="M20 2 L35.58845726812 29 L4.41154273188 29 Z
+             M20 38 L4.41154273188 11 L35.58845726812 11 Z"
+        />
+      </svg>
       <div v-if="hasProgress" class="research-node-inner" :style="getFillStyle" :class="getFillClass" />
       <div v-if="levelText" class="research-node-level" :style="getTextStyle">
         {{ levelText }}
@@ -387,9 +399,12 @@ export default {
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   }
 
-  .corruption & {
-    background-color: #9b59b6;
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  .research-node.corruption & {
+    background-color: transparent !important;
+
+    &::before {
+      display: none;
+    }
   }
 
   .core & {
@@ -413,6 +428,27 @@ export default {
 
   .sink & {
     background-color: rgb(125, 100, 150);
+  }
+}
+
+.corruption-outline {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: #111014;
+  stroke: #9b59b6;
+  stroke-width: 2;
+  stroke-linejoin: miter;
+  shape-rendering: geometricPrecision;
+  pointer-events: none;
+
+  .locked &,
+  .unaffordable & {
+    stroke: rgb(100, 100, 100);
+  }
+
+  .completed & {
+    stroke: #aeae77;
   }
 }
 
