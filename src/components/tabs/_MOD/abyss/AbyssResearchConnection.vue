@@ -71,16 +71,14 @@ export default {
   },
   methods: {
     update() {
-      this.isResearching = AbyssResearches[this.data[1][2]].isResearching;
-      this.isActive =
-        (this.isResearching &&
-          AbyssResearches[this.data[0][2]].completed &&
-          AbyssResearches[this.data[1][2]].unlocked) ||
-        (AbyssResearches[this.data[0][2]].isResearching &&
-          AbyssResearches[this.data[1][2]].completed &&
-          AbyssResearches[this.data[0][2]].unlocked);
+      const source = AbyssResearches[this.data[0][2]];
+      const target = AbyssResearches[this.data[1][2]];
+      this.isResearching = target.isResearching;
+      const isForwardActive = source.completed && target.unlocked && this.isResearching;
+      this.isActive = isForwardActive || (target.completed && source.unlocked && source.isResearching);
 
-      if (!this.isResearching || !this.isActive) {
+      // Each connection instance animates only from data[0] to data[1]; the reverse has its own instance.
+      if (!isForwardActive) {
         this.animationPercentages = [-60, 0];
         this.positions = Array.range(0, this.animationLines).map(x => [
           [-10000, -10000],

@@ -171,6 +171,14 @@ export default {
       return AbyssResearches[this.id].type;
     },
     getNodeStyle() {
+      if (this.getNodeType === "corruption") {
+        return {
+          left: `${AbyssResearches[this.id].x - 25}px`,
+          top: `${AbyssResearches[this.id].y - 25}px`,
+          width: "50px",
+          height: "50px",
+        };
+      }
       if (this.getNodeType === "core") {
         return {
           left: `${AbyssResearches[this.id].x - 30}px`,
