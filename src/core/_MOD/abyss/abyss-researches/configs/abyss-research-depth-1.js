@@ -136,7 +136,7 @@ const baseConfig = {
     position: [-2, 3],
     type: NODE_TYPE.CORRUPTION,
     cost: {
-      timeTheorems: 100 + 50 * getEternityTotalState(),
+      timeTheorems: () => 100 + 50 * getEternityTotalState(),
     },
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
