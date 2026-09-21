@@ -38,11 +38,11 @@ export const eternityUpgrades = {
     cap: DC.D2P20D0_61,
     formatEffect: value => formatX(value, 2, 1)
   },
-  tdMultAchs: {
+  ISMultEternities: {
     id: 4,
     cost: 1e16,
-    description: "Your Eternities boosts Time Dimensions (x/10+1)",
-    effect: () => Currency.eternities.value.div(10).add(1),
+    description: "Your Eternities boosts Infinities (x/100+1)",
+    effect: () => Currency.eternities.value.div(100).add(1),
     formatEffect: value => formatX(value, 2, 1)
   },
   tdMultTheorems: {

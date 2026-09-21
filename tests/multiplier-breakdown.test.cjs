@@ -838,6 +838,7 @@ test("all reachable breakdown tree references resolve and mod research is reacha
   assert.ok(tree.RS_total[0].includes("RS_A22"));
   assert.ok(tree.infinities_total[0].includes("infinities_A12"));
   assert.ok(tree.infinities_total[0].includes("infinities_A18"));
+  assert.ok(tree.infinities_total[0].includes("infinities_eternityUpgrade"));
   assert.ok(tree.AD_purchase[0].includes("AD_buy10A10"));
   assert.ok(tree.AD_dimboost[0].includes("AD_boostA8"));
   assert.ok(!tree.AD_total[0].includes("AD_buy10A10"));

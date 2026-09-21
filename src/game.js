@@ -339,6 +339,7 @@ export function gainedInfinities() {
     Achievement(164),
     Ra.unlocks.continuousTTBoost.effects.infinity,
     SpaceResearchRifts.r43,
+    EternityUpgrade.ISMultEternities,
     AbyssResearches.A12,
     AbyssResearches.A18
   );
@@ -794,6 +795,7 @@ function passivePrestigeGen() {
         RealityUpgrade(7),
         Ra.unlocks.continuousTTBoost.effects.infinity,
         SpaceResearchRifts.r43,
+        EternityUpgrade.ISMultEternities,
         AbyssResearches.A12,
         AbyssResearches.A18
       );

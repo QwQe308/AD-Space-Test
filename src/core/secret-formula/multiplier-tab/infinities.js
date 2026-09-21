@@ -25,6 +25,12 @@ export const infinities = {
     isActive: () => Achievement(87).isUnlocked,
     icon: MultiplierTabIcons.ACHIEVEMENT,
   },
+  eternityUpgrade: {
+    name: "Eternity Upgrade - Eternities",
+    multValue: () => EternityUpgrade.ISMultEternities.effectOrDefault(1),
+    isActive: () => EternityUpgrade.ISMultEternities.canBeApplied,
+    icon: MultiplierTabIcons.UPGRADE("eternity"),
+  },
   SR43: {
     name: "Space Research r43 - Infinite Intensifier",
     multValue: () => SpaceResearchRifts.r43.effectValue,

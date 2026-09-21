@@ -17,7 +17,7 @@ export default {
           EternityUpgrade.idMultICRecords
         ],
         [
-          EternityUpgrade.tdMultAchs,
+          EternityUpgrade.ISMultEternities,
           EternityUpgrade.tdMultTheorems,
           EternityUpgrade.tdMultRealTime,
         ]

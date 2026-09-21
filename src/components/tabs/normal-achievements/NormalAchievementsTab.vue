@@ -22,7 +22,6 @@ export default {
       hideCompletedRows: false,
       achMultBreak: false,
       achMultToIDS: false,
-      achMultToTDS: false,
       achMultToBH: false,
       achMultToTP: false,
       achMultToTT: false,
@@ -44,7 +43,6 @@ export default {
       const dimMultList = [];
       dimMultList.push("Antimatter");
       if (this.achMultToIDS) dimMultList.push("Infinity");
-      if (this.achMultToTDS) dimMultList.push("Time");
       boostList.push(`${makeEnumeration(dimMultList)} Dimensions: ${achievementPower}`);
 
       boostList.push(`Research Speed: ${achievementPower}`);
@@ -84,7 +82,6 @@ export default {
       this.hideCompletedRows = player.options.hideCompletedAchievementRows;
       this.achMultBreak = BreakInfinityUpgrade.achievementMult.canBeApplied;
       this.achMultToIDS = Achievement(75).isUnlocked;
-      this.achMultToTDS = EternityUpgrade.tdMultAchs.isBought;
       this.achMultToTP = RealityUpgrade(8).isBought;
       this.achMultToBH = VUnlocks.achievementBH.canBeApplied;
       this.achMultToTT = Ra.unlocks.achievementTTMult.canBeApplied;

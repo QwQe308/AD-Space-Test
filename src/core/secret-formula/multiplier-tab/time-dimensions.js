@@ -94,13 +94,6 @@ export const TD = {
     icon: MultiplierTabIcons.UPGRADE("imaginary"),
   },
 
-  achievementMult: {
-    name: "Eternity Upgrade - Achievement Multiplier",
-    multValue: dim => Decimal.pow(EternityUpgrade.tdMultAchs.effectOrDefault(1),
-      dim ? 1 : MultiplierTabHelper.activeDimCount("TD")),
-    isActive: () => EternityUpgrade.tdMultAchs.canBeApplied && !Pelle.isDoomed,
-    icon: MultiplierTabIcons.ACHIEVEMENT,
-  },
   achievement: {
     name: "Achievement Rewards",
     multValue: dim => {

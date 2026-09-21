@@ -11,7 +11,7 @@ const propList = {
   ID: ["purchase", "A20", "achievementMult", "achievement", "lightYellow", "replicanti", "infinityChallenge",
     "timeStudy", "eternityUpgrade",
     "eternityChallenge", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "nerfV", "nerfCursed", "nerfPelle"],
-  TD: ["purchase", "achievementMult", "achievement", "timeStudy", "eternityUpgrade", "eternityChallenge",
+  TD: ["purchase", "achievement", "timeStudy", "eternityUpgrade", "eternityChallenge",
     "dilationUpgrade", "realityUpgrade", "glyph", "alchemy", "imaginaryUpgrade", "pelle", "iap", "nerfV", "nerfCursed"],
   IP: ["base", "infinityUpgrade", "SR41", "A14", "achievement", "timeStudy", "glyph", "alchemy", "pelle", "iap",
     "nerfTeresa", "nerfV"],

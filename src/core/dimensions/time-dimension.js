@@ -149,7 +149,6 @@ export function timeDimensionCommonMultiplier() {
       TimeStudy(301),
       EternityChallenge(1).reward,
       EternityChallenge(10).reward,
-      EternityUpgrade.tdMultAchs,
       EternityUpgrade.tdMultTheorems,
       EternityUpgrade.tdMultRealTime,
       Replicanti.areUnlocked && Replicanti.amount.gt(1) ? DilationUpgrade.tdMultReplicanti : null,

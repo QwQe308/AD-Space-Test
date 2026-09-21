@@ -308,7 +308,7 @@ test("revised orb effects affect EP, ISU Power, and slowdown instead of prestige
   global.Ra = { unlocks: { continuousTTBoost: { effects: { infinity: identity, replicanti: identity } } } };
   global.SingularityMilestone = { infinitiedPow: identity };
   global.AlchemyResource = { eternity: identity, replication: identity };
-  global.EternityUpgrade = { epMult: identity };
+  global.EternityUpgrade = { epMult: identity, ISMultEternities: identity };
   global.GlyphEffect = { epMult: identity };
   player.records = { thisInfinity: { time: new Decimal(0) } };
   const formulas = {
@@ -327,6 +327,8 @@ test("revised orb effects affect EP, ISU Power, and slowdown instead of prestige
     restricted = false;
     assert.ok(formula().eq(1), `${id} no obsolete multiplier after restriction`);
   }
+  EternityUpgrade.ISMultEternities = new Effect(new Decimal(4));
+  assert.ok(formulas.infinities().eq(4));
   const totalEP = productionFunction("game.js", "totalEPMult");
   assert.ok(totalEP().eq_tolerance(3.375, 1e-12));
   AbyssResearches.A23 = new Effect(new Decimal(2.25));
