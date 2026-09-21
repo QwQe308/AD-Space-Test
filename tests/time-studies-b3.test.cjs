@@ -138,6 +138,12 @@ test("B3 only makes normal studies through 111 free and refreshes displayed pric
   const vm = { ...button.data(), study: TimeStudy(11) };
   button.methods.update.call(vm);
   assert.ok(button.computed.config.call(vm).cost.eq(1));
+  vm.showCost = true;
+  vm.showStCost = false;
+  vm.STCost = 0;
+  vm.setup = { isSmall: false };
+  vm.doomedRealityStudy = false;
+  assert.equal(button.computed.showDefaultCostDisplay.call(vm), true);
   activateB3();
   for (const study of NormalTimeStudyState.all) {
     assert.ok(study.cost.eq(study.id <= 111 ? 0 : study.config.cost), `TS ${study.id}`);
@@ -147,6 +153,15 @@ test("B3 only makes normal studies through 111 free and refreshes displayed pric
   assert.ok(TimeStudy.timeDimension(5).cost.eq("1e6"));
   button.methods.update.call(vm);
   assert.ok(button.computed.config.call(vm).cost.eq(0));
+  assert.equal(button.computed.showDefaultCostDisplay.call(vm), false);
+  const freeConfig = button.computed.config.call(vm);
+  assert.equal(button.computed.customCostStr.call({ ...vm, config: freeConfig }), "");
+  assert.equal(button.computed.showCustomCostDisplay.call({
+    customCostStr: "", doomedRealityStudy: false, isDisabledByEnslaved: false,
+  }), false);
+  assert.equal(button.computed.customCostStr.call({
+    ...vm, config: freeConfig, setup: { isSmall: true }, showStCost: true, STCost: 2,
+  }), "2 ST");
   assert.equal(TimeStudy(11).purchase(), true);
   assert.ok(Currency.timeTheorems.value.eq(0));
   assert.equal(TimeStudy(11).purchase(), false);

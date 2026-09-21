@@ -114,31 +114,37 @@ export default {
       };
     },
     showDefaultCostDisplay() {
-      const costCond = (this.showCost && !this.showStCost) || this.STCost === 0;
-      return !this.setup.isSmall && !this.doomedRealityStudy && costCond;
+      const costCond = !this.showStCost || this.STCost === 0;
+      return this.showCost && this.cost.gt(0) && !this.setup.isSmall && !this.doomedRealityStudy && costCond;
     },
     isDisabledByEnslaved() {
       return this.study.id === 192 && Enslaved.isRunning;
     },
     customCostStr() {
-      let ttStr;
-      if (this.config.cost.lte(1e6)) {
-        ttStr = this.setup.isSmall
-          ? `${formatInt(this.config.cost)} TT`
-          : quantifyInt("Time Theorem", this.config.cost);
-      } else {
-        ttStr = this.setup.isSmall
-          ? `${format(this.config.cost)} TT`
-          : quantify("Time Theorem", this.config.cost);
-      }
-      const stStr = this.setup.isSmall
-        ? `${formatInt(this.STCost)} ST`
-        : quantifyInt("Space Theorem", this.STCost);
-
       const costs = [];
-      if (this.config.cost) costs.push(ttStr);
-      if (this.STCost && this.showStCost) costs.push(stStr);
+      if (this.showCost && this.config.cost.gt(0)) {
+        let ttStr;
+        if (this.config.cost.lte(1e6)) {
+          ttStr = this.setup.isSmall
+            ? `${formatInt(this.config.cost)} TT`
+            : quantifyInt("Time Theorem", this.config.cost);
+        } else {
+          ttStr = this.setup.isSmall
+            ? `${format(this.config.cost)} TT`
+            : quantify("Time Theorem", this.config.cost);
+        }
+        costs.push(ttStr);
+      }
+      if (this.STCost && this.showStCost) {
+        const stStr = this.setup.isSmall
+          ? `${formatInt(this.STCost)} ST`
+          : quantifyInt("Space Theorem", this.STCost);
+        costs.push(stStr);
+      }
       return costs.join(" + ");
+    },
+    showCustomCostDisplay() {
+      return !this.doomedRealityStudy && !this.isDisabledByEnslaved && this.customCostStr.length > 0;
     },
     doomedRealityStudy() {
       return this.study.type === TIME_STUDY_TYPE.DILATION && this.study.id === 6 && Pelle.isDoomed;
@@ -204,7 +210,7 @@ export class TimeStudySetup {
       :config="config"
       name="Time Theorem"
     />
-    <div v-else-if="!doomedRealityStudy && !isDisabledByEnslaved">
+    <div v-else-if="showCustomCostDisplay">
       Cost: {{ customCostStr }}
     </div>
   </button>
