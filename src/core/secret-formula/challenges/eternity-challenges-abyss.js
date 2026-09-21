@@ -9,7 +9,7 @@ export const abyssEternityChallenges = [
     reward: {
       description: "Free Tickspeed threshold is decreased.",
       effect: completions => completions * -0.01,
-      formatEffect: value => `${formatAdd(value, 2, 2)} (${format(1.25, 2, 2)}x → ${format(1.25 + value, 2, 2)}x)`
+      formatEffect: value => `${formatAdd(value, 2, 2)}`
     }
   },
 ];

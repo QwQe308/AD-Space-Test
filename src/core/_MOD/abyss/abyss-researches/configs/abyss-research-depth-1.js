@@ -9,6 +9,10 @@ function getEternityStateCompleted(id) {
   return AbyssResearches[id].completed;
 }
 
+function getEmpowerCost(){
+  return 75 + 75 * getEternityTotalState()
+}
+
 const baseConfig = {
   // ARs taken from depth 0.
   A21B: {
@@ -149,7 +153,7 @@ const baseConfig = {
     position: [-3, 3],
     type: NODE_TYPE.CORRUPTION,
     cost: {
-      timeTheorems: () => 100 + 50 * getEternityTotalState(),
+      timeTheorems: getEmpowerCost,
     },
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
@@ -171,7 +175,7 @@ const baseConfig = {
     position: [0, 5],
     type: NODE_TYPE.CORRUPTION,
     cost: {
-      timeTheorems: () => 100 + 50 * getEternityTotalState(),
+      timeTheorems: getEmpowerCost,
     },
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to inspect the PRESENT.`;
@@ -193,7 +197,7 @@ const baseConfig = {
     position: [3, 3],
     type: NODE_TYPE.CORRUPTION,
     cost: {
-      timeTheorems: () => 100 + 50 * getEternityTotalState(),
+      timeTheorems: getEmpowerCost,
     },
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to forecast the FUTURE.`;
