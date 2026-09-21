@@ -41,8 +41,8 @@ export const eternityUpgrades = {
   tdMultAchs: {
     id: 4,
     cost: 1e16,
-    description: "Your Achievement bonus affects Time Dimensions",
-    effect: () => Achievements.power,
+    description: "Your Eternities boosts Time Dimensions (x/10+1)",
+    effect: () => Currency.eternities.value.div(10).add(1),
     formatEffect: value => formatX(value, 2, 1)
   },
   tdMultTheorems: {
