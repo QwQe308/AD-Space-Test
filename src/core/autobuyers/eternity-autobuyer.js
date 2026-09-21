@@ -80,11 +80,11 @@ export class EternityAutobuyerState extends AutobuyerState {
   }
 
   get willEternity() {
-    if (EternityChallenge.isRunning) {
+    if (EternityChallenges.isRunning) {
       // We Eternity asap if we're in an Eternity Challenge and can't reach more completions.
       // Code elsewhere ensures this hasMoreCompletions evaluates to false when ready to complete the EC at all
       // without the ECB perk or when capped at max completions with it (and true otherwise)
-      return !EternityChallenge.current?.gainedCompletionStatus.hasMoreCompletions;
+      return !EternityChallenges.current?.gainedCompletionStatus.hasMoreCompletions;
     }
 
     switch (this.mode) {

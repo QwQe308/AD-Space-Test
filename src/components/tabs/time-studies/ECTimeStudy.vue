@@ -55,11 +55,11 @@ export default {
     update() {
       const id = this.id;
       const study = this.study;
-      const ec = EternityChallenge(id);
+      const ec = study.challenge;
       this.hasRequirement = !Perk.studyECRequirement.isBought && !study.wasRequirementPreviouslyMet;
       this.completions = ec.completions;
       this.showTotalCompletions = !Enslaved.isRunning || id !== 1;
-      this.isRunning = EternityChallenge.current?.id === id;
+      this.isRunning = EternityChallenges.current === ec;
       this.isUnlocked = ec.isUnlocked;
       if (!this.hasRequirement || id > 10) return;
       const requirement = this.requirement;

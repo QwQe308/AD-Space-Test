@@ -161,8 +161,11 @@ window.player = {
     },
     eternity: {
       current: 0,
+      currentType: "normal",
       unlocked: 0,
+      unlockedType: "normal",
       requirementBits: 0,
+      abyssRequirementBits: 0,
     },
     space: {
       current: 0,
@@ -665,6 +668,7 @@ window.player = {
     moveGlyphsOnProtection: false,
     perkPoints: DC.D0,
     unlockedEC: 0,
+    unlockedAbyssEC: 0,
     autoEC: true,
     lastAutoEC: DC.D0,
     partEternitied: DC.D0,
@@ -1089,11 +1093,11 @@ export const Player = {
   },
 
   get isInAnyChallenge() {
-    return this.isInAntimatterChallenge || EternityChallenge.isRunning || SpaceChallenge.isRunning;
+    return this.isInAntimatterChallenge || EternityChallenges.isRunning || SpaceChallenge.isRunning;
   },
 
   get anyChallenge() {
-    return this.antimatterChallenge || EternityChallenge.current || SpaceChallenge.current;
+    return this.antimatterChallenge || EternityChallenges.current || SpaceChallenge.current;
   },
 
   get spaceChallenge() {
@@ -1142,7 +1146,7 @@ export const Player = {
   },
 
   get eternityGoal() {
-    return EternityChallenge.isRunning ? EternityChallenge.current.currentGoal : requiredIPForEP(1);
+    return EternityChallenges.isRunning ? EternityChallenges.current.currentGoal : requiredIPForEP(1);
   },
 
   get automatorUnlocked() {

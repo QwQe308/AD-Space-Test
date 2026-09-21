@@ -65,7 +65,7 @@ class InfinityChallengeState extends GameMechanicState {
     player.challenge.infinity.current = this.id;
     if (!Enslaved.isRunning && !isSCRunningOnTierOrHigher(6, 1)) Tab.dimensions.antimatter.show();
     player.break = true;
-    if (EternityChallenge.isRunning) Achievement(115).unlock();
+    if (EternityChallenges.isRunning) Achievement(115).unlock();
   }
 
   get isCompleted() {

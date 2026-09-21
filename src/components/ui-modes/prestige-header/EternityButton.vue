@@ -136,7 +136,7 @@ export default {
         return;
       }
 
-      if (EternityChallenge.isRunning) {
+      if (EternityChallenges.isRunning) {
         if (!Perk.studyECBulk.isBought) {
           this.type = EP_BUTTON_DISPLAY_TYPE.CHALLENGE;
           return;
@@ -172,7 +172,7 @@ export default {
       this.creditsClosed = GameEnd.creditsEverClosed;
     },
     updateChallengeWithRUPG() {
-      const ec = EternityChallenge.current;
+      const ec = EternityChallenges.current;
       this.fullyCompleted = ec.isFullyCompleted;
       if (this.fullyCompleted) return;
       const status = ec.gainedCompletionStatus;

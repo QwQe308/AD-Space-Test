@@ -17,8 +17,8 @@ function giveEternityRewards(auto) {
 
   Currency.eternities.add(newEternities);
 
-  if (EternityChallenge.isRunning) {
-    const challenge = EternityChallenge.current;
+  if (EternityChallenges.isRunning) {
+    const challenge = EternityChallenges.current;
     challenge.addCompletion(false);
     if (Perk.studyECBulk.isBought) {
       let completionCount = 0;
@@ -29,7 +29,7 @@ function giveEternityRewards(auto) {
       AutomatorData.lastECCompletionCount = completionCount;
       if (Enslaved.isRunning && completionCount > 5) EnslavedProgress.ec1.giveProgress();
     }
-    player.challenge.eternity.requirementBits &= ~(1 << challenge.id);
+    challenge.clearRequirement();
     respecTimeStudies(auto);
   }
 
@@ -110,6 +110,7 @@ export function eternity(force, auto, specialConditions = {}) {
   // This needs to be after the dilation check for the "can gain TP" check in rewardTP to be correct.
   if (force) {
     player.challenge.eternity.current = 0;
+    player.challenge.eternity.currentType = "normal";
   }
 
   initializeChallengeCompletions();
@@ -121,6 +122,7 @@ export function eternity(force, auto, specialConditions = {}) {
   }
 
   player.challenge.eternity.current = 0;
+  player.challenge.eternity.currentType = "normal";
   if (!specialConditions.enteringEC && !Pelle.isDoomed) {
     player.dilation.active = false;
   }

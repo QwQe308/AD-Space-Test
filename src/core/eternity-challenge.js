@@ -35,15 +35,26 @@ class EternityChallengeRewardState extends GameMechanicState {
   }
 
   get isEffectActive() {
-    return this._challenge.completions > 0;
+    return this._challenge.isAvailable && this._challenge.completions > 0;
   }
 }
 
 export class EternityChallengeState extends GameMechanicState {
-  constructor(config) {
+  constructor(config, isAbyss = false) {
     super(config);
-    this._fullId = `eterc${this.id}`;
+    this._isAbyss = isAbyss;
+    this._fullId = `${isAbyss ? "abyssE" : "e"}terc${this.id}`;
     this._reward = new EternityChallengeRewardState(config.reward, this);
+  }
+
+  get type() {
+    return this._isAbyss ? "abyss" : "normal";
+  }
+
+  get isAvailable() {
+    if (this.id !== 5) return !this._isAbyss;
+    const useAbyss = !player.options.breakPlaceHolder && Boolean(TimeStudy(111).isBought);
+    return this._isAbyss === useAbyss;
   }
 
   get fullId() {
@@ -51,11 +62,13 @@ export class EternityChallengeState extends GameMechanicState {
   }
 
   get isUnlocked() {
-    return player.challenge.eternity.unlocked === this.id;
+    return this.isAvailable && player.challenge.eternity.unlocked === this.id &&
+      (player.challenge.eternity.unlockedType ?? "normal") === this.type;
   }
 
   get isRunning() {
-    return player.challenge.eternity.current === this.id;
+    return this.isAvailable && player.challenge.eternity.current === this.id &&
+      (player.challenge.eternity.currentType ?? "normal") === this.type;
   }
 
   get isEffectActive() {
@@ -63,11 +76,43 @@ export class EternityChallengeState extends GameMechanicState {
   }
 
   get hasUnlocked() {
-    return (player.reality.unlockedEC & (1 << this.id)) !== 0;
+    const unlocked = this._isAbyss ? player.reality.unlockedAbyssEC ?? 0 : player.reality.unlockedEC;
+    return this.isAvailable && (unlocked & (1 << this.id)) !== 0;
   }
 
   set hasUnlocked(value) {
-    if (value) player.reality.unlockedEC |= (1 << this.id);
+    if (!value) return;
+    if (this._isAbyss) player.reality.unlockedAbyssEC = (player.reality.unlockedAbyssEC ?? 0) | (1 << this.id);
+    else player.reality.unlockedEC |= (1 << this.id);
+  }
+
+  unlock() {
+    player.challenge.eternity.unlocked = this.id;
+    player.challenge.eternity.unlockedType = this.type;
+  }
+
+  get wasRequirementPreviouslyMet() {
+    const bits = this._isAbyss
+      ? player.challenge.eternity.abyssRequirementBits ?? 0
+      : player.challenge.eternity.requirementBits;
+    return (bits & (1 << this.id)) !== 0;
+  }
+
+  markRequirementMet() {
+    if (this._isAbyss) {
+      player.challenge.eternity.abyssRequirementBits =
+        (player.challenge.eternity.abyssRequirementBits ?? 0) | (1 << this.id);
+    } else {
+      player.challenge.eternity.requirementBits |= 1 << this.id;
+    }
+  }
+
+  clearRequirement() {
+    if (this._isAbyss) {
+      player.challenge.eternity.abyssRequirementBits &= ~(1 << this.id);
+    } else {
+      player.challenge.eternity.requirementBits &= ~(1 << this.id);
+    }
   }
 
   get completions() {
@@ -190,7 +235,7 @@ export class EternityChallengeState extends GameMechanicState {
   }
 
   start(auto) {
-    if (EternityChallenge.isRunning) return false;
+    if (EternityChallenges.isRunning) return false;
     if (!this.isUnlocked) return false;
     const maxInversion = player.requirementChecks.reality.slowestBH.lte(1e-300);
     if (this.id === 12 && ImaginaryUpgrade(24).isLockingMechanics && Ra.isRunning && maxInversion) {
@@ -208,6 +253,7 @@ export class EternityChallengeState extends GameMechanicState {
     const enteringGamespeed = getGameSpeedupFactor();
     if (Player.canEternity) eternity(false, auto, { enteringEC: true });
     player.challenge.eternity.current = this.id;
+    player.challenge.eternity.currentType = this.type;
     if (this.id === 12) {
       if (enteringGamespeed.lt(1e-3)) SecretAchievement(42).unlock();
       player.requirementChecks.reality.slowestBH = DC.D1;
@@ -241,6 +287,7 @@ export class EternityChallengeState extends GameMechanicState {
       Player.antimatterChallenge.exit();
     }
     player.challenge.eternity.current = 0;
+    player.challenge.eternity.currentType = "normal";
     if (!isRestarting) player.respec = true;
     eternity(true);
   }
@@ -287,25 +334,60 @@ export class EternityChallengeState extends GameMechanicState {
  * @return {EternityChallengeState}
  */
 export const EternityChallenge = EternityChallengeState.createAccessor(GameDatabase.challenges.eternity);
+const abyssEternityChallengeIndex = mapGameData(
+  GameDatabase.challenges.abyssEternity,
+  config => new EternityChallengeState(config, true)
+);
+export const AbyssEternityChallenge = id => abyssEternityChallengeIndex[id];
+AbyssEternityChallenge.index = abyssEternityChallengeIndex;
+
+function currentChallenge(accessor) {
+  if (player.challenge.eternity.current === 0) return undefined;
+  const challenge = accessor(player.challenge.eternity.current);
+  return challenge?.isRunning ? challenge : undefined;
+}
 
 /**
  * @returns {EternityChallengeState}
  */
 Object.defineProperty(EternityChallenge, "current", {
-  get: () => (player.challenge.eternity.current > 0
-    ? EternityChallenge(player.challenge.eternity.current)
-    : undefined),
+  get: () => currentChallenge(EternityChallenge),
 });
 
 Object.defineProperty(EternityChallenge, "isRunning", {
-  get: () => player.challenge.eternity.current !== 0,
+  get: () => EternityChallenge.current !== undefined,
+});
+
+Object.defineProperty(AbyssEternityChallenge, "current", {
+  get: () => currentChallenge(AbyssEternityChallenge),
+});
+
+Object.defineProperty(AbyssEternityChallenge, "isRunning", {
+  get: () => AbyssEternityChallenge.current !== undefined,
 });
 
 export const EternityChallenges = {
+  forStudy(id) {
+    const abyssChallenge = AbyssEternityChallenge(id);
+    return abyssChallenge?.isAvailable ? abyssChallenge : EternityChallenge(id);
+  },
+
+  get current() {
+    return AbyssEternityChallenge.current ?? EternityChallenge.current;
+  },
+
+  get isRunning() {
+    return this.current !== undefined;
+  },
+
   /**
    * @type {EternityChallengeState[]}
    */
-  all: EternityChallenge.index.compact(),
+  get all() {
+    return EternityChallenge.index.map(challenge => (challenge
+      ? this.forStudy(challenge.id)
+      : challenge)).compact();
+  },
 
   get completions() {
     return EternityChallenges.all

@@ -50,7 +50,7 @@ export default {
         {
           name: token => `Eternity Challenge ${token}`,
           isActive: token => token > 0,
-          activityToken: () => player.challenge.eternity.current,
+          activityToken: () => EternityChallenges.current?.id ?? 0,
         },
         {
           name: () =>
@@ -90,8 +90,9 @@ export default {
           }
           names.push(`${part.name(token)} ${completionText}`);
         } else if (part.name(token).includes("Eternity Challenge")) {
-          const currEC = player.challenge.eternity.current;
-          const nextCompletion = EternityChallenge(currEC).completions + 1;
+          const ec = EternityChallenges.current;
+          const currEC = ec.id;
+          const nextCompletion = ec.completions + 1;
           let completionText = "";
           if (Enslaved.isRunning && currEC === 1) {
             completionText = `(${formatInt(nextCompletion)}/???)`;

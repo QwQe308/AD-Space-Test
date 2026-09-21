@@ -187,8 +187,11 @@ export async function abyssAnimation() {
   player.totalTickGained = DC.D0;
   player.eternityChalls = {};
   player.challenge.eternity.current = 0;
+  player.challenge.eternity.currentType = "normal";
   player.challenge.eternity.unlocked = 0;
+  player.challenge.eternity.unlockedType = "normal";
   player.challenge.eternity.requirementBits = 0;
+  player.challenge.eternity.abyssRequirementBits = 0;
   SpaceResearchTierDetail[4].forEach(x => SpaceResearchRifts[x].reset());
   eternity(true, true);
   player.eternityPoints = new Decimal(0);

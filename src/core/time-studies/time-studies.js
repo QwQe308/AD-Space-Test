@@ -151,10 +151,12 @@ export function respecTimeStudies(auto) {
   player.timestudy.studies = hasTS111 ? [111] : [];
   GameCache.timeStudies.invalidate();
   player.celestials.v.STSpent = 0;
-  const ecStudy = TimeStudy.eternityChallenge.current();
-  if (ecStudy !== undefined) {
+  const unlockedEC = player.challenge.eternity.unlocked;
+  if (unlockedEC !== 0) {
+    const ecStudy = TimeStudy.eternityChallenge(unlockedEC);
     refund = refund.add(ecStudy.cost);
     player.challenge.eternity.unlocked = 0;
+    player.challenge.eternity.unlockedType = "normal";
   }
   Currency.timeTheorems.add(refund);
   if (!auto) {

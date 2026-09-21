@@ -658,10 +658,16 @@ export function finishProcessReality(realityProps) {
   player.totalTickGained = DC.D0;
   if (!PelleUpgrade.keepEternityChallenges.canBeApplied) player.eternityChalls = {};
   player.reality.unlockedEC = 0;
+  player.reality.unlockedAbyssEC = 0;
   player.reality.lastAutoEC = DC.D0;
   player.challenge.eternity.current = 0;
-  if (!PelleUpgrade.timeStudiesNoReset.canBeApplied) player.challenge.eternity.unlocked = 0;
+  player.challenge.eternity.currentType = "normal";
+  if (!PelleUpgrade.timeStudiesNoReset.canBeApplied) {
+    player.challenge.eternity.unlocked = 0;
+    player.challenge.eternity.unlockedType = "normal";
+  }
   player.challenge.eternity.requirementBits = 0;
+  player.challenge.eternity.abyssRequirementBits = 0;
   player.respec = false;
   player.eterc8ids = 50;
   player.eterc8repl = 40;

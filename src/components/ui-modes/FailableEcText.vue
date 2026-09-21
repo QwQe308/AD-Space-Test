@@ -40,15 +40,15 @@ export default {
   },
   methods: {
     update() {
-      if (EternityChallenge.current && [4, 12].includes(EternityChallenge.current.id)) {
-        this.currentEternityChallengeId = EternityChallenge.current.id;
+      if (EternityChallenges.current && [4, 12].includes(EternityChallenges.current.id)) {
+        this.currentEternityChallengeId = EternityChallenges.current.id;
         if (this.currentEternityChallengeId === 4) {
           this.currentResource.copyFrom(Currency.infinities);
         } else {
           this.currentResource = new Decimal(Time.thisEternity.totalSeconds);
         }
-        this.maximumResource = new Decimal(EternityChallenge.current.config.restriction(
-          EternityChallenge.current.completions));
+        this.maximumResource = new Decimal(EternityChallenges.current.config.restriction(
+          EternityChallenges.current.completions));
       }
     },
   },

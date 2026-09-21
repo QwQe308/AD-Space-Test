@@ -191,7 +191,8 @@ export const Tickspeed = {
 
   get continuumValue() {
     if (!this.isUnlocked) return DC.D0;
-    const contVal = this.costScale.getContinuumValue(Currency.antimatter.value, DC.D1);
+    const antimatter = AbyssEternityChallenge(5).isRunning ? DC.E1 : Currency.antimatter.value;
+    const contVal = this.costScale.getContinuumValue(antimatter, DC.D1);
     return contVal ? contVal.times(Laitela.matterExtraPurchaseFactor) : DC.D0;
   },
 
@@ -224,7 +225,9 @@ export const FreeTickspeed = {
   GROWTH_RATE: new Decimal(6e-6).add(1),
   GROWTH_EXP: DC.D2,
   tickmult: () =>
-    DC.D1.add(Effects.min(1.25, TimeStudy(171)).sub(1)).mul(Decimal.max(getAdjustedGlyphEffect("cursedtickspeed"), 1)),
+    DC.D1.add(Effects.min(1.25, TimeStudy(171)).sub(1))
+      .plusEffectsOf(AbyssEternityChallenge(5).reward)
+      .mul(Decimal.max(getAdjustedGlyphEffect("cursedtickspeed"), 1)),
 
   get amount() {
     return player.totalTickGained.add(this.extraAmount);

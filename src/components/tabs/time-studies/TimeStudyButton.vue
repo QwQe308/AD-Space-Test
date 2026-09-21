@@ -157,13 +157,13 @@ export default {
       this.isUseless = Pelle.uselessTimeStudies.includes(this.study.id) && Pelle.isDoomed;
       this.isBought = study.isBought;
       this.eternityChallengeRunning = study.type === TIME_STUDY_TYPE.ETERNITY_CHALLENGE &&
-        EternityChallenge.current?.id === study.id;
+        EternityChallenges.current === study.challenge;
       if (!this.isBought) {
         this.isAvailableForPurchase = study.canBeBought && study.isAffordable;
       }
       this.STCost = this.study.STCost;
       this.isCompleteEC = this.study.type === TIME_STUDY_TYPE.ETERNITY_CHALLENGE &&
-        EternityChallenge(this.study.id).remainingCompletions === 0;
+        this.study.challenge.remainingCompletions === 0;
     },
     handleClick() {
       if (this.specialClick === null || !this.study.isBought) this.study.purchase();

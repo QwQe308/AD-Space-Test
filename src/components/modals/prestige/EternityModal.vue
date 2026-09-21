@@ -33,7 +33,7 @@ export default {
         : ``;
     },
     eternityChallenge() {
-      const ec = EternityChallenge.current;
+      const ec = EternityChallenges.current;
       if (ec.isFullyCompleted) {
         return `Eternity Challenge ${ec.id} is already fully completed.`;
       }
@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     update() {
-      this.exitingEC = EternityChallenge.isRunning;
+      this.exitingEC = EternityChallenges.isRunning;
       this.startingIP = Currency.infinityPoints.startingValue;
       this.gainedEternityPoints = gainedEternityPoints();
       this.gainedEternities = gainedEternities();

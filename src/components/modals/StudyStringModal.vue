@@ -78,7 +78,7 @@ export default {
       //   one which is being imported, and the tree object will contain a different EC if we already have one
       const stringEC = TimeStudyTree.getECFromString(this.truncatedInput);
       const hasExclamationPoint = combinedTree.startEC;
-      const canUnlockEC = [0, stringEC].includes(player.challenge.eternity.current);
+      const canUnlockEC = [0, stringEC].includes(EternityChallenges.current?.id ?? 0);
       const hasECMismatch = combinedTree.ec !== stringEC;
       return {
         timeTheorems: combinedTree.spentTheorems[0].sub(currentStudyTree.spentTheorems[0]),

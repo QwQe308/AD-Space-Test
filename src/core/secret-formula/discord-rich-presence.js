@@ -95,9 +95,9 @@ export const discordRichPresence = {
       name: token => `EC ${token}`,
       // This results in "EC 3x3" (for example) when there are remaining completions, and just "EC 3" if not
       activityToken: () => {
-        if (!player.challenge.eternity.current) return false;
-        const num = player.challenge.eternity.current;
-        const ec = EternityChallenge(num);
+        const ec = EternityChallenges.current;
+        if (!ec) return false;
+        const num = ec.id;
         return ec.remainingCompletions ? `${num}x${ec.completions + 1}` : num;
       },
       resource: () => `${format(player.infinityPoints, 2)} IP`,

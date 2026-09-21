@@ -229,7 +229,7 @@ export const tabs = [
         component: "eternity-challenges-tab",
         condition: () =>
           PlayerProgress.realityUnlocked() ||
-          player.challenge.eternity.unlocked !== 0 ||
+          TimeStudy.eternityChallenge.current() !== undefined ||
           EternityChallenges.all.some(ec => ec.completions > 0),
         id: 2,
         hidable: true,

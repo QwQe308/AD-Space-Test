@@ -16,6 +16,7 @@ global.player = { options: { multiplierTab: { replacePowers: false, showAltGroup
 global.InfinityChallenge = () => ({ isCompleted: true });
 global.NormalChallenge = () => ({ isRunning: false });
 global.PlayerProgress = { eternityUnlocked: () => true };
+global.AbyssEternityChallenge = () => ({ isRunning: false });
 global.format = value => String(value);
 global.formatX = value => `x${value}`;
 global.formatPow = value => `^${value}`;
@@ -1143,7 +1144,7 @@ test("AD snapshot shares Continuum across entries and reads current currency out
     "AntimatterDimensionState", "AntimatterDimension");
   const { memoizeBreakdown } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/cache.js"));
   const originals = new Map(["EternityMilestone", "Laitela", "Enslaved", "Currency", "NormalChallenge",
-    "EternityChallenge", "isSCRunningOnTier"].map(key => [key, global[key]]));
+    "EternityChallenge", "AbyssEternityChallenge", "isSCRunningOnTier"].map(key => [key, global[key]]));
   t.after(() => {
     for (const [key, value] of originals) global[key] = value;
   });
@@ -1153,6 +1154,8 @@ test("AD snapshot shares Continuum across entries and reads current currency out
   global.Currency = { antimatter: { value: new Decimal("1e1000") } };
   global.NormalChallenge = () => ({ isRunning: false });
   global.EternityChallenge = () => ({ isRunning: false });
+  let abyssEC5 = false;
+  global.AbyssEternityChallenge = () => ({ get isRunning() { return abyssEC5; } });
   global.isSCRunningOnTier = () => false;
   let continuumReads = 0;
   const dim = Object.create(State.prototype);
@@ -1178,6 +1181,9 @@ test("AD snapshot shares Continuum across entries and reads current currency out
   assert.ok(first()[1].eq(20000));
   assert.ok(second().eq(2000));
   assert.equal(continuumReads, 3);
+  abyssEC5 = true;
+  assert.ok(dim.continuumValue.eq(1));
+  assert.equal(continuumReads, 4);
 });
 
 test("Future Empower breakdown follows slowdown, EP, and additive ISU Power without double counting", () => {

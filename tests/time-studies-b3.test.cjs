@@ -31,6 +31,7 @@ function load(relative) {
   modules.set(filename, loaded);
   loaded.require = name => {
     if (name.startsWith("@/components") || name === "./TimeStudyButton") return {};
+    if (name === "@/utility/deepmerge") return load("utility/deepmerge.js");
     if (!name.startsWith(".")) return require(name);
     const resolved = path.resolve(path.dirname(filename), name).replace(/\.js$/, "");
     if (resolved === path.join(root, "env")) return { DEV: false };
@@ -65,6 +66,10 @@ global.GameDatabase = { eternity: { timeStudies: {
   ec: load("core/secret-formula/eternity/time-studies/ec-time-studies.js").ecTimeStudies,
   dilation: load("core/secret-formula/eternity/time-studies/dilation-time-studies.js").dilationTimeStudies,
 } } };
+GameDatabase.challenges = {
+  eternity: load("core/secret-formula/challenges/eternity-challenges.js").eternityChallenges,
+  abyssEternity: load("core/secret-formula/challenges/eternity-challenges-abyss.js").abyssEternityChallenges,
+};
 const { TimeStudy, NormalTimeStudyState, NormalTimeStudies } = load("core/time-studies/normal-time-study.js");
 Object.assign(global, { TimeStudy, NormalTimeStudyState, NormalTimeStudies });
 Object.assign(global, load("core/time-studies/ec-time-study.js"));
@@ -77,6 +82,12 @@ global.TimeTheoremPurchaseType = TimeTheoremPurchaseType;
 const { respecTimeStudies, buyStudiesUntil } = load("core/time-studies/time-studies.js");
 global.buyStudiesUntil = buyStudiesUntil;
 global.respecTimeStudies = respecTimeStudies;
+const {
+  AbyssEternityChallenge: configuredAbyssEternityChallenge,
+  EternityChallenge: configuredEternityChallenge,
+  EternityChallenges: configuredEternityChallenges,
+} = load("core/eternity-challenge.js");
+global.EternityChallenges = configuredEternityChallenges;
 const depth1 = load("core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js").AbyssResearchesDepth1;
 const { B3 } = depth1;
 GameDatabase.space = { abyssResearches: depth1 };
@@ -98,7 +109,16 @@ beforeEach(() => {
     }])),
     abyssResearchTooltipsShown: new Set(),
     options: { breakPlaceHolder: false, testServer: true },
-    challenge: { eternity: { unlocked: 0, current: 0 } },
+    challenge: { eternity: {
+      unlocked: 0,
+      unlockedType: "normal",
+      current: 0,
+      currentType: "normal",
+      requirementBits: 0,
+      abyssRequirementBits: 0,
+    } },
+    eternityChalls: {},
+    reality: { unlockedEC: 0, unlockedAbyssEC: 0 },
     celestials: { v: { STSpent: 0 }, enslaved: { hasSecretStudy: false } },
     dilation: { studies: [] },
     requirementChecks: { reality: { maxStudies: 0 } },
@@ -165,6 +185,63 @@ test("B3 only makes normal studies through 111 free and refreshes displayed pric
   assert.equal(TimeStudy(11).purchase(), true);
   assert.ok(Currency.timeTheorems.value.eq(0));
   assert.equal(TimeStudy(11).purchase(), false);
+});
+
+test("normal and Abyss EC5 keep independent unlocks, runs, completions, and rewards", () => {
+  const normal = configuredEternityChallenge(5);
+  const abyss = configuredAbyssEternityChallenge(5);
+  const normalDescription = normal.config.description();
+  assert.match(normalDescription, /Galaxy cost increase/u);
+  assert.equal(Boolean(TimeStudy(111).isBought), false);
+  assert.equal(normal.isAvailable, true);
+  normal.unlock();
+  normal.hasUnlocked = true;
+  normal.markRequirementMet();
+  normal.completions = 3;
+  player.challenge.eternity.current = 5;
+  assert.equal(normal.isUnlocked, true);
+  assert.equal(normal.isRunning, true);
+  assert.equal(normal.reward.canBeApplied, true);
+  assert.equal(abyss.completions, 0);
+
+  player.timestudy.studies.push(111);
+  assert.equal(normal.isAvailable, false);
+  assert.equal(normal.isUnlocked, false);
+  assert.equal(normal.isRunning, false);
+  assert.equal(normal.reward.canBeApplied, false);
+  assert.equal(abyss.isAvailable, true);
+  assert.equal(abyss.isUnlocked, false);
+  assert.equal(abyss.isRunning, false);
+  assert.equal(configuredEternityChallenges.current, undefined);
+  assert.match(abyss.config.description(), /continuum works as if you have only 10 AM/u);
+  assert.equal(abyss, configuredEternityChallenges.all.find(challenge => challenge.id === 5));
+
+  abyss.unlock();
+  abyss.hasUnlocked = true;
+  abyss.markRequirementMet();
+  abyss.completions = 2;
+  player.challenge.eternity.currentType = "abyss";
+  assert.equal(abyss.isUnlocked, true);
+  assert.equal(abyss.isRunning, true);
+  assert.equal(abyss.reward.canBeApplied, true);
+  assert.equal(configuredEternityChallenges.current, abyss);
+  assert.equal(normal.completions, 3);
+  assert.equal(abyss.completions, 2);
+  assert.equal(player.eternityChalls.eterc5, 3);
+  assert.equal(player.eternityChalls.abyssEterc5, 2);
+  assert.equal(player.reality.unlockedEC, 1 << 5);
+  assert.equal(player.reality.unlockedAbyssEC, 1 << 5);
+  assert.equal(player.challenge.eternity.requirementBits, 1 << 5);
+  assert.equal(player.challenge.eternity.abyssRequirementBits, 1 << 5);
+  normal.clearRequirement();
+  player.reality.unlockedEC = 0;
+  assert.equal(abyss.hasUnlocked, true);
+  assert.equal(abyss.wasRequirementPreviouslyMet, true);
+
+  player.options.breakPlaceHolder = true;
+  assert.equal(configuredEternityChallenges.forStudy(5), normal);
+  assert.equal(normal.config.description(), normalDescription);
+  assert.equal(abyss.isRunning, false);
 });
 
 test("B3 makes EC5 free while preserving its requirements and zero-cost refund", () => {

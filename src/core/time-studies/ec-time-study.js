@@ -10,7 +10,7 @@ export class ECTimeStudyState extends TimeStudyState {
   }
 
   get isBought() {
-    return player.challenge.eternity.unlocked === this.id;
+    return this.challenge.isUnlocked;
   }
 
   get cost() {
@@ -19,15 +19,16 @@ export class ECTimeStudyState extends TimeStudyState {
 
   purchase(auto) {
     if (GameEnd.creditsEverClosed) return false;
-    EternityChallenge(this.id).hasUnlocked = true;
+    const challenge = this.challenge;
+    challenge.hasUnlocked = true;
     const clickTime = Date.now();
 
-    if (this.isBought && player.challenge.eternity.current === 0 && !auto) {
+    if (this.isBought && !EternityChallenges.isRunning && !auto) {
       // If it is bought and you aren't in a Eternity Challenge, check
       if (clickTime - ui.lastClickTime < 750) {
         // If you last clicked on it within 3/4ths of a second, enter them in or ask confirmation if they have that on
         ui.lastClickTime = 0;
-        EternityChallenge(this.id).requestStart();
+        challenge.requestStart();
       } else {
         // Otherwise, record it for the next time they click
         ui.lastClickTime = clickTime;
@@ -37,11 +38,11 @@ export class ECTimeStudyState extends TimeStudyState {
       // send you into the EC, deduct your resources, and move you to the EC tab if that isn't disabled
       ui.lastClickTime = 0;
 
-      player.challenge.eternity.unlocked = this.id;
+      challenge.unlock();
       if (!auto) {
         Tab.challenges.eternity.show();
       }
-      player.challenge.eternity.requirementBits |= 1 << this.id;
+      challenge.markRequirementMet();
       Currency.timeTheorems.subtract(this.cost);
       TimeStudyTree.commitToGameState([TimeStudy.eternityChallenge(this.id)]);
       return true;
@@ -75,7 +76,7 @@ export class ECTimeStudyState extends TimeStudyState {
     if (!this.isAffordable) {
       return false;
     }
-    if (player.challenge.eternity.unlocked !== 0) {
+    if (TimeStudy.eternityChallenge.current() !== undefined) {
       return false;
     }
     if (!this.config.requirement.some(s => TimeStudy(s).isBought)) {
@@ -88,7 +89,7 @@ export class ECTimeStudyState extends TimeStudyState {
    * @returns {EternityChallengeState}
    */
   get challenge() {
-    return EternityChallenge(this.id);
+    return EternityChallenges.forStudy(this.id);
   }
 
   get requirementTotal() {
@@ -125,7 +126,7 @@ export class ECTimeStudyState extends TimeStudyState {
 
   get wasRequirementPreviouslyMet() {
     if (this.id === 11 || this.id === 12) return false;
-    return (player.challenge.eternity.requirementBits & (1 << this.id)) !== 0;
+    return this.challenge.wasRequirementPreviouslyMet;
   }
 
   invalidateRequirement() {
@@ -150,9 +151,9 @@ TimeStudy.eternityChallenge = function(id) {
  * @returns {ECTimeStudyState|undefined}
  */
 TimeStudy.eternityChallenge.current = function() {
-  return player.challenge.eternity.unlocked
-    ? TimeStudy.eternityChallenge(player.challenge.eternity.unlocked)
-    : undefined;
+  if (!player.challenge.eternity.unlocked) return undefined;
+  const study = TimeStudy.eternityChallenge(player.challenge.eternity.unlocked);
+  return study.isBought ? study : undefined;
 };
 
 ECTimeStudyState.invalidateCachedRequirements = function() {

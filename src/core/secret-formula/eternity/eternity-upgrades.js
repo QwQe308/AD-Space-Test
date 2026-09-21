@@ -41,7 +41,7 @@ export const eternityUpgrades = {
   ISMultEternities: {
     id: 4,
     cost: 1e16,
-    description: "Your Eternities boosts Infinities (x/100+1)",
+    description: "Eternities boosts Infinities (x/100+1)",
     effect: () => Currency.eternities.value.div(100).add(1),
     formatEffect: value => formatX(value, 2, 1)
   },

@@ -68,7 +68,8 @@ export class TimeStudyTree {
   static get currentStudies() {
     const currentStudies = player.timestudy.studies.map(s => TimeStudy(s));
     if (player.challenge.eternity.unlocked !== 0) {
-      currentStudies.push(TimeStudy.eternityChallenge(player.challenge.eternity.unlocked));
+      const ecStudy = TimeStudy.eternityChallenge(player.challenge.eternity.unlocked);
+      if (ecStudy.isBought) currentStudies.push(ecStudy);
     }
     return currentStudies;
   }
@@ -90,7 +91,7 @@ export class TimeStudyTree {
       const study = typeof item === "number" ? TimeStudy(item) : item;
       if (study && !study.isBought) study.purchase(auto);
       // Note: This will automatically (silently) fail if we try to start an EC while we have a different one unlocked
-      if (startEC && study instanceof ECTimeStudyState) EternityChallenge(study.id).start(auto);
+      if (startEC && study instanceof ECTimeStudyState) study.challenge.start(auto);
     }
     GameCache.currentStudyTree.invalidate();
   }
@@ -326,6 +327,6 @@ export class TimeStudyTree {
     return `${this.purchasedStudies
       .filter(s => s instanceof NormalTimeStudyState)
       .map(s => s.id)
-      .join(",")}|${this.ec}${player.challenge.eternity.current === 0 ? "" : "!"}`;
+      .join(",")}|${this.ec}${EternityChallenges.isRunning ? "!" : ""}`;
   }
 }
