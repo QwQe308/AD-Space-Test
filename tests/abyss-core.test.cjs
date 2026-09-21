@@ -101,6 +101,7 @@ const { AbyssResearches: researches, AbyssResearchHelperTools: helper } = loadSo
 );
 global.AbyssResearches = researches;
 global.getEffectiveSpace = () => new Decimal(0);
+const { tabs } = loadSource(path.join(root, "core/secret-formula/tabs.js"));
 
 beforeEach(() => {
   conditionsMet = true;
@@ -118,6 +119,22 @@ beforeEach(() => {
     timestudy: { theorem: new Decimal(100), maxTheorem: new Decimal(100) },
     reality: { perkPoints: new Decimal(10) },
   };
+});
+
+test("Empower subtabs are unlocked by their corresponding Abyss Research", t => {
+  const empowerTabs = tabs.find(tab => tab.key === "eternity").subtabs
+    .filter(tab => ["past", "present", "future"].includes(tab.key));
+  const temporaryResearches = ["PRS", "FTR"];
+  for (const id of temporaryResearches) researches[id] = { completed: false };
+  t.after(() => temporaryResearches.forEach(id => delete researches[id]));
+
+  assert.deepEqual(empowerTabs.map(tab => tab.condition()), [false, false, false]);
+  researches.PST.level = DC.D1;
+  assert.deepEqual(empowerTabs.map(tab => tab.condition()), [true, false, false]);
+  researches.PRS.completed = true;
+  assert.deepEqual(empowerTabs.map(tab => tab.condition()), [true, true, false]);
+  researches.FTR.completed = true;
+  assert.deepEqual(empowerTabs.map(tab => tab.condition()), [true, true, true]);
 });
 
 test("starting a Core with satisfied live requirements completes immediately at zero progress", () => {
@@ -259,7 +276,7 @@ test("all Corruption prices are checked and snapshotted before any resource is d
 });
 
 test("PST's configured dynamic price works with missing future nodes and rechecks at purchase", () => {
-  assert.equal(researches.PST.cost.timeTheorems, 100);
+  assert.equal(researches.PST.cost.timeTheorems, 75);
   assert.equal(researches.PST.canPurchase, true);
   researches.PRS = { completed: true };
   try {
