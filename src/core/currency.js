@@ -424,19 +424,15 @@ Currency.timeTheorems = new class extends DecimalCurrency {
   get value() { return player.timestudy.theorem; }
   set value(value) {
     player.timestudy.theorem = value;
-    player.timestudy.maxTheorem = value.plus(TimeTheorems.calculateTimeStudiesCost());
+    player.timestudy.maxTheorem = TimeTheorems.total();
   }
 
-  get max() { return player.timestudy.maxTheorem; }
-
-  add(amount) {
-    super.add(amount);
-    player.timestudy.maxTheorem = player.timestudy.maxTheorem.plus(amount);
-  }
+  get max() { return TimeTheorems.total(); }
 
   reset() {
     respecTimeStudies(true);
     player.timestudy.studies = [];
+    player.timestudy.corruptionTTSpent = DC.D0;
     super.reset();
     TimeTheoremPurchaseType.am.reset();
     TimeTheoremPurchaseType.ip.reset();

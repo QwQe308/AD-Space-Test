@@ -131,6 +131,13 @@ const baseConfig = {
       You can select one additional Dimension path.`;
     },
     onLevelUp() {
+      // This hook runs before B3's level changes, so cost still contains the amount paid.
+      let refund = TimeStudy.boughtNormalTS()
+        .filter(study => study.id <= 111)
+        .reduce((total, study) => total.add(study.cost), DC.D0);
+      const ec = TimeStudy.eternityChallenge.current();
+      if (ec?.id === 5) refund = refund.add(ec.cost);
+      Currency.timeTheorems.add(refund);
       GameCache.currentStudyTree.invalidate();
     },
     next: ["PST", "PRS", "FTR"],

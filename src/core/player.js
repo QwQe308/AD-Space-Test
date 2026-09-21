@@ -531,6 +531,7 @@ window.player = {
   timestudy: {
     theorem: DC.D0,
     maxTheorem: DC.D0,
+    corruptionTTSpent: DC.D0,
     amBought: DC.D0,
     ipBought: DC.D0,
     epBought: DC.D0,

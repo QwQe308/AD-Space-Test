@@ -20,13 +20,7 @@ global.mapGameData = (data, create) => {
   for (const config of data) result[config.id] = create(config);
   return result;
 };
-const Currency = { timeTheorems: {
-  get value() { return player.timestudy.theorem; },
-  gte(cost) { return this.value.gte(cost); },
-  subtract(cost) { player.timestudy.theorem = this.value.sub(cost); },
-  add(cost) { player.timestudy.theorem = this.value.add(cost); },
-} };
-global.Currency = Currency;
+let Currency;
 
 const root = path.resolve(__dirname, "../src");
 const modules = new Map();
@@ -42,6 +36,7 @@ function load(relative) {
     if (resolved === path.join(root, "env")) return { DEV: false };
     if (resolved === path.join(root, "core/currency")) return { Currency };
     if (resolved === path.join(root, "core/game-mechanics")) return load("core/game-mechanics/game-mechanic.js");
+    if (resolved === path.join(root, "core/utils")) return load("core/game-mechanics/game-mechanic.js");
     if (resolved.endsWith(path.join("infinity", "infinity-upgrades"))) return { dimInfinityMult: () => new Decimal(1) };
     return load(path.relative(root, `${resolved}.js`));
   };
@@ -55,6 +50,8 @@ function load(relative) {
 }
 load("core/constants.js");
 load("core/extensions.js");
+Currency = load("core/currency.js").Currency;
+global.Currency = Currency;
 const originalInterval = global.setInterval;
 let normal;
 try {
@@ -74,18 +71,32 @@ Object.assign(global, load("core/time-studies/ec-time-study.js"));
 load("core/time-studies/dilation-time-study.js");
 const { TimeStudyTree } = load("core/time-studies/time-study-tree.js");
 global.TimeStudyTree = TimeStudyTree;
-const { TimeTheorems } = load("core/time-theorems.js");
+const { TimeTheorems, TimeTheoremPurchaseType } = load("core/time-theorems.js");
 global.TimeTheorems = TimeTheorems;
+global.TimeTheoremPurchaseType = TimeTheoremPurchaseType;
 const { respecTimeStudies, buyStudiesUntil } = load("core/time-studies/time-studies.js");
 global.buyStudiesUntil = buyStudiesUntil;
-const { B3 } = load("core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js").AbyssResearchesDepth1;
+global.respecTimeStudies = respecTimeStudies;
+const depth1 = load("core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js").AbyssResearchesDepth1;
+const { B3 } = depth1;
+GameDatabase.space = { abyssResearches: depth1 };
+global.mapGameDataToObject = (configs, create) => {
+  const states = Object.fromEntries(Object.entries(configs).map(([id, config]) => [id, create(config)]));
+  return { ...states, all: Object.values(states) };
+};
+const researches = load("core/_MOD/abyss/abyss-researches/abyssResearch.js").AbyssResearches;
 const button = load("components/tabs/time-studies/TimeStudyButton.vue").default;
+const sidebarTotal = load("core/secret-formula/sidebar-resources.js").sidebarResources.find(resource => resource.id === 6);
 const beforeSplit = [11, 21, 31, 41, 51, 61];
 const paths = [[71, 81, 91, 101], [72, 82, 92, 102], [73, 83, 93, 103]];
 
 beforeEach(() => {
   global.player = {
-    timestudy: { theorem: new Decimal(0), studies: [], preferredPaths: [[1, 2], 0] },
+    timestudy: { theorem: new Decimal(0), studies: [], preferredPaths: [[1, 2], 0], corruptionTTSpent: null },
+    abyssResearches: Object.fromEntries(researches.all.map(research => [research.id, {
+      level: new Decimal(0), progress: new Decimal(0), unlocked: true, shown: true,
+    }])),
+    abyssResearchTooltipsShown: new Set(),
     options: { breakPlaceHolder: false, testServer: true },
     challenge: { eternity: { unlocked: 0, current: 0 } },
     celestials: { v: { STSpent: 0 }, enslaved: { hasSecretStudy: false } },
@@ -139,6 +150,33 @@ test("B3 only makes normal studies through 111 free and refreshes displayed pric
   assert.equal(TimeStudy(11).purchase(), true);
   assert.ok(Currency.timeTheorems.value.eq(0));
   assert.equal(TimeStudy(11).purchase(), false);
+});
+
+test("B3 makes EC5 free while preserving its requirements and zero-cost refund", () => {
+  const ec5 = TimeStudy.eternityChallenge(5);
+  assert.ok(ec5.cost.eq(130));
+  activateB3();
+  for (const study of ECTimeStudyState.studies.filter(Boolean)) {
+    assert.ok(study.cost.eq(study.id === 5 ? 0 : study.config.cost));
+  }
+  global.ui = { lastClickTime: 0 };
+  global.EternityChallenge = () => ({ completions: 0 });
+  player.galaxies = new Decimal(174);
+  assert.equal(ec5.purchase(true), false);
+  TimeStudyTree.commitToGameState([11, 22, 32, 42]);
+  assert.equal(ec5.purchase(true), false);
+  player.galaxies = new Decimal(175);
+  const tree = new TimeStudyTree("11,22,32,42|5");
+  assert.equal(tree.ec, 5);
+  assert.ok(tree.spentTheorems[0].eq(0));
+  assert.equal(ec5.purchase(true), true);
+  assert.ok(Currency.timeTheorems.value.eq(0));
+  assert.ok(TimeTheorems.calculateTimeStudiesCost().eq(0));
+  respecTimeStudies(true);
+  assert.equal(player.challenge.eternity.unlocked, 0);
+  assert.ok(Currency.timeTheorems.value.eq(0));
+  AbyssResearches.B3.isEffectActive = false;
+  assert.ok(ec5.cost.eq(130));
 });
 
 test("B3 permits two complete dimension paths with zero TT but not a third", () => {
@@ -212,4 +250,91 @@ test("virtual tree budgets use effective prices and reject unaffordable paid stu
   tree.purchasedStudies.push(TimeStudy(111));
   tree.attemptBuyArray([121], true);
   assert.equal(tree.purchasedStudies.includes(TimeStudy(121)), false);
+});
+
+test("buying B3 refunds discounted studies and EC5 once while preserving Corruption spending", () => {
+  global.AbyssResearches = researches;
+  global.ui = { lastClickTime: 0 };
+  global.EternityChallenge = () => ({ completions: 0 });
+  player.galaxies = new Decimal(175);
+  Currency.timeTheorems.value = new Decimal(1000);
+  TimeStudyTree.commitToGameState([11, 22, 32, 42]);
+  assert.equal(TimeStudy.eternityChallenge(5).purchase(true), true);
+  const invested = TimeTheorems.calculateTimeStudiesCost();
+  const balance = Currency.timeTheorems.value;
+  const total = Currency.timeTheorems.max;
+  assert.equal(researches.B3.purchase(), true);
+  assert.ok(Currency.timeTheorems.value.eq(balance.sub(50).add(invested)));
+  assert.ok(Currency.timeTheorems.max.eq(total));
+  assert.ok(player.timestudy.maxTheorem.eq(total));
+  assert.ok(TimeTheorems.corruptionTTSpent.eq(50));
+  assert.equal(researches.B3.purchase(), false);
+  respecTimeStudies(true);
+  assert.ok(Currency.timeTheorems.value.eq(950));
+  assert.ok(Currency.timeTheorems.max.eq(1000));
+  for (const [id, spent] of [["FTR", 150], ["PST", 300], ["PRS", 500]]) {
+    assert.equal(researches[id].purchase(), true);
+    assert.ok(TimeTheorems.corruptionTTSpent.eq(spent));
+    assert.ok(Currency.timeTheorems.value.eq(1000 - spent));
+    assert.ok(Currency.timeTheorems.max.eq(1000));
+    assert.ok(sidebarTotal.value().eq(1000));
+    respecTimeStudies(true);
+    assert.ok(Currency.timeTheorems.value.eq(1000 - spent));
+  }
+  Currency.timeTheorems.add(7);
+  assert.ok(Currency.timeTheorems.max.eq(1007));
+  assert.ok(player.timestudy.maxTheorem.eq(1007));
+});
+
+test("an unaffordable B3 purchase grants neither a refund nor Corruption credit", () => {
+  global.AbyssResearches = researches;
+  player.timestudy.studies = [11, 111];
+  Currency.timeTheorems.value = new Decimal(49);
+  assert.equal(researches.B3.purchase(), false);
+  assert.ok(Currency.timeTheorems.value.eq(49));
+  assert.ok(TimeTheorems.corruptionTTSpent.eq(0));
+  assert.equal(researches.B3.completed, false);
+});
+
+test("B3 also refunds owned TS111 but leaves later studies and other ECs paid", () => {
+  global.AbyssResearches = researches;
+  player.timestudy.studies = [11, 111, 121];
+  player.challenge.eternity.unlocked = 1;
+  Currency.timeTheorems.value = new Decimal(100);
+  assert.equal(researches.B3.purchase(), true);
+  assert.ok(Currency.timeTheorems.value.eq(81));
+  assert.deepEqual(player.timestudy.studies, [11, 111, 121]);
+  assert.equal(player.challenge.eternity.unlocked, 1);
+  assert.ok(TimeTheorems.calculateTimeStudiesCost().eq(39));
+  respecTimeStudies(true);
+  assert.ok(Currency.timeTheorems.value.eq(120));
+  assert.ok(Currency.timeTheorems.max.eq(170));
+  respecTimeStudies(true);
+  assert.ok(Currency.timeTheorems.value.eq(120));
+});
+
+test("Corruption totals persist across saving and cannot fund a tree import", () => {
+  activateB3();
+  player.timestudy.studies = [111];
+  player.timestudy.corruptionTTSpent = new Decimal(500);
+  player.timestudy = JSON.parse(JSON.stringify(player.timestudy));
+  player.timestudy.theorem = new Decimal(player.timestudy.theorem);
+  assert.ok(Currency.timeTheorems.max.eq(500));
+  const tree = new TimeStudyTree();
+  tree.purchasedStudies.push(TimeStudy(111));
+  tree.attemptBuyArray([121], true);
+  assert.equal(tree.purchasedStudies.includes(TimeStudy(121)), false);
+  respecTimeStudies(true);
+  assert.ok(Currency.timeTheorems.value.eq(0));
+  assert.ok(Currency.timeTheorems.max.eq(500));
+});
+
+test("resetting TT clears Corruption accounting for the next Reality", () => {
+  activateB3();
+  player.timestudy.corruptionTTSpent = new Decimal(500);
+  player.timestudy.theorem = new Decimal(20);
+  Currency.timeTheorems.reset();
+  assert.ok(Currency.timeTheorems.value.eq(0));
+  assert.ok(Currency.timeTheorems.max.eq(0));
+  assert.ok(TimeTheorems.corruptionTTSpent.eq(0));
 });

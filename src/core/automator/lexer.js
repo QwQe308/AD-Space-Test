@@ -172,7 +172,7 @@ createInCategory(AutomatorCurrency, "TT", /(tt|time theorems?)/i, {
 });
 createInCategory(AutomatorCurrency, "TotalTT", /total[ \t]+tt/i, {
   $autocomplete: "total TT",
-  $getter: () => player.timestudy.theorem.plus(TimeTheorems.calculateTimeStudiesCost()),
+  $getter: () => Currency.timeTheorems.max,
 });
 
 createInCategory(AutomatorCurrency, "TotalCompletions", /total[ \t]+completions/i, {

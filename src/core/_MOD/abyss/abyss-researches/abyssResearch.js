@@ -305,8 +305,11 @@ class AbyssResearchClass extends GameMechanicState {
     // Resolve dynamic prices once and check every resource before spending any of them.
     const costs = Object.entries(this.cost);
     if (!costs.every(([currency, cost]) => Currency[currency].gte(cost))) return false;
+    const ttCost = costs.find(([currency]) => currency === "timeTheorems")?.[1] ?? 0;
+    player.timestudy.corruptionTTSpent = TimeTheorems.corruptionTTSpent.add(ttCost);
     for (const [currency, cost] of costs) Currency[currency].subtract(cost);
     this.level = DC.D1;
+    player.timestudy.maxTheorem = TimeTheorems.total();
     this.updateCompletion();
     return true;
   }

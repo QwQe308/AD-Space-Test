@@ -137,24 +137,26 @@ export function buyStudiesUntil(id, ec = -1) {
 }
 
 export function respecTimeStudies(auto) {
+  // Only the tree's current costs are refundable; total TT also includes Corruption spending.
+  let refund = new Decimal(0);
   let hasTS111 = false;
   for (const study of TimeStudy.boughtNormalTS()) {
-    if (study.id !== 111) {
-      study.refund();
-    } else {
+    if (study.id === 111) {
       hasTS111 = true;
+    } else {
+      refund = refund.add(study.cost);
     }
   }
 
-  if (!hasTS111) player.timestudy.studies = [];
-  else player.timestudy.studies = [111];
+  player.timestudy.studies = hasTS111 ? [111] : [];
   GameCache.timeStudies.invalidate();
   player.celestials.v.STSpent = 0;
   const ecStudy = TimeStudy.eternityChallenge.current();
   if (ecStudy !== undefined) {
-    ecStudy.refund();
+    refund = refund.add(ecStudy.cost);
     player.challenge.eternity.unlocked = 0;
   }
+  Currency.timeTheorems.add(refund);
   if (!auto) {
     Tab.eternity.studies.show();
   }

@@ -80,7 +80,11 @@ function loadSource(filename) {
 }
 const { Currency } = loadSource(path.join(root, "core/currency.js"));
 global.Currency = Currency;
-global.TimeTheorems = { calculateTimeStudiesCost: () => DC.D0 };
+global.TimeStudy = { boughtNormalTS: () => [], eternityChallenge: { current: () => undefined } };
+global.Enslaved = { isRunning: false };
+global.TimeTheorems = loadSource(path.join(root, "core/time-theorems.js")).TimeTheorems;
+// These tests have no Time Studies; use real total and Corruption accounting with an empty tree.
+TimeTheorems.calculateTimeStudiesCost = () => DC.D0;
 const { AbyssResearchesDepth1: depth1 } = loadSource(
   path.join(root, "core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js")
 );
@@ -210,7 +214,8 @@ test("Corruption buys instantly with a full queue, spends actual Currency and co
   assert.equal(researches.B3.canResearch, false);
   researches.B3.click();
   assert.ok(Currency.timeTheorems.value.eq(remaining));
-  assert.ok(player.timestudy.maxTheorem.eq(remaining));
+  assert.ok(player.timestudy.maxTheorem.eq(100));
+  assert.ok(Currency.timeTheorems.max.eq(100));
   assert.equal(researches.B3.completed, true);
   assert.equal(researches.B3.maxed, true);
   assert.equal(researches.B3.percentage, 1);
@@ -242,12 +247,15 @@ test("Corruption rejects locked and unaffordable nodes without spending or compl
 test("all Corruption prices are checked and snapshotted before any resource is deducted", () => {
   Currency.perkPoints.value = new Decimal(9);
   assert.equal(researches.MULTI.purchase(), false);
+  assert.ok(TimeTheorems.corruptionTTSpent.eq(0));
   assert.ok(Currency.timeTheorems.value.eq(100));
   assert.ok(Currency.perkPoints.value.eq(9));
   Currency.perkPoints.value = new Decimal(10);
   assert.equal(researches.MULTI.purchase(), true);
   assert.ok(Currency.timeTheorems.value.eq(50));
   assert.ok(Currency.perkPoints.value.eq(0));
+  assert.ok(TimeTheorems.corruptionTTSpent.eq(50));
+  assert.ok(Currency.timeTheorems.max.eq(100));
 });
 
 test("PST's configured dynamic price works with missing future nodes and rechecks at purchase", () => {
@@ -260,6 +268,8 @@ test("PST's configured dynamic price works with missing future nodes and recheck
     Currency.timeTheorems.value = new Decimal(150);
     assert.equal(researches.PST.purchase(), true);
     assert.ok(Currency.timeTheorems.value.eq(0));
+    assert.ok(TimeTheorems.corruptionTTSpent.eq(150));
+    assert.ok(Currency.timeTheorems.max.eq(150));
   } finally {
     delete researches.PRS;
   }

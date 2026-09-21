@@ -160,6 +160,14 @@ export const TimeTheorems = {
       .add(TimeTheoremPurchaseType.ep.amount);
   },
 
+  get corruptionTTSpent() {
+    return new Decimal(player.timestudy.corruptionTTSpent ?? 0);
+  },
+
+  total() {
+    return Currency.timeTheorems.value.add(this.calculateTimeStudiesCost()).add(this.corruptionTTSpent);
+  },
+
   calculateTimeStudiesCost() {
     let totalCost = TimeStudy.boughtNormalTS()
       .map(ts => ts.cost)
