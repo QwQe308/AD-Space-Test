@@ -172,9 +172,9 @@ export const TimeTheorems = {
     let totalCost = TimeStudy.boughtNormalTS()
       .map(ts => ts.cost)
       .reduce(Decimal.sumReducer, new Decimal());
-    const ecStudy = TimeStudy.eternityChallenge.current();
-    if (ecStudy !== undefined) {
-      totalCost = totalCost.add(ecStudy.cost);
+    const unlockedEC = player.challenge.eternity.unlocked;
+    if (unlockedEC !== 0) {
+      totalCost = totalCost.add(TimeStudy.eternityChallenge(unlockedEC).cost);
     }
     if (Enslaved.isRunning && player.celestials.enslaved.hasSecretStudy) totalCost = totalCost.sub(100);
     if (TimeStudy(111).isBought) totalCost = totalCost.sub(TimeStudy(111).cost);

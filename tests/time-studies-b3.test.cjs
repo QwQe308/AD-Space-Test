@@ -194,6 +194,9 @@ test("normal and Abyss EC5 keep independent unlocks, runs, completions, and rewa
   assert.match(normalDescription, /Galaxy cost increase/u);
   assert.equal(Boolean(TimeStudy(111).isBought), false);
   assert.equal(normal.isAvailable, true);
+  assert.equal(configuredEternityChallenges.isAbyssMode, false);
+  assert.equal(configuredEternityChallenges.all.length, 12);
+  assert.ok(configuredEternityChallenges.all.every(challenge => challenge.type === "normal"));
   normal.unlock();
   normal.hasUnlocked = true;
   normal.markRequirementMet();
@@ -209,11 +212,15 @@ test("normal and Abyss EC5 keep independent unlocks, runs, completions, and rewa
   assert.equal(normal.isUnlocked, false);
   assert.equal(normal.isRunning, false);
   assert.equal(normal.reward.canBeApplied, false);
+  assert.equal(configuredEternityChallenge(1).isAvailable, false);
   assert.equal(abyss.isAvailable, true);
+  assert.equal(configuredEternityChallenges.isAbyssMode, true);
+  assert.equal(configuredEternityChallenges.all.length, 1);
+  assert.ok(configuredEternityChallenges.all.every(challenge => challenge.type === "abyss"));
   assert.equal(abyss.isUnlocked, false);
   assert.equal(abyss.isRunning, false);
   assert.equal(configuredEternityChallenges.current, undefined);
-  assert.match(abyss.config.description(), /continuum works as if you have only 10 AM/u);
+  assert.match(abyss.config.description(), /cannot go above Free Tickspeed Upgrades/u);
   assert.equal(abyss, configuredEternityChallenges.all.find(challenge => challenge.id === 5));
 
   abyss.unlock();

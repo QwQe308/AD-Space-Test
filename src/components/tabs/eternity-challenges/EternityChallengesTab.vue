@@ -13,6 +13,7 @@ export default {
   data() {
     return {
       unlockedCount: 0,
+      challengeCount: 12,
       showAllChallenges: false,
       autoEC: false,
       isAutoECVisible: false,
@@ -46,6 +47,7 @@ export default {
   methods: {
     update() {
       this.showAllChallenges = player.options.showAllChallenges;
+      this.challengeCount = EternityChallenges.isAbyssMode ? 6 : 12;
       this.unlockedCount = EternityChallenges.all
         .filter(this.isChallengeVisible)
         .length;
@@ -108,11 +110,11 @@ export default {
       When you respec out of an unlocked Eternity Challenge, you don't need to redo the secondary requirement<br>
       in order to unlock it again until you complete it; only the Time Theorems are required.
     </div>
-    <div v-if="unlockedCount !== 12">
-      You have seen {{ formatInt(unlockedCount) }} out of {{ formatInt(12) }} Eternity Challenges.
+    <div v-if="unlockedCount !== challengeCount">
+      You have seen {{ formatInt(unlockedCount) }} out of {{ formatInt(challengeCount) }} Eternity Challenges.
     </div>
     <div v-else>
-      You have seen all {{ formatInt(12) }} Eternity Challenges.
+      You have seen all {{ formatInt(challengeCount) }} Eternity Challenges.
     </div>
     <ChallengeGrid
       v-slot="{ challenge }"

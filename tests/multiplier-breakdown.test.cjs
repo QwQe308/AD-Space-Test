@@ -1139,23 +1139,30 @@ test("unlocked dimensions avoid lower-tier Continuum reads without bypassing cha
   assert.equal(available.call({ tier: 8 }), false);
 });
 
-test("AD snapshot shares Continuum across entries and reads current currency outside the display", t => {
+test("AD snapshot shares Continuum and applies the Abyss EC5 Time Dimension cap", t => {
   const State = productionStateClass("core/dimensions/antimatter-dimension.js",
     "AntimatterDimensionState", "AntimatterDimension");
   const { memoizeBreakdown } = loadSource(path.join(root, "src/core/secret-formula/multiplier-tab/cache.js"));
   const originals = new Map(["EternityMilestone", "Laitela", "Enslaved", "Currency", "NormalChallenge",
     "EternityChallenge", "AbyssEternityChallenge", "isSCRunningOnTier"].map(key => [key, global[key]]));
+  const originalTotalTickGained = player.totalTickGained;
   t.after(() => {
     for (const [key, value] of originals) global[key] = value;
+    player.totalTickGained = originalTotalTickGained;
   });
   global.EternityMilestone = { unlockAllND: { isReached: true } };
   global.Laitela = { continuumActive: true, isRunning: false, matterExtraPurchaseFactor: new Decimal(1) };
   global.Enslaved = { isRunning: false };
   global.Currency = { antimatter: { value: new Decimal("1e1000") } };
+  player.totalTickGained = new Decimal(1500);
   global.NormalChallenge = () => ({ isRunning: false });
   global.EternityChallenge = () => ({ isRunning: false });
   let abyssEC5 = false;
-  global.AbyssEternityChallenge = () => ({ get isRunning() { return abyssEC5; } });
+  global.AbyssEternityChallenge = () => ({
+    get isRunning() {
+      return abyssEC5;
+    }
+  });
   global.isSCRunningOnTier = () => false;
   let continuumReads = 0;
   const dim = Object.create(State.prototype);
@@ -1182,8 +1189,38 @@ test("AD snapshot shares Continuum across entries and reads current currency out
   assert.ok(second().eq(2000));
   assert.equal(continuumReads, 3);
   abyssEC5 = true;
-  assert.ok(dim.continuumValue.eq(1));
+  assert.ok(dim.continuumValue.eq(1500));
   assert.equal(continuumReads, 4);
+  Currency.antimatter.value = new Decimal("1e1000");
+  assert.ok(dim.continuumValue.eq(1000));
+});
+
+test("Abyss EC5 caps Tickspeed Continuum at upgrades gained from Time Dimensions", t => {
+  const continuumValue = productionMethod("core/tickspeed.js", "continuumValue");
+  const originals = new Map(["Currency", "Laitela", "AbyssEternityChallenge"].map(key => [key, global[key]]));
+  const originalTotalTickGained = player.totalTickGained;
+  t.after(() => {
+    for (const [key, value] of originals) global[key] = value;
+    player.totalTickGained = originalTotalTickGained;
+  });
+  let abyssEC5 = false;
+  global.Currency = { antimatter: { value: new Decimal("1e2000") } };
+  global.Laitela = { matterExtraPurchaseFactor: new Decimal(1) };
+  global.AbyssEternityChallenge = () => ({
+    get isRunning() {
+      return abyssEC5;
+    }
+  });
+  player.totalTickGained = new Decimal(1500);
+  const tickspeed = {
+    isUnlocked: true,
+    costScale: { getContinuumValue: currency => currency.log10() },
+  };
+  assert.ok(continuumValue.call(tickspeed).eq(2000));
+  abyssEC5 = true;
+  assert.ok(continuumValue.call(tickspeed).eq(1500));
+  Currency.antimatter.value = new Decimal("1e1000");
+  assert.ok(continuumValue.call(tickspeed).eq(1000));
 });
 
 test("Future Empower breakdown follows slowdown, EP, and additive ISU Power without double counting", () => {

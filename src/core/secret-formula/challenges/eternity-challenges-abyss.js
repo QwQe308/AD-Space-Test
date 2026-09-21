@@ -3,9 +3,9 @@ import { DC } from "../../constants";
 export const abyssEternityChallenges = [
   {
     id: 5,
-    description: () => `Antimatter Dimensions's and Tickspeed Upgrades's continuum works as if you have only 10 AM.`,
-    goal: DC.E600,
-    goalIncrease: DC.E200,
+    description: () => `Antimatter Dimensions' and Tickspeed Upgrades' continuum value cannot go above Free Tickspeed Upgrades gained from Time Dimensions.`,
+    goal: DC.E1000,
+    goalIncrease: DC.E500,
     reward: {
       description: "Free Tickspeed threshold is decreased.",
       effect: completions => completions * -0.01,

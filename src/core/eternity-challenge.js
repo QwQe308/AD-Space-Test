@@ -39,6 +39,10 @@ class EternityChallengeRewardState extends GameMechanicState {
   }
 }
 
+function isAbyssEternityChallengeMode() {
+  return !player.options.breakPlaceHolder && Boolean(TimeStudy(111).isBought);
+}
+
 export class EternityChallengeState extends GameMechanicState {
   constructor(config, isAbyss = false) {
     super(config);
@@ -52,9 +56,7 @@ export class EternityChallengeState extends GameMechanicState {
   }
 
   get isAvailable() {
-    if (this.id !== 5) return !this._isAbyss;
-    const useAbyss = !player.options.breakPlaceHolder && Boolean(TimeStudy(111).isBought);
-    return this._isAbyss === useAbyss;
+    return this._isAbyss === isAbyssEternityChallengeMode();
   }
 
   get fullId() {
@@ -367,6 +369,10 @@ Object.defineProperty(AbyssEternityChallenge, "isRunning", {
 });
 
 export const EternityChallenges = {
+  get isAbyssMode() {
+    return isAbyssEternityChallengeMode();
+  },
+
   forStudy(id) {
     const abyssChallenge = AbyssEternityChallenge(id);
     return abyssChallenge?.isAvailable ? abyssChallenge : EternityChallenge(id);
@@ -384,9 +390,7 @@ export const EternityChallenges = {
    * @type {EternityChallengeState[]}
    */
   get all() {
-    return EternityChallenge.index.map(challenge => (challenge
-      ? this.forStudy(challenge.id)
-      : challenge)).compact();
+    return (this.isAbyssMode ? AbyssEternityChallenge.index : EternityChallenge.index).compact();
   },
 
   get completions() {

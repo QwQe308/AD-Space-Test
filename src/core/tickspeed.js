@@ -191,9 +191,12 @@ export const Tickspeed = {
 
   get continuumValue() {
     if (!this.isUnlocked) return DC.D0;
-    const antimatter = AbyssEternityChallenge(5).isRunning ? DC.E1 : Currency.antimatter.value;
-    const contVal = this.costScale.getContinuumValue(antimatter, DC.D1);
-    return contVal ? contVal.times(Laitela.matterExtraPurchaseFactor) : DC.D0;
+    const contVal = this.costScale.getContinuumValue(Currency.antimatter.value, DC.D1);
+    if (!contVal) return DC.D0;
+    const continuum = contVal.times(Laitela.matterExtraPurchaseFactor);
+    return AbyssEternityChallenge(5).isRunning
+      ? continuum.clampMax(player.totalTickGained)
+      : continuum;
   },
 
   get baseValue() {

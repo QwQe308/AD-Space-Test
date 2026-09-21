@@ -501,9 +501,12 @@ class AntimatterDimensionState extends DimensionState {
     // It's safe to use dimension.currencyAmount because this is
     // a dimension-only method (so don't just copy it over to tickspeed).
     // We need to use dimension.currencyAmount here because of different costs in NC6.
-    const antimatter = AbyssEternityChallenge(5).isRunning ? DC.E1 : this.currencyAmount;
-    const contVal = this.costScale.getContinuumValue(antimatter, DC.E1);
-    return contVal ? contVal.times(Laitela.matterExtraPurchaseFactor) : DC.D0;
+    const contVal = this.costScale.getContinuumValue(this.currencyAmount, DC.E1);
+    if (!contVal) return DC.D0;
+    const continuum = contVal.times(Laitela.matterExtraPurchaseFactor);
+    return AbyssEternityChallenge(5).isRunning
+      ? continuum.clampMax(player.totalTickGained)
+      : continuum;
   }
 
   /**
