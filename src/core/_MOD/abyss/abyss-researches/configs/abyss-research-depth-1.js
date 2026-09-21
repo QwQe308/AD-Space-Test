@@ -77,11 +77,11 @@ const baseConfig = {
       costIncrease: new Decimal(1.5),
     },
     description(level) {
-      return `Multiplies EP gain by 2 for each level.<br>
+      return `Multiplies EP gain by 3 for each level.<br>
       (×${format(this.effectValue(level), 2, 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
     },
     effectValue(level) {
-      return DC.D2.pow(level);
+      return DC.D3.pow(level);
     },
     next: ["B1"],
     tooltipTags: ["Permanent", "Toturial"],
