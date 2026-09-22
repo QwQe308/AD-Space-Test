@@ -73,6 +73,7 @@ export const EP = {
     name: "Time Studies",
     multValue: () => DC.D1.timesEffectsOf(
       TimeStudy(61),
+      TimeStudy(93),
       TimeStudy(121),
       TimeStudy(122),
       TimeStudy(123),

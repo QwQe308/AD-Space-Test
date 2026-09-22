@@ -1365,3 +1365,42 @@ test("ISU breakdown expands with TS31 alone and updates when Future Empower is e
       .eq_tolerance(Decimal.pow(10, 2.1), 1e-12));
   }
 });
+
+test("TS93 contributes once to both the EP study total and its expandable breakdown", () => {
+  const base = path.join(root, "src/core/secret-formula/multiplier-tab");
+  const { multiplierTabValues } = loadSource(path.join(base, "values.js"));
+  const { multiplierTabTree } = loadSource(path.join(base, "tree.js"));
+  const { EP } = multiplierTabValues;
+  global.GameDatabase = { multiplierTabValues, multiplierTabTree };
+  global.player = { eternities: new Decimal(1) };
+  global.Pelle = { isDoomed: false, isDisabled: () => false };
+  const identity = mockEffect(1);
+  const studies = { 61: mockEffect(3), 93: mockEffect(1), 121: mockEffect(7),
+    122: mockEffect(1, false), 123: mockEffect(1, false) };
+  global.TimeStudy = id => studies[id] ?? identity;
+  global.EternityUpgrade = { epMult: identity };
+  global.RealityUpgrade = () => identity;
+  global.GlyphEffect = { epMult: identity };
+  global.SpaceResearchRifts = { r51: identity };
+  global.AbyssResearches = { A23: identity, B0: identity };
+  global.FutureEmpowerOrbs = { eternities: identity };
+  global.getAdjustedGlyphEffect = () => new Decimal(1);
+  const source = fs.readFileSync(path.join(root, "src/game.js"), "utf8");
+  const ast = require("@babel/parser").parse(source, { sourceType: "module" });
+  const fn = ast.program.body.find(node => node.id?.name === "totalEPMult");
+  const totalEP = compileFunction(source.slice(fn.body.start + 1, fn.body.end - 1));
+  const keys = multiplierTabTree.EP_timeStudy[0];
+  assert.equal(keys.filter(key => key === "general_timeStudy_93").length, 1);
+  const group = new BreakdownEntryInfoGroup(keys);
+  for (const [value, active] of [[5, true], ["ee20", true], [5, false]]) {
+    studies[93] = mockEffect(value, active);
+    beginBreakdownUpdate();
+    assertDecimalClose(EP.timeStudy.multValue(), totalEP());
+    assertDecimalClose(EP.timeStudy.multValue(), new Decimal(21).mul(active ? value : 1));
+    const studyEntry = group.entries.find(entry => entry.key === "general_timeStudy_93");
+    assert.equal(studyEntry.isVisible, active);
+    assert.equal(group.hasVisibleEntries, true);
+    assertDecimalClose(group.entries.filter(entry => entry.isVisible)
+      .reduce((mult, entry) => mult.mul(entry.mult), new Decimal(1)), EP.timeStudy.multValue());
+  }
+});
