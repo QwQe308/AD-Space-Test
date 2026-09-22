@@ -3,6 +3,7 @@ import { deepmergeAll } from "@/utility/deepmerge";
 import { GameMechanicState } from "./game-mechanics";
 
 export function startEternityChallenge() {
+  if (["infinityPoints", "antimatter"].includes(PastEmpower.freezing)) PastEmpower.removeFreezing();
   initializeChallengeCompletions();
   initializeResourcesAfterEternity();
   resetInfinityRuns();

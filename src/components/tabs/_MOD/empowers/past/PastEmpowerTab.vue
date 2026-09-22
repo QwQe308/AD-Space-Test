@@ -315,7 +315,7 @@ export default {
   margin-inline: auto;
   position: relative;
   width: 100%;
-  height: 40vh;
+  height: 400px;
   margin-top: 25px;
 }
 

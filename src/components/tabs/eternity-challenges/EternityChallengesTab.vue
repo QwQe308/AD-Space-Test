@@ -22,6 +22,7 @@ export default {
       untilNextEC: TimeSpan.zero,
       untilAllEC: TimeSpan.zero,
       hasECR: false,
+      hasPastEmpower: false,
     };
   },
   computed: {
@@ -46,6 +47,7 @@ export default {
   },
   methods: {
     update() {
+      this.hasPastEmpower = AbyssResearches.PST.completed;
       this.showAllChallenges = player.options.showAllChallenges;
       this.challengeCount = EternityChallenges.isAbyssMode ? 6 : 12;
       this.unlockedCount = EternityChallenges.all
@@ -109,6 +111,12 @@ export default {
     <div v-if="!hasECR">
       When you respec out of an unlocked Eternity Challenge, you don't need to redo the secondary requirement<br>
       in order to unlock it again until you complete it; only the Time Theorems are required.
+    </div>
+    <div
+      v-if="hasPastEmpower"
+      class="frozen-currency"
+    >
+      Infinity Points and Antimatter will be unfrozen and reset when entering Eternity Challenges.
     </div>
     <div v-if="unlockedCount !== challengeCount">
       You have seen {{ formatInt(unlockedCount) }} out of {{ formatInt(challengeCount) }} Eternity Challenges.
