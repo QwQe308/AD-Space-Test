@@ -45,7 +45,7 @@ export default {
 
 <template>
   <div class="info-container">
-    <p>If simulating Eternity, expected rewards will be (based on current Eternity):</p>
+    <p>If simulating Eternity, expected rewards/sec will be (based on current Eternity):</p>
     <table>
       <tr>
         <th>Speed</th>
