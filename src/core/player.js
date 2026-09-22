@@ -71,6 +71,7 @@ window.player = {
     past: {
       frozenCurrency: null,
       simulating: null,
+      displayingSimulation: null,
       simulationSpeed: DC.D1,
 
       simulationTimeThisReset: new Decimal(0),

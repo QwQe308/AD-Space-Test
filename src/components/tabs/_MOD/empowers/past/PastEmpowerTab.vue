@@ -30,7 +30,7 @@ export default {
       ],
 
       simulatingPrestige: PastEmpower.simulating,
-      displayingSimulation: PastEmpower.simulating,
+      displayingSimulation: player.empowers.past.displayingSimulation,
       prestigesAvailableForSimulation: [
         { name: "Infinity", glyph: "infinity" },
         { name: "Eternity", glyph: "time" },
@@ -50,6 +50,7 @@ export default {
     },
     toggleSimulationDisplay(id) {
       this.displayingSimulation = id === this.displayingSimulation ? null : id;
+      player.empowers.past.displayingSimulation = this.displayingSimulation;
     },
     toggleFreeze(id) {
       PastEmpower.toggleFreezing(id);
