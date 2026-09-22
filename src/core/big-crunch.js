@@ -204,11 +204,11 @@ export function preProductionGenerateIP(diff) {
     if (diff.gte(1e100)) {
       genCount = Decimal.div(diff, genPeriod);
     } else {
-      // Partial progress (fractions from 0 to 1) are stored in player.partInfinityPoint
-      const idk = diff.toNumber();
-      player.partInfinityPoint += idk / genPeriod.clampMax(1e300).toNumber();
-      genCount = Decimal.floor(player.partInfinityPoint);
-      player.partInfinityPoint -= genCount.toNumber();
+      // Keep the full count in Decimal: converting huge counts to Number before subtracting
+      // can leave an enormous (even negative) remainder shared with Infinity Simulation.
+      const progress = diff.div(genPeriod).add(player.partInfinityPoint);
+      genCount = progress.floor();
+      player.partInfinityPoint = progress.sub(genCount).toNumber();
     }
     let gainedPerGen = player.records.bestInfinity.time.gte(DC.BEMAX) ? DC.D0 : InfinityUpgrade.ipGen.effectValue;
     if (Laitela.isRunning) gainedPerGen = dilatedValueOf(gainedPerGen);

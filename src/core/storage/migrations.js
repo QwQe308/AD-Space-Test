@@ -469,6 +469,12 @@ export const migrations = {
       delete player.empowers.future.insight;
       delete player.empowers.future.upgrades;
     },
+    105: player => {
+      // Repair IP remainders corrupted by mixed Number/Decimal arithmetic.
+      if (!Number.isFinite(player.partInfinityPoint) || player.partInfinityPoint < 0 || player.partInfinityPoint >= 1) {
+        player.partInfinityPoint = 0;
+      }
+    },
   },
 
   normalizeTimespans(player) {

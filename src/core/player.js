@@ -63,7 +63,7 @@ function createSpaceResearchesData() {
 // This is actually reassigned when importing saves
 // eslint-disable-next-line prefer-const
 window.player = {
-  version: 104,
+  version: 105,
   // MOD
   // empowers
   empowers: {
