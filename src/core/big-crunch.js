@@ -199,7 +199,7 @@ export function secondSoftReset(enteringAntimatterChallenge) {
 
 export function preProductionGenerateIP(diff) {
   if (InfinityUpgrade.ipGen.isBought) {
-    const genPeriod = Time.bestInfinity.totalMilliseconds.clampMin(1e-100).times(4);
+    const genPeriod = Time.bestInfinity.totalMilliseconds.clampMin(33).times(4);
     let genCount;
     if (diff.gte(1e100)) {
       genCount = Decimal.div(diff, genPeriod);

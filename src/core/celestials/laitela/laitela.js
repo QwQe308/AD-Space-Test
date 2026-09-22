@@ -60,7 +60,7 @@ export const Laitela = {
   get realityReward() {
     return Decimal.clampMin(
       Decimal.pow(100, this.difficultyTier).mul(
-        Decimal.pow(player.celestials.laitela.fastestCompletion.recip().mul(360), 2)
+        Decimal.pow(player.celestials.laitela.fastestCompletion.clampMin(0.033).recip().mul(360), 2)
       ),
       1
     );

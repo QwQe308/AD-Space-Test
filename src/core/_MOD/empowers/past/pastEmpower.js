@@ -85,12 +85,13 @@ class PastEmpowerClass {
     this.data.simulationTickThisReset++;
     // Avoiding largr diff periods such as offline progress
     let fakeSimulationTime = this.data.simulationTrueTimeThisReset;
-    if (fakeSimulationTime > this.data.simulationTickThisReset * 20)
-      fakeSimulationTime = this.data.simulationTickThisReset * 20;
+    if (fakeSimulationTime > this.data.simulationTickThisReset * 15)
+      fakeSimulationTime = this.data.simulationTickThisReset * 15;
     // Handle simulation
     if (CurrentSimulationConfig.checkSuccess()) {
       if (fakeSimulationTime < 2000) {
-        this.simulationSpeed = this.simulationSpeed.mul(2000 / fakeSimulationTime).min(this.simulationMaxSpeed);
+        this.simulationSpeed = this.simulationSpeed.mul(2000 / Math.max(33, fakeSimulationTime))
+          .min(this.simulationMaxSpeed);
         if (this.simulationSpeed.eq(this.simulationMaxSpeed)) return;
       }
       CurrentSimulationConfig.giveRewards(this.simulationSpeed, this.data.simulationTimeThisReset.div(1000));

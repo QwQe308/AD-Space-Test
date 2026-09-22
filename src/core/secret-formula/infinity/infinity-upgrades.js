@@ -171,7 +171,8 @@ export const infinityUpgrades = {
       if (Teresa.isRunning || V.isRunning) return "Disabled in this reality";
       if (Pelle.isDoomed) return "Disabled";
       if (player.records.bestInfinity.time.gte(DC.BEMAX.log10())) return "Too slow to generate";
-      return `${format(value, 2)} every ${Time.bestInfinity.times(DC.D4).toStringShort()}`;
+      const period = TimeSpan.fromMilliseconds(Time.bestInfinity.totalMilliseconds.clampMin(33).times(4));
+      return `${format(value, 2)} every ${period.toStringShort()}`;
     },
     charged: {
       description: () =>

@@ -286,7 +286,7 @@ export function autoReality() {
 }
 
 function updateRealityRecords(realityProps) {
-  const thisRunRMmin = realityProps.gainedRM.div(Time.thisRealityRealTime.totalMinutes.clampMin(0.0005));
+  const thisRunRMmin = realityProps.gainedRM.div(Time.thisRealityRealTime.totalMilliseconds.clampMin(33)).mul(60000);
   if (player.records.bestReality.RMmin.lt(thisRunRMmin)) {
     player.records.bestReality.RMmin = thisRunRMmin;
     player.records.bestReality.RMminSet = Glyphs.copyForRecords(Glyphs.active.filter(g => g !== null));

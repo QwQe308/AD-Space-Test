@@ -216,7 +216,7 @@ export function resetChallengeStuff() {
 }
 
 export function ratePerMinute(amount, time) {
-  return Decimal.divide(amount, time.div(60 * 1000));
+  return Decimal.divide(amount, time.clampMin(33).div(60 * 1000));
 }
 
 // eslint-disable-next-line max-params
@@ -753,19 +753,19 @@ export function gameLoop(passedDiff, options = {}) {
 }
 
 function updatePrestigeRates() {
-  const currentIPmin = gainedInfinityPoints().div(Decimal.max(0.0005, Time.thisInfinityRealTime.totalMinutes));
+  const currentIPmin = gainedInfinityPoints().div(Time.thisInfinityRealTime.totalMilliseconds.clampMin(33)).mul(60000);
   if (currentIPmin.gt(player.records.thisInfinity.bestIPmin) && Player.canCrunch) {
     player.records.thisInfinity.bestIPmin = currentIPmin;
     player.records.thisInfinity.bestIPminVal = gainedInfinityPoints();
   }
 
-  const currentEPmin = gainedEternityPoints().dividedBy(Decimal.max(0.0005, Time.thisEternityRealTime.totalMinutes));
+  const currentEPmin = gainedEternityPoints().div(Time.thisEternityRealTime.totalMilliseconds.clampMin(33)).mul(60000);
   if (currentEPmin.gt(player.records.thisEternity.bestEPmin) && Player.canEternity) {
     player.records.thisEternity.bestEPmin = currentEPmin;
     player.records.thisEternity.bestEPminVal = gainedEternityPoints();
   }
 
-  const currentRSmin = Effarig.shardsGained.div(Decimal.max(0.0005, Time.thisRealityRealTime.totalMinutes));
+  const currentRSmin = Effarig.shardsGained.div(Time.thisRealityRealTime.totalMilliseconds.clampMin(33)).mul(60000);
   if (currentRSmin.gt(player.records.thisReality.bestRSmin && isRealityAvailable())) {
     player.records.thisReality.bestRSmin = currentRSmin;
     player.records.thisReality.bestRSminVal = Effarig.shardsGained;

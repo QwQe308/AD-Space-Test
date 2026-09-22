@@ -58,7 +58,9 @@ export const GameCache = {
   worstChallengeTime: new Lazy(() => highestInArray(player.challenge.normal.bestTimes)),
 
   bestRunIPPM: new Lazy(() =>
-    player.records.recentInfinities.map(run => run[3].div(run[1]).times(60000)).reduce(Decimal.maxReducer)
+    // Resets can occur without advancing time; generation treats each run as taking at least 33 ms.
+    player.records.recentInfinities.map(run => run[3].div(run[1].clampMin(33)).times(60000))
+      .reduce(Decimal.maxReducer)
   ),
 
   averageRealTimePerEternity: new Lazy(() =>
