@@ -61,6 +61,36 @@ beforeEach(() => {
   global.PlayerProgress = { infinityUnlocked: () => true, eternityUnlocked: () => true };
 });
 
+test("IP resets keep frozen IP eligible for Eternity and clear ordinary run records", t => {
+  const previousPast = global.PastEmpower;
+  const previousPelle = global.Pelle;
+  t.after(() => {
+    global.PastEmpower = previousPast;
+    global.Pelle = previousPelle;
+  });
+  global.PastEmpower = { get freezing() { return player.empowers.past.frozenCurrency; } };
+  global.Pelle = { isDisabled: () => true, isDoomed: false };
+  player.infinityPoints = new Decimal("1e400");
+  player.records = {
+    thisEternity: { maxIP: new Decimal("1e500") },
+    thisReality: { maxIP: new Decimal("1e500") },
+  };
+  player.empowers.past.frozenCurrency = "infinityPoints";
+  for (let reset = 0; reset < 2; reset++) {
+    Currency.infinityPoints.reset();
+    assert.ok(Currency.infinityPoints.value.eq("1e400"));
+    assert.ok(player.records.thisEternity.maxIP.eq("1e400"));
+    assert.ok(player.records.thisEternity.maxIP.gte(Number.MAX_VALUE));
+    Currency.infinityPoints.add(new Decimal("1e600"));
+    assert.ok(player.records.thisEternity.maxIP.eq("1e400"));
+  }
+  player.empowers.past.frozenCurrency = null;
+  Currency.infinityPoints.reset();
+  assert.ok(Currency.infinityPoints.value.eq(0));
+  assert.ok(player.records.thisEternity.maxIP.eq(0));
+  assert.ok(player.records.thisReality.maxIP.eq("1e500"));
+});
+
 test("each orb uses live thresholds and resets only its source resource after upgrading", () => {
   for (const orb of FutureEmpower.orbs) {
     const resource = Currency[orb.id];

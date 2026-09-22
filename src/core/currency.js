@@ -335,7 +335,8 @@ Currency.infinityPoints = new class extends DecimalCurrency {
 
   reset() {
     super.reset();
-    player.records.thisEternity.maxIP = this.startingValue;
+    // Frozen IP survives the reset and must count toward the next Eternity's goal.
+    player.records.thisEternity.maxIP = this.value;
   }
 
   get frozen() {
