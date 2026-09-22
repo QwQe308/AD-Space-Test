@@ -30,7 +30,14 @@ function giveEternityRewards(auto) {
       if (Enslaved.isRunning && completionCount > 5) EnslavedProgress.ec1.giveProgress();
     }
     challenge.clearRequirement();
-    respecTimeStudies(auto);
+    if (challenge.type !== "abyss") {
+      respecTimeStudies(auto);
+    } else if (challenge.id === 5 && challenge.isUnlocked) {
+      TimeStudy.eternityChallenge(5).refund();
+      player.challenge.eternity.unlocked = 0;
+      player.challenge.eternity.unlockedType = "normal";
+      GameCache.currentStudyTree.invalidate();
+    }
   }
 
   const spaceChall = SpaceChallenge.current;
