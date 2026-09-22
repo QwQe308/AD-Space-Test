@@ -5,6 +5,8 @@ import GlyphComponent from "../../../../GlyphComponent.vue";
 
 import InfinitySimulationHeader from "./Infinity/InfinitySimulationHeader.vue";
 import InfinitySimulationInfo from "./Infinity/InfinitySimulationInfo.vue";
+import EternitySimulationHeader from "./Eternity/EternitySimulationHeader.vue";
+import EternitySimulationInfo from "./Eternity/EternitySimulationInfo.vue";
 
 export default {
   name: "PastEmpowerTab",
@@ -12,6 +14,8 @@ export default {
     GlyphComponent,
     InfinitySimulationHeader,
     InfinitySimulationInfo,
+    EternitySimulationHeader,
+    EternitySimulationInfo,
   },
   data() {
     return {
@@ -142,11 +146,13 @@ export default {
                 </div>
                 <div class="gain">
                   <InfinitySimulationHeader v-if="simulatingPrestige === 'Infinity'" />
+                  <EternitySimulationHeader v-if="simulatingPrestige === 'Eternity'" />
                 </div>
               </div>
               <br>
               <div class="main">
                 <InfinitySimulationInfo v-if="displayingSimulation === 'Infinity'" />
+                <EternitySimulationInfo v-if="displayingSimulation === 'Eternity'" />
               </div>
             </div>
           </div>

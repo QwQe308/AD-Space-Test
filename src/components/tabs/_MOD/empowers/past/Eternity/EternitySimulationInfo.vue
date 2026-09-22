@@ -3,7 +3,7 @@ import { PastEmpower } from "../../../../../../core/_MOD/empowers/past/pastEmpow
 import { DC } from "../../../../../../core/constants";
 
 export default {
-  name: "InfinitySimulationInfo",
+  name: "EternitySimulationInfo",
   data() {
     return {
       thresholds: [
@@ -14,13 +14,10 @@ export default {
         PastEmpower.simulationMaxSpeed,
       ],
 
-      gainOnThresholds: Array(5).map((value, index) => {
-        PastEmpower.simulationGainOnSpeed("Infinity", DC.D1);
-      }),
+      gainOnThresholds: Array.from({ length: 5 }, () =>
+        PastEmpower.simulationGainOnSpeed("Eternity", DC.D1)),
 
-      growthOnThresholds: Array(5).map((value, index) => {
-        PastEmpower.simulationGainOnSpeed("Infinity", DC.D0);
-      }),
+      growthOnThresholds: Array.from({ length: 5 }, () => ({ eternityPoints: null, eternities: null })),
     };
   },
   methods: {
@@ -33,13 +30,13 @@ export default {
         PastEmpower.simulationMaxSpeed,
       ];
 
-      this.gainOnThresholds = this.thresholds.map(value => PastEmpower.simulationGainOnSpeed("Infinity", value));
+      this.gainOnThresholds = this.thresholds.map(value => PastEmpower.simulationGainOnSpeed("Eternity", value));
 
       this.growthOnThresholds = this.gainOnThresholds.map(value => ({
-        infinityPoints: Currency.infinityPoints.value.eq(0)
+        eternityPoints: Currency.eternityPoints.value.eq(0)
           ? null
-          : value.infinityPoints.div(Currency.infinityPoints.value),
-        infinities: Currency.infinities.value.eq(0) ? null : value.infinities.div(Currency.infinities.value),
+          : value.eternityPoints.div(Currency.eternityPoints.value),
+        eternities: Currency.eternities.value.eq(0) ? null : value.eternities.div(Currency.eternities.value),
       }));
     },
   },
@@ -48,7 +45,7 @@ export default {
 
 <template>
   <div class="info-container">
-    <p>If simulating Infinity, expected rewards will be (based on current Infinity):</p>
+    <p>If simulating Eternity, expected rewards will be (based on current Eternity):</p>
     <table>
       <tr>
         <th>Speed</th>
@@ -59,33 +56,33 @@ export default {
         <th>{{ format(thresholds[4], 2, 2) }}x (100%)</th>
       </tr>
       <tr>
-        <th>IP<br>(Growth)</th>
+        <th>EP<br>(Growth)</th>
         <td
           v-for="i in 5"
           :key="i"
         >
-          {{ format(gainOnThresholds[i - 1].infinityPoints, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].infinityPoints
-              ? formatPercents(growthOnThresholds[i - 1].infinityPoints, 2)
+          {{ format(gainOnThresholds[i - 1].eternityPoints, 2, 2) }}<br>(+{{
+            growthOnThresholds[i - 1].eternityPoints
+              ? formatPercents(growthOnThresholds[i - 1].eternityPoints, 2)
               : "∞"
           }}/s)
         </td>
       </tr>
       <tr>
-        <th>Infinities<br>(Growth)</th>
+        <th>Eternities<br>(Growth)</th>
         <td
           v-for="i in 5"
           :key="i"
         >
-          {{ format(gainOnThresholds[i - 1].infinities, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].infinities ? formatPercents(growthOnThresholds[i - 1].infinities, 2) : "∞"
+          {{ format(gainOnThresholds[i - 1].eternities, 2, 2) }}<br>(+{{
+            growthOnThresholds[i - 1].eternities ? formatPercents(growthOnThresholds[i - 1].eternities, 2) : "∞"
           }}/s)
         </td>
       </tr>
     </table>
     <p class="weak">
-      (Note that simulations' rewards are based on currencies gained on current Infinity, so after slowdown it may be lower
-      than excepted)
+      (Note that simulations' rewards are based on currencies gained on current Eternity, so after slowdown it may be lower
+      than expected)
     </p>
   </div>
 </template>

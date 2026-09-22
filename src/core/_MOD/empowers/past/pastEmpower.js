@@ -160,11 +160,11 @@ const SimulationConfigs = {
     },
     giveRewards(simulationSpeed, diff) {
       const SimulationRewards = this.getRewards(simulationSpeed);
-      // Infinity Points
-      const EP = EternityRewards.eternityPoints.mul(diff);
+      // Eternity Points
+      const EP = SimulationRewards.eternityPoints.mul(diff);
       Currency.eternityPoints.add(EP);
       // Eternities
-      const ES = EternityRewards.eternities.mul(diff).add(player.reality.partEternitied);
+      const ES = SimulationRewards.eternities.mul(diff).add(player.reality.partEternitied);
       Currency.eternities.add(ES.floor());
       player.reality.partEternitied = ES.sub(ES.floor());
     },
