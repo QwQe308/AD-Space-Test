@@ -1,1 +1,1 @@
-{"sha":"3918d08e68cdf375a6e76dbab42751d0a289002e","message":"fix: TS93 is now counted in multiplier breakdown in EP mult","author":"QwQe308"}
+{"sha":"7d7c728c1cfeecf020219fcefa08a6b6c87f28ce","message":"fix: fix NaN while running infinity simulation","author":"QwQe308"}
