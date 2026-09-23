@@ -168,7 +168,7 @@ const baseConfig = {
       }
       return baseInfo;
     },
-    next: ["Sink-2-Past"],
+    next: ["Sink-2-Past", "Past-Present"],
     tooltipTags: ["Empower"],
   },
 
@@ -191,6 +191,7 @@ const baseConfig = {
       }
       return baseInfo;
     },
+    next: ["Past-Present", "Present-Future"],
     tooltipTags: ["Empower"],
   },
 
@@ -213,7 +214,7 @@ const baseConfig = {
       }
       return baseInfo;
     },
-    next: ["Sink-2-Future"],
+    next: ["Sink-2-Future", "Present-Future"],
     tooltipTags: ["Empower"],
   },
 
@@ -222,13 +223,23 @@ const baseConfig = {
     type: NODE_TYPE.SINK,
     position: [-3, 4],
     description(){
-      return `Sink to the deeper place... to Depth 2 (Future).`
+      return `Sink to the deeper place... to Depth 2 (Past).`
     },
     target: "Float-1-Past",
     tooltipTags: ["Link"]
   },
 
-  // Past branch
+  "Past-Present": {
+    position: [-1, 5],
+    type: NODE_TYPE.SINGLE,
+    cost: new Decimal(1e5),
+    description(level) {
+      return `+ 1 Max concurrent Abyss Researches.`;
+    },
+    next: [],
+  },
+
+  // Future branch
   "Sink-2-Future": {
     type: NODE_TYPE.SINK,
     position: [3, 4],
@@ -237,6 +248,16 @@ const baseConfig = {
     },
     target: "Float-1-Future",
     tooltipTags: ["Link"]
+  },
+
+  "Present-Future": {
+    position: [1, 5],
+    type: NODE_TYPE.SINGLE,
+    cost: new Decimal(1e5),
+    description(level) {
+      return `Unlock Advanced Eternity Automation.`;
+    },
+    next: [],
   },
 };
 

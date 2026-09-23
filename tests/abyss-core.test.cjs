@@ -100,6 +100,8 @@ const { AbyssResearchesDepth1: depth1 } = loadSource(
   path.join(root, "core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js")
 );
 Object.assign(GameDatabase.space.abyssResearches, {
+  "Past-Present": config("Past-Present", { ...depth1["Past-Present"], depth: "0", next: [], previous: [] }),
+  "Present-Future": config("Present-Future", { ...depth1["Present-Future"], depth: "0", next: [], previous: [] }),
   B3: config("B3", { ...depth1.B3, depth: "0", next: ["NEXT"], previous: [],
     onLevelUp: () => completions++ }),
   PST: config("PST", { ...depth1.PST, depth: "0" }),
@@ -302,6 +304,57 @@ test("depth conditions prioritize force-disable and use the unlocked portal's de
   } finally {
     researches.FLOAT.depth = previousDepth;
   }
+});
+
+test("PST unlocks Past-Present even when its portal visits the node first by a longer path", () => {
+  const previousNext = researches.PST.next;
+  const previousPortalLinks = researches.SINK.previous;
+  try {
+    // Match PST's config order: a portal first, followed by the ordinary research.
+    researches.PST.next = ["SINK", "Past-Present"];
+    researches.SINK.previous = ["PST"];
+    for (const id of ["SINK", "FLOAT", "Past-Present"]) {
+      Object.assign(player.abyssResearches[id], { unlocked: false, shown: false });
+    }
+    assert.equal(researches.PST.purchase(), true);
+    assert.equal(researches["Past-Present"].unlocked, true);
+    assert.equal(researches["Past-Present"].canResearch, true);
+    player.abyssResearches["Past-Present"].unlocked = false;
+    researches.PST.updateCompletionWithCondition();
+    assert.equal(researches["Past-Present"].unlocked, true);
+  } finally {
+    researches.PST.next = previousNext;
+    researches.SINK.previous = previousPortalLinks;
+  }
+});
+
+test("Past-Present adds a concurrent research slot and stacks with both existing upgrades", () => {
+  player.activeAbyssResearches.add("SINGLE");
+  assert.equal(researches.NEXT.maxConcurrent, 1);
+  researches.NEXT.unlock();
+  assert.equal(researches.NEXT.canResearch, false);
+  researches["Past-Present"].addProgress(depth1["Past-Present"].cost);
+  assert.equal(researches.NEXT.maxConcurrent, 2);
+  assert.equal(researches.NEXT.canResearch, true);
+  researches.A6.level = DC.D1;
+  researches.A6B.level = DC.D1;
+  assert.equal(researches.NEXT.maxConcurrent, 4);
+  researches["Past-Present"].reset();
+  assert.equal(researches.NEXT.maxConcurrent, 3);
+});
+
+test("Present-Future unlocks existing advanced Eternity modes independently of Reality upgrade 13", () => {
+  const { EternityAutobuyerState } = loadSource(path.join(root, "core/autobuyers/eternity-autobuyer.js"));
+  const autobuyer = new EternityAutobuyerState();
+  let realityUpgradeBought = false;
+  global.RealityUpgrade = id => ({ isBought: id === 13 && realityUpgradeBought });
+  assert.equal(autobuyer.hasAdditionalModes, false);
+  researches["Present-Future"].addProgress(depth1["Present-Future"].cost);
+  assert.equal(autobuyer.hasAdditionalModes, true);
+  researches["Present-Future"].reset();
+  assert.equal(autobuyer.hasAdditionalModes, false);
+  realityUpgradeBought = true;
+  assert.equal(autobuyer.hasAdditionalModes, true);
 });
 
 test("Empower subtabs are unlocked by their corresponding Abyss Research", t => {

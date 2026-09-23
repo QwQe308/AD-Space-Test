@@ -141,6 +141,7 @@ class AbyssResearchClass extends GameMechanicState {
     let maxConcurrent = 1;
     if (AbyssResearches.A6.isEffectActive) maxConcurrent++;
     if (AbyssResearches.A6B.isEffectActive) maxConcurrent++;
+    if (AbyssResearches["Past-Present"].isEffectActive) maxConcurrent++;
     return maxConcurrent;
   }
 
