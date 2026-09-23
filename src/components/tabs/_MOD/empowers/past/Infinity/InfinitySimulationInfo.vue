@@ -48,7 +48,7 @@ export default {
 
 <template>
   <div class="info-container">
-    <p>If simulating Infinity, expected rewards/sec will be (based on current Infinity):</p>
+    <p>If simulating Infinity, expected rewards/sec will be (based on current Infinity, assuming 33ms per reset):</p>
     <table>
       <tr>
         <th>Speed</th>
