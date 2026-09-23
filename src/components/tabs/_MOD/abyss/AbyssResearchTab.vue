@@ -136,15 +136,17 @@ export default {
       this.depth = newVal;
     },
 
-    navigateToNode(target) {
+    navigateToNode(target, centerView = false) {
       this.endDrag();
       this.depth = target.depth;
-      const { width, height } = this.$refs.canvasContainer.getBoundingClientRect();
-      // The canvas is offset by -5000 px and scales around its center at (5000, 5000).
-      this.offset = new Vector(
-        width / 2 - (target.x - 5000) * this.zoomLevel,
-        height / 2 - (target.y - 5000) * this.zoomLevel
-      );
+      if (centerView) {
+        const { width, height } = this.$refs.canvasContainer.getBoundingClientRect();
+        // The canvas is offset by -5000 px and scales around its center at (5000, 5000).
+        this.offset = new Vector(
+          width / 2 - (target.x - 5000) * this.zoomLevel,
+          height / 2 - (target.y - 5000) * this.zoomLevel
+        );
+      }
       this.shownNodes = this.getCurrentNodes.filter(id => player.abyssResearches[id].shown);
     },
 

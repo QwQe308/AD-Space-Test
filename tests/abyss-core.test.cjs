@@ -64,7 +64,8 @@ function loadSource(filename) {
   loaded.filename = filename;
   loaded.paths = module.paths;
   loaded.require = name => {
-    const resolved = path.resolve(path.dirname(filename), name).replace(/\.js$/, "");
+    const resolved = (name.startsWith("@/") ? path.resolve(root, name.slice(2))
+      : path.resolve(path.dirname(filename), name)).replace(/\.js$/u, "");
     if (resolved === path.join(root, "core/constants")) return { DC };
     if (resolved === path.join(root, "core/globals")) {
       return { AbyssResearchHelperTools: global.AbyssResearchHelperTools };
@@ -73,7 +74,7 @@ function loadSource(filename) {
       return loadSource(path.join(root, "core/game-mechanics/game-mechanic.js"));
     }
     if (resolved === path.join(root, "core/_MOD/abyss/abyss-researches/abyssResearchSpawner")) {
-      return { ...loadSource(`${resolved}.js`), abyssDepths: [["0"], ["1"]],
+      return { ...loadSource(`${resolved}.js`),
         globalAbyssResearchSpeed: () => new Decimal(0) };
     }
     if (resolved === path.join(root, "env")) return { DEV: false };
@@ -210,7 +211,15 @@ test("portal navigation centers the destination at different zooms and stops dra
       endDrag: component.methods.endDrag,
       updateCanvasTransform: component.methods.updateCanvasTransform,
     };
+    const originalOffset = { x: 120, y: -80 };
+    view.offset = originalOffset;
     component.methods.navigateToNode.call(view, researches.FLOAT);
+    assert.equal(view.depth, "1");
+    assert.equal(view.offset, originalOffset);
+    component.methods.navigateToNode.call(view, researches.SINK, false);
+    assert.equal(view.depth, "0");
+    assert.equal(view.offset, originalOffset);
+    component.methods.navigateToNode.call(view, researches.FLOAT, true);
     assert.equal(view.depth, "1");
     assert.equal(view.isDragging, false);
     assert.equal(view.zoomLevel, zoom);
@@ -231,26 +240,68 @@ test("portal visuals reverse for float nodes and clicks forward their navigation
     assert.equal(view.hasProgress, false);
     assert.doesNotMatch(view.getMainInfosTooltip, /Progress:|Forever/u);
     assert.equal(view.sinkAnimationStyle(1)["animation-direction"], id === "FLOAT" ? "reverse" : "normal");
-    let destination;
-    view.$on("navigate", node => { destination = node; });
+    let destination, centerView;
+    view.$on("navigate", (node, center) => { destination = node; centerView = center; });
     view.handleClick();
     assert.equal(destination, researches[researches[id].target]);
+    assert.equal(centerView, false);
+    researches[id].config.centerView = true;
+    try {
+      view.handleClick();
+      assert.equal(centerView, true);
+    } finally {
+      delete researches[id].config.centerView;
+    }
     view.$destroy();
   }
 });
 
 test("portal destinations unlock their depth in the page selector", () => {
   const component = loadSource(path.join(root, "components/tabs/_MOD/abyss/AbyssResearchPageSelector.vue")).default;
-  global.abyssDepths = [["0", () => true], ["1", () => false]];
+  player.abyssResearches.SINK.unlocked = false;
   player.abyssResearches.FLOAT.unlocked = false;
   const view = new (Vue.extend(component))({ propsData: { depth: "0" } });
   view.update();
   assert.deepEqual(view.unlockedDepthsList, ["0"]);
-  player.abyssResearches.SINK.unlocked = false;
   researches.SINK.unlock();
   view.update();
   assert.deepEqual(view.unlockedDepthsList, ["0", "1"]);
+  researches.C0.level = DC.D1;
+  view.update();
+  assert.deepEqual(view.unlockedDepthsList, ["1"]);
   view.$destroy();
+});
+
+test("depth conditions prioritize force-disable and use the unlocked portal's destination", () => {
+  const { isAbyssDepthUnlocked } = loadSource(
+    path.join(root, "core/_MOD/abyss/abyss-researches/abyssResearchSpawner.js")
+  );
+  player.abyssResearches.FLOAT.unlocked = false;
+  // Only the source needs to be unlocked to expose its destination's option.
+  assert.equal(isAbyssDepthUnlocked("1"), true);
+  assert.equal(isAbyssDepthUnlocked("0"), true);
+  player.abyssResearches.SINK.unlocked = false;
+  assert.equal(isAbyssDepthUnlocked("1"), false);
+  assert.equal(isAbyssDepthUnlocked("2"), false);
+  assert.equal(isAbyssDepthUnlocked("unknown"), false);
+  // Force-unlock works without any unlocked portals.
+  researches.C0.level = DC.D1;
+  assert.equal(isAbyssDepthUnlocked("0"), false);
+  assert.equal(isAbyssDepthUnlocked("1"), true);
+  // Force-disable also overrides a valid unlocked incoming float node.
+  player.abyssResearches.FLOAT.unlocked = true;
+  assert.equal(isAbyssDepthUnlocked("0"), false);
+  researches.C0.level = DC.D0;
+  assert.equal(isAbyssDepthUnlocked("0"), true);
+  // A depth with neither override becomes available through an incoming portal.
+  const previousDepth = researches.FLOAT.depth;
+  try {
+    researches.FLOAT.depth = "2";
+    player.abyssResearches.SINK.unlocked = true;
+    assert.equal(isAbyssDepthUnlocked("2"), true);
+  } finally {
+    researches.FLOAT.depth = previousDepth;
+  }
 });
 
 test("Empower subtabs are unlocked by their corresponding Abyss Research", t => {

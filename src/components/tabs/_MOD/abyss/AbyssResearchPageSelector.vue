@@ -1,4 +1,6 @@
 <script>
+import { abyssDepths, isAbyssDepthUnlocked } from "@/core/_MOD/abyss/abyss-researches/abyssResearchSpawner";
+
 export default {
   name: "AbyssResearchPageSelector",
   props: {
@@ -19,9 +21,7 @@ export default {
   },
   methods: {
     update() {
-      this.depthUnlockStates = Object.fromEntries(abyssDepths.map(([depth, condition]) => [depth,
-        condition() || AbyssResearches.all.some(node => node.depth === depth && node.isPortal && node.unlocked),
-      ]));
+      this.depthUnlockStates = Object.fromEntries(abyssDepths.map(([depth]) => [depth, isAbyssDepthUnlocked(depth)]));
     },
     changeTab(tabId) {
       if (player.abyssResearchCanvas.currentAbyssResearchDepth === tabId) return;

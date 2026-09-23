@@ -10,7 +10,7 @@ function getEternityStateCompleted(id) {
 }
 
 function getEmpowerCost(){
-  return 75 + 75 * getEternityTotalState()
+  return [75, 250, 600][getEternityTotalState()]
 }
 
 const baseConfig = {
@@ -168,6 +168,7 @@ const baseConfig = {
       }
       return baseInfo;
     },
+    next: ["Sink-2-Past"],
     tooltipTags: ["Empower"],
   },
 
@@ -212,7 +213,30 @@ const baseConfig = {
       }
       return baseInfo;
     },
+    next: ["Sink-2-Future"],
     tooltipTags: ["Empower"],
+  },
+
+  // Past branch
+  "Sink-2-Past": {
+    type: NODE_TYPE.SINK,
+    position: [-3, 4],
+    description(){
+      return `Sink to the deeper place... to Depth 2 (Future).`
+    },
+    target: "Float-1-Past",
+    tooltipTags: ["Link"]
+  },
+
+  // Past branch
+  "Sink-2-Future": {
+    type: NODE_TYPE.SINK,
+    position: [3, 4],
+    description(){
+      return `Sink to the deeper place... to Depth 2 (Future).`
+    },
+    target: "Float-1-Future",
+    tooltipTags: ["Link"]
   },
 };
 

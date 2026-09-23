@@ -1,9 +1,21 @@
 import { DEV } from "../../../../env";
 
 export const abyssDepths = [
-  ["0", () => !AbyssResearches.C0.completed],
-  ["1", () => AbyssResearches.C0.completed],
+  // ID / Force Unlock if / Force Disable if (takes priority over all unlock sources).
+  // Otherwise, an unlocked sink/float targeting this depth unlocks its selector option.
+  ["0", () => true, () => AbyssResearches.C0.completed],
+  ["1", () => AbyssResearches.C0.completed, () => false],
+  ["2", () => false, () => false],
 ];
+
+export function isAbyssDepthUnlocked(depth) {
+  const config = abyssDepths.find(([id]) => id === depth);
+  if (!config) return false;
+  const [, forceUnlock, forceDisable] = config;
+  if (forceDisable()) return false;
+  return forceUnlock() || AbyssResearches.all.some(node =>
+    node.isPortal && node.unlocked && node.targetNode?.depth === depth);
+}
 
 export function quickSpawnResearches(config, layer) {
   // Safety checker
@@ -126,7 +138,7 @@ export const extraAbyssResearchTooltips = {
   Depth: `* Depths are similar to "pages" Abyss Researches are at. You could find unlocked depths in the left-upper corner,
   and also quick switch depths here.`,
 
-  Link: `* Link nodes can serve as a "portal", connecting to another node, and do researches in the other side.
+  Link: `* Sink & Float nodes can serve as a "portal", connecting to another node, and do researches in the other side.
   If it connects to a new depth, it will be permanently shown in the left upper corner, and allows you to quick switch by clicking.`,
 
   Permanent: `* Permanent nodes will never reset, most of them gives QOLs or Automations. They will be marked with *.`,
@@ -145,6 +157,7 @@ export const NODE_TYPE = {
   CORE: "core",
   CORRUPTION: "corruption",
   // Bind both ends by ID: sink.target = float.id and float.target = sink.id.
+  // Set centerView: true on the clicked node to center its destination; defaults to false.
   SINK: "sink",
   FLOAT: "float",
   LINK: "link",

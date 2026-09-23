@@ -251,7 +251,7 @@ export default {
   methods: {
     handleClick() {
       const target = AbyssResearches[this.id].click();
-      if (target) this.$emit("navigate", target);
+      if (target) this.$emit("navigate", target, this.getNode.config.centerView === true);
     },
     sinkAnimationStyle(id) {
       return {
