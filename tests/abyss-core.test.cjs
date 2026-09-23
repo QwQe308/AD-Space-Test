@@ -45,6 +45,13 @@ global.GameDatabase = { space: { abyssResearches: {
   SINGLE: config("SINGLE", { restrictions: [{ requirement: () => conditionsMet }] }),
   NO_CONDITIONS: config("NO_CONDITIONS", { type: "core" }),
   A6: config("A6"), A6B: config("A6B"),
+  PORTAL_START: config("PORTAL_START", { next: ["SINK"] }),
+  SINK: config("SINK", { type: "sink", cost: undefined, target: "FLOAT", previous: ["PORTAL_START"] }),
+  FLOAT: config("FLOAT", {
+    type: "float", cost: undefined, target: "SINK", depth: "1", position: [3, -2], next: ["DEST"],
+  }),
+  DEST: config("DEST", { depth: "1", previous: ["FLOAT"], next: ["FURTHER"] }),
+  FURTHER: config("FURTHER", { depth: "1", previous: ["DEST"] }),
 } } };
 
 const root = path.resolve(__dirname, "../src");
@@ -59,11 +66,14 @@ function loadSource(filename) {
   loaded.require = name => {
     const resolved = path.resolve(path.dirname(filename), name).replace(/\.js$/, "");
     if (resolved === path.join(root, "core/constants")) return { DC };
+    if (resolved === path.join(root, "core/globals")) {
+      return { AbyssResearchHelperTools: global.AbyssResearchHelperTools };
+    }
     if (resolved === path.join(root, "core/utils")) {
       return loadSource(path.join(root, "core/game-mechanics/game-mechanic.js"));
     }
     if (resolved === path.join(root, "core/_MOD/abyss/abyss-researches/abyssResearchSpawner")) {
-      return { ...loadSource(`${resolved}.js`), abyssDepths: [["0"]],
+      return { ...loadSource(`${resolved}.js`), abyssDepths: [["0"], ["1"]],
         globalAbyssResearchSpeed: () => new Decimal(0) };
     }
     if (resolved === path.join(root, "env")) return { DEV: false };
@@ -100,6 +110,7 @@ const { AbyssResearches: researches, AbyssResearchHelperTools: helper } = loadSo
   path.join(root, "core/_MOD/abyss/abyss-researches/abyssResearch.js")
 );
 global.AbyssResearches = researches;
+global.AbyssResearchHelperTools = helper;
 global.getEffectiveSpace = () => new Decimal(0);
 const { tabs } = loadSource(path.join(root, "core/secret-formula/tabs.js"));
 
@@ -113,12 +124,133 @@ beforeEach(() => {
       restrictionData: (research.restrictions ?? []).map(() => ({ completion: false, stillCompletable: true })),
     }])),
     activeAbyssResearches: new Set(),
+    abyssResearchCanvas: { currentAbyssResearchDepth: "0" },
     abyssResearchTooltipsShown: new Set(),
     space: new Decimal(0),
     records: { thisReality: { maxSpace: new Decimal(0), maxEffectiveSpace: new Decimal(0) } },
     timestudy: { theorem: new Decimal(100), maxTheorem: new Decimal(100) },
     reality: { perkPoints: new Decimal(10) },
   };
+});
+
+test("unlocking either portal end unlocks its partner and neighboring research without recursive loops", () => {
+  for (const first of ["SINK", "FLOAT"]) {
+    for (const id of ["SINK", "FLOAT", "DEST", "FURTHER"]) {
+      Object.assign(player.abyssResearches[id], { unlocked: false, shown: false });
+    }
+    researches[first].unlock();
+    assert.equal(researches.SINK.unlocked, true);
+    assert.equal(researches.FLOAT.unlocked, true);
+    assert.equal(researches.DEST.unlocked, true);
+    assert.equal(researches.FURTHER.unlocked, false);
+    assert.equal(player.abyssResearches.FURTHER.shown, true);
+  }
+});
+
+test("research completion propagates through portals to another depth", () => {
+  for (const id of ["SINK", "FLOAT", "DEST", "FURTHER"]) {
+    Object.assign(player.abyssResearches[id], { unlocked: false, shown: false });
+  }
+  researches.PORTAL_START.addProgress(new Decimal(100));
+  assert.equal(researches.FLOAT.unlocked, true);
+  assert.equal(researches.DEST.unlocked, true);
+  assert.equal(researches.FURTHER.unlocked, false);
+  // Loading a save with one end unlocked restores the same graph through normal status updates.
+  player.abyssResearches.FLOAT.unlocked = false;
+  researches.SINK.updateCompletionWithCondition();
+  assert.equal(researches.FLOAT.unlocked, true);
+});
+
+test("portal navigation works both ways with a full queue and never starts research", () => {
+  player.activeAbyssResearches.add("SINGLE");
+  player.abyssResearches.SINK.unlocked = false;
+  assert.equal(researches.SINK.click(), undefined);
+  assert.equal(player.abyssResearchCanvas.currentAbyssResearchDepth, "0");
+  researches.SINK.unlock();
+  assert.equal(researches.SINK.click(), researches.FLOAT);
+  assert.equal(player.abyssResearchCanvas.currentAbyssResearchDepth, "1");
+  assert.equal(researches.FLOAT.click(), researches.SINK);
+  assert.equal(player.abyssResearchCanvas.currentAbyssResearchDepth, "0");
+  for (const node of [researches.SINK, researches.FLOAT]) {
+    node.start();
+    node.addProgress(new Decimal(100));
+    assert.equal(node.canResearch, false);
+    assert.equal(node.isAutoResearching, false);
+    assert.equal(node.completed, false);
+    assert.equal(node.percentage, 0);
+    assert.ok(node.progress.eq(0));
+  }
+  assert.deepEqual([...player.activeAbyssResearches], ["SINGLE"]);
+});
+
+test("portal configs reject missing, same-type and non-reciprocal targets", () => {
+  const { validateAbyssPortalTargets, NODE_TYPE } = loadSource(
+    path.join(root, "core/_MOD/abyss/abyss-researches/abyssResearchSpawner.js")
+  );
+  const pair = {
+    S: { type: NODE_TYPE.SINK, target: "F" },
+    F: { type: NODE_TYPE.FLOAT, target: "S" },
+  };
+  assert.doesNotThrow(() => validateAbyssPortalTargets(pair));
+  assert.throws(() => validateAbyssPortalTargets({ S: pair.S }), /must target/u);
+  assert.throws(() => validateAbyssPortalTargets({ ...pair, F: { type: "sink", target: "S" } }), /must target/u);
+  assert.throws(() => validateAbyssPortalTargets({ ...pair, F: { type: "float", target: "OTHER" } }), /must target/u);
+});
+
+test("portal navigation centers the destination at different zooms and stops dragging", () => {
+  global.Vector = class {
+    constructor(x, y) { this.x = x; this.y = y; }
+  };
+  const component = loadSource(path.join(root, "components/tabs/_MOD/abyss/AbyssResearchTab.vue")).default;
+  for (const zoom of [0.33, 1, 3]) {
+    const view = {
+      depth: "0", zoomLevel: zoom, isDragging: true,
+      $refs: { canvasContainer: { getBoundingClientRect: () => ({ width: 1200, height: 700 }) } },
+      get getCurrentNodes() { return researches.all.filter(node => node.depth === this.depth).map(node => node.id); },
+      endDrag: component.methods.endDrag,
+      updateCanvasTransform: component.methods.updateCanvasTransform,
+    };
+    component.methods.navigateToNode.call(view, researches.FLOAT);
+    assert.equal(view.depth, "1");
+    assert.equal(view.isDragging, false);
+    assert.equal(view.zoomLevel, zoom);
+    assert.equal(view.offset.x + (researches.FLOAT.x - 5000) * zoom, 600);
+    assert.equal(view.offset.y + (researches.FLOAT.y - 5000) * zoom, 350);
+    assert.ok(view.shownNodes.includes("FLOAT"));
+    component.watch.offset.call(view, view.offset);
+    assert.equal(player.abyssResearchCanvas.offsetX, view.offset.x);
+    assert.equal(player.abyssResearchCanvas.offsetY, view.offset.y);
+  }
+});
+
+test("portal visuals reverse for float nodes and clicks forward their navigation destination", () => {
+  const component = loadSource(path.join(root, "components/tabs/_MOD/abyss/AbyssResearchNode.vue")).default;
+  for (const id of ["SINK", "FLOAT"]) {
+    const view = new (Vue.extend(component))({ propsData: { id } });
+    view.update();
+    assert.equal(view.hasProgress, false);
+    assert.doesNotMatch(view.getMainInfosTooltip, /Progress:|Forever/u);
+    assert.equal(view.sinkAnimationStyle(1)["animation-direction"], id === "FLOAT" ? "reverse" : "normal");
+    let destination;
+    view.$on("navigate", node => { destination = node; });
+    view.handleClick();
+    assert.equal(destination, researches[researches[id].target]);
+    view.$destroy();
+  }
+});
+
+test("portal destinations unlock their depth in the page selector", () => {
+  const component = loadSource(path.join(root, "components/tabs/_MOD/abyss/AbyssResearchPageSelector.vue")).default;
+  global.abyssDepths = [["0", () => true], ["1", () => false]];
+  player.abyssResearches.FLOAT.unlocked = false;
+  const view = new (Vue.extend(component))({ propsData: { depth: "0" } });
+  view.update();
+  assert.deepEqual(view.unlockedDepthsList, ["0"]);
+  player.abyssResearches.SINK.unlocked = false;
+  researches.SINK.unlock();
+  view.update();
+  assert.deepEqual(view.unlockedDepthsList, ["0", "1"]);
+  view.$destroy();
 });
 
 test("Empower subtabs are unlocked by their corresponding Abyss Research", t => {
@@ -315,7 +447,7 @@ test("Corruption tooltips show live resource costs instead of research progress 
   };
   global.format = value => String(value);
   const component = loadSource(path.join(root, "components/tabs/_MOD/abyss/AbyssResearchNode.vue")).default;
-  const vm = new (Vue.extend(component))({ propsData: { id: "B3" } });
+const vm = new (Vue.extend(component))({ propsData: { id: "B3" } });
   vm.update();
   assert.equal(vm.hasProgress, false);
   assert.ok(vm.getMainInfosTooltip.includes(`${cost} Time Theorems`));

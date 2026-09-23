@@ -18,7 +18,7 @@ class AbyssResearchClass extends GameMechanicState {
     this.tooltipTags = config.tooltipTags;
     this.hasRestriction = Boolean(config.restrictions);
     this.target = config.target;
-    if (!config.cost && !config.costs && this.type !== "sink") this.scalingType = config.scaling.type;
+    if (!config.cost && !config.costs && !this.isPortal) this.scalingType = config.scaling.type;
 
     if (config.restrictions) {
       try {
@@ -34,7 +34,22 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get ignoredOnUnlocking() {
-    return (this.type === "core" && this.completed) || this.type === "sink";
+    return (this.type === "core" && this.completed) || this.isPortal;
+  }
+
+  get isPortal() {
+    return this.type === "sink" || this.type === "float";
+  }
+
+  get targetNode() {
+    if (!this.isPortal) return undefined;
+    const target = AbyssResearches[this.target];
+    const oppositeType = this.type === "sink" ? "float" : "sink";
+    return target?.type === oppositeType && target.target === this.id ? target : undefined;
+  }
+
+  get connectedNodes() {
+    return [...this.next, ...this.previous, ...(this.targetNode ? [this.targetNode.id] : [])];
   }
 
   get data() {
@@ -90,6 +105,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get percentage() {
+    if (this.isPortal) return 0;
     if (this.level.gte(this.maxLevel)) return 1;
     if (this.type === "corruption") return 0;
     return this.progress.div(this.cost).min(1).toNumber();
@@ -100,14 +116,14 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   set progress(data) {
-    if (this.type === "corruption") return;
+    if (this.type === "corruption" || this.isPortal) return;
     this.data.progress = data;
     if (!(this.type === "single")) this.updateScaling();
     this.updateLevel();
   }
 
   get canResearch() {
-    if (this.type === "corruption") return false;
+    if (this.type === "corruption" || this.isPortal) return false;
     return player.activeAbyssResearches.size < this.maxConcurrent && this.unlocked && this.level.lt(this.maxLevel);
   }
 
@@ -141,7 +157,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get isAutoResearching() {
-    if (this.type === "corruption") return false;
+    if (this.type === "corruption" || this.isPortal) return false;
     return this.linkedAbyssResearchCore ? this.linkedAbyssResearchCore.completed : false;
   }
 
@@ -154,6 +170,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   get maxed() {
+    if (this.isPortal) return false;
     return this.level.gte(this.maxLevel);
   }
 
@@ -198,7 +215,7 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   updateLevel() {
-    if (this.type === "corruption") return;
+    if (this.type === "corruption" || this.isPortal) return;
     const preLevel = this.level;
     const isFirstLevel = preLevel.eq(0);
     switch (this.type) {
@@ -248,10 +265,10 @@ class AbyssResearchClass extends GameMechanicState {
       player.abyssResearchTooltipsShown.add(tag);
     }
 
-    // This shows nearby nodes, 2 layers away at maxiumn, and unlocks nodes next to it.
+    // This shows nearby nodes, 2 layers away at max, and unlocks nodes next to it.
     const recorder = [];
     const callback = (start, layer) => {
-      for (const node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+      for (const node of AbyssResearches[start].connectedNodes) {
         if (recorder.includes(node)) continue;
         recorder.push(node);
         if (layer === 1) AbyssResearches[node].unlock();
@@ -264,8 +281,14 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   unlock() {
+    const wasUnlocked = this.unlocked;
     player.abyssResearches[this.id].unlocked = true;
     player.abyssResearches[this.id].shown = true;
+    // Mark this end first so reciprocal portal bindings cannot recurse indefinitely.
+    if (this.isPortal && !wasUnlocked) {
+      if (this.targetNode && !this.targetNode.unlocked) this.targetNode.unlock();
+      this.updateCompletion();
+    }
   }
 
   show() {
@@ -273,13 +296,21 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   updateCompletionWithCondition() {
-    if (this.level.gte(1)) return this.updateCompletion();
+    if (this.isPortal && this.unlocked) {
+      if (this.targetNode && !this.targetNode.unlocked) this.targetNode.unlock();
+      this.updateCompletion();
+      return;
+    }
+    if (this.level.gte(1)) {
+      this.updateCompletion();
+      return;
+    }
     if (!player.abyssResearches[this.id].unlocked) return;
 
     // This shows nearby nodes, 1 layers away at maxiumn.
     const recorder = [];
     const callback = (start, layer) => {
-      for (const node of [...AbyssResearches[start].next, ...AbyssResearches[start].previous]) {
+      for (const node of AbyssResearches[start].connectedNodes) {
         if (recorder.includes(node)) continue;
         recorder.push(node);
         AbyssResearches[node].show();
@@ -315,11 +346,18 @@ class AbyssResearchClass extends GameMechanicState {
   }
 
   click() {
-    if (!this.unlocked) return;
-    if (this.type === "sink") player.abyssResearchCanvas.currentAbyssResearchDepth = this.target;
-    else if (this.type === "corruption") this.purchase();
+    if (!this.unlocked) return undefined;
+    if (this.isPortal) {
+      const target = this.targetNode;
+      if (!target) return undefined;
+      target.unlock();
+      player.abyssResearchCanvas.currentAbyssResearchDepth = target.depth;
+      return target;
+    }
+    if (this.type === "corruption") this.purchase();
     else if (this.isResearching) this.stop();
     else this.start();
+    return undefined;
   }
 
   addProgress(data) {
@@ -398,7 +436,8 @@ class AbyssResearchHelper {
       const Depth = Core.depth;
       const Efficiency = Core.effectValue;
       for (const research in this.sortByDepth[Depth]) {
-        if (AbyssResearches[research].maxed || AbyssResearches[research].type === "corruption") continue;
+        if (AbyssResearches[research].maxed || AbyssResearches[research].type === "corruption" ||
+          AbyssResearches[research].isPortal) continue;
         AbyssResearches[research].addProgress(
           AbyssResearches[research].researchSpeed.mul(Efficiency).mul(diff).div(1000)
         );

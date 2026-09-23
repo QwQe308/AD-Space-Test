@@ -67,8 +67,8 @@ export function abyssResearchSafetyChecker(config, layer) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No cost defined)`);
         error = true;
       }
-    } else if (config[i].type === "sink") {
-      if (!config[i].target) {
+    } else if (config[i].type === "sink" || config[i].type === "float") {
+      if (typeof config[i].target !== "string" || !config[i].target) {
         console.error(`*Config error found in Abyss Research ${i} (layer ${layer}) (No target defined)`);
         error = true;
       }
@@ -85,6 +85,17 @@ export function globalAbyssResearchSpeed() {
   let abyssResearchSpeed = player.records.thisReality.maxEffectiveSpace.pow(0.5).div(10);
   abyssResearchSpeed = abyssResearchSpeed.timesEffectsOf(AbyssResearches.A5);
   return abyssResearchSpeed;
+}
+
+export function validateAbyssPortalTargets(configs) {
+  for (const [id, config] of Object.entries(configs)) {
+    if (config.type !== "sink" && config.type !== "float") continue;
+    const target = configs[config.target];
+    const oppositeType = config.type === "sink" ? "float" : "sink";
+    if (target?.type !== oppositeType || target.target !== id) {
+      throw new Error(`Abyss portal ${id} must target a ${oppositeType} node which targets ${id} back`);
+    }
+  }
 }
 
 export const extraAbyssResearchTooltips = {
@@ -133,6 +144,9 @@ export const NODE_TYPE = {
   UNLIMITED: "unlimited",
   CORE: "core",
   CORRUPTION: "corruption",
+  // Bind both ends by ID: sink.target = float.id and float.target = sink.id.
+  SINK: "sink",
+  FLOAT: "float",
   LINK: "link",
 };
 

@@ -19,7 +19,9 @@ export default {
   },
   methods: {
     update() {
-      this.depthUnlockStates = abyssDepths.map(x => x[1]());
+      this.depthUnlockStates = Object.fromEntries(abyssDepths.map(([depth, condition]) => [depth,
+        condition() || AbyssResearches.all.some(node => node.depth === depth && node.isPortal && node.unlocked),
+      ]));
     },
     changeTab(tabId) {
       if (player.abyssResearchCanvas.currentAbyssResearchDepth === tabId) return;

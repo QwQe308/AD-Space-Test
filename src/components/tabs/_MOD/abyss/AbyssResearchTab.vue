@@ -90,9 +90,9 @@ export default {
 
   methods: {
     update() {
+      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
       this.shownNodes = this.getCurrentNodes.filter(x => player.abyssResearches[x].shown);
       this.activeNodes = player.activeAbyssResearches;
-      this.depth = player.abyssResearchCanvas.currentAbyssResearchDepth;
     },
 
     updateCanvasTransform() {
@@ -136,6 +136,18 @@ export default {
       this.depth = newVal;
     },
 
+    navigateToNode(target) {
+      this.endDrag();
+      this.depth = target.depth;
+      const { width, height } = this.$refs.canvasContainer.getBoundingClientRect();
+      // The canvas is offset by -5000 px and scales around its center at (5000, 5000).
+      this.offset = new Vector(
+        width / 2 - (target.x - 5000) * this.zoomLevel,
+        height / 2 - (target.y - 5000) * this.zoomLevel
+      );
+      this.shownNodes = this.getCurrentNodes.filter(id => player.abyssResearches[id].shown);
+    },
+
     relocate() {
       this.offset = new Vector(750, 333);
       this.zoomLevel = 1;
@@ -163,6 +175,7 @@ export default {
           v-for="id in shownNodes"
           :id="id"
           :key="id"
+          @navigate="navigateToNode"
         />
         <!-- lines -->
         <svg

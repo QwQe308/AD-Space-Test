@@ -31,6 +31,9 @@ export default {
     };
   },
   computed: {
+    isPortal() {
+      return this.getNode.isPortal;
+    },
     getMainInfosTooltip() {
       let tooltipContent = `${this.id}`;
       if (this.type === "corruption") {
@@ -43,7 +46,7 @@ export default {
         }
         return `${tooltipContent}`;
       }
-      if (!this.isMaxed && this.type !== "sink") {
+      if (!this.isMaxed && !this.isPortal) {
         switch (AbyssResearches[this.id].type) {
           case "single":
             tooltipContent += `<br>----------[ ${formatPercents(this.percentage)} ]----------`;
@@ -151,7 +154,7 @@ export default {
     getTooltip() {
       let tooltipContent = this.getMainInfosTooltip;
 
-      if (this.type !== "core" && this.type !== "sink") tooltipContent += `<br><br>`;
+      if (this.type !== "core" && !this.isPortal) tooltipContent += `<br><br>`;
       else tooltipContent += "<br>";
 
       tooltipContent += `<span style="color:#cccccc">${AbyssResearches[this.id].description}</span>`;
@@ -247,11 +250,13 @@ export default {
   },
   methods: {
     handleClick() {
-      AbyssResearches[this.id].click();
+      const target = AbyssResearches[this.id].click();
+      if (target) this.$emit("navigate", target);
     },
     sinkAnimationStyle(id) {
       return {
         "animation-delay": `${1 - id}s`,
+        "animation-direction": this.type === "float" ? "reverse" : "normal",
       };
     },
     calcTimeToNext(researchSpeed) {
@@ -264,7 +269,7 @@ export default {
     update() {
       this.type = this.getNode.type;
       this.unlocked = this.getNode.unlocked;
-      if (this.type === "sink") return;
+      if (this.isPortal) return;
       this.percentage = this.getNode.percentage;
       this.isMaxed = this.getNode.maxed;
       this.level.copyFrom(this.getNode.level);
@@ -326,9 +331,9 @@ export default {
       <div v-if="levelText" class="research-node-level" :style="getTextStyle">
         {{ levelText }}
       </div>
-      <!-- For "Sink" type -->
-      <div v-if="type === 'sink'" class="sink-animation">
-        <div v-for="i in 3" :style="sinkAnimationStyle(i)" class="sink-animation-block" />
+      <!-- Paired portals use the same animation in opposite directions. -->
+      <div v-if="isPortal" class="sink-animation">
+        <div v-for="i in 3" :key="i" :style="sinkAnimationStyle(i)" class="sink-animation-block" />
       </div>
     </div>
   </div>
@@ -430,7 +435,8 @@ export default {
     }
   }
 
-  .sink & {
+  .sink &,
+  .float & {
     background-color: rgb(125, 100, 150);
   }
 }
