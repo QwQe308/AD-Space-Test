@@ -77,6 +77,14 @@ class PastEmpowerClass {
     this.data.simulationTickThisReset = 0;
   }
 
+  get effectiveSimulationTime() {
+    return Math.min(this.data.simulationTrueTimeThisReset, this.data.simulationTickThisReset * 15);
+  }
+
+  get simulationResetTimeRemaining() {
+    return Math.max(2000 - this.effectiveSimulationTime, 0);
+  }
+
   updateSimulationAfterTick(diff, trueDiff) {
     if (!this.simulating) return;
     const CurrentSimulationConfig = this.simulationConfig;
@@ -84,9 +92,7 @@ class PastEmpowerClass {
     this.data.simulationTrueTimeThisReset += trueDiff;
     this.data.simulationTickThisReset++;
     // Avoiding largr diff periods such as offline progress
-    let fakeSimulationTime = this.data.simulationTrueTimeThisReset;
-    if (fakeSimulationTime > this.data.simulationTickThisReset * 15)
-      fakeSimulationTime = this.data.simulationTickThisReset * 15;
+    const fakeSimulationTime = this.effectiveSimulationTime;
     // Handle simulation
     if (CurrentSimulationConfig.checkSuccess()) {
       if (fakeSimulationTime < 2000) {
@@ -98,7 +104,7 @@ class PastEmpowerClass {
       CurrentSimulationConfig.reset();
       this.resetSimulationTimer();
     } else if (fakeSimulationTime > 3000) {
-      this.simulationSpeed = this.simulationSpeed.mul(0.9 ** (trueDiff / 3000)).max(1);
+      this.simulationSpeed = this.simulationSpeed.mul(0.9 ** (Math.min(trueDiff, 200) / 3000)).max(1);
     }
   }
 

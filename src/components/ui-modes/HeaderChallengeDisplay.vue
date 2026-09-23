@@ -1,4 +1,6 @@
 <script>
+import { PastEmpower } from "@/core/_MOD/empowers/past/pastEmpower";
+
 import FailableEcText from "./FailableEcText";
 import PrimaryButton from "@/components/PrimaryButton";
 
@@ -16,6 +18,10 @@ export default {
       exitText: "",
       resetCelestial: false,
       inPelle: false,
+      simulation: null,
+      simulationResetTimeRemaining: 0,
+      simulationSpeed: new Decimal(1),
+      simulationCanReset: false,
     };
   },
   computed: {
@@ -109,20 +115,30 @@ export default {
       return names;
     },
     isVisible() {
-      return this.infinityUnlocked || this.activeChallengeNames.length > 0;
+      return this.infinityUnlocked || this.activeChallengeNames.length > 0 || Boolean(this.simulation);
+    },
+    simulationDisplay() {
+      if (!this.simulation) return "";
+      let countdown = this.simulationCanReset ? "reset pending" : "waiting for reset requirements";
+      if (this.simulationResetTimeRemaining > 0) {
+        countdown = `reset in ~${format(this.simulationResetTimeRemaining / 1000, 2, 2)} sec`;
+      }
+      return `${this.simulation} Simulation (${countdown}, speed: ${formatX(this.simulationSpeed, 2, 2)})`;
     },
     isInFailableEC() {
       return this.activeChallengeNames.some(str => str.match(/Eternity Challenge (4|12)/gu));
     },
     challengeDisplay() {
-      if (this.inPelle && this.activeChallengeNames.length > 0) {
-        return `${this.activeChallengeNames.join(" + ")} in a Doomed Reality. Good luck.`;
+      const names = [...this.activeChallengeNames];
+      if (this.simulation) names.push(this.simulationDisplay);
+      if (this.inPelle && names.length > 0) {
+        return `${names.join(" + ")} in a Doomed Reality. Good luck.`;
       }
       if (this.inPelle) return "a Doomed Reality. Good luck.";
-      if (this.activeChallengeNames.length === 0) {
+      if (names.length === 0) {
         return "the Antimatter Universe (no active challenges)";
       }
-      return this.activeChallengeNames.join(" + ");
+      return names.join(" + ");
     },
   },
   methods: {
@@ -137,6 +153,12 @@ export default {
       this.exitText = this.exitDisplay();
       this.resetCelestial = player.options.retryCelestial;
       this.inPelle = Pelle.isDoomed;
+      this.simulation = PastEmpower.simulating;
+      if (this.simulation) {
+        this.simulationResetTimeRemaining = PastEmpower.simulationResetTimeRemaining;
+        this.simulationSpeed.copyFrom(PastEmpower.simulationSpeed);
+        this.simulationCanReset = PastEmpower.simulationConfig.checkSuccess();
+      }
     },
     // Process exit requests from the inside out; Challenges first, then dilation, then Celestial Reality. If the
     // relevant option is toggled, we pass a bunch of information over to a modal - otherwise we immediately exit
@@ -251,7 +273,7 @@ export default {
 <style scoped>
 .l-game-header__challenge-text {
   display: flex;
-  height: 2rem;
+  min-height: 2rem;
   top: 50%;
   justify-content: center;
   align-items: center;
