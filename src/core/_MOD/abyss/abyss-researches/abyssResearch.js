@@ -267,11 +267,13 @@ class AbyssResearchClass extends GameMechanicState {
     }
 
     // This shows nearby nodes, 2 layers away at max, and unlocks nodes next to it.
-    const recorder = [];
+    const distances = new Map([[this.id, 0]]);
     const callback = (start, layer) => {
       for (const node of AbyssResearches[start].connectedNodes) {
-        if (recorder.includes(node)) continue;
-        recorder.push(node);
+        // A portal or another branch may reach this node by a longer path first.
+        // Revisit it when the shorter path upgrades visibility to an unlock.
+        if ((distances.get(node) ?? Infinity) <= layer) continue;
+        distances.set(node, layer);
         if (layer === 1) AbyssResearches[node].unlock();
         else AbyssResearches[node].show();
         if (layer < 2) callback(node, layer + (AbyssResearches[node].ignoredOnUnlocking ? 0 : 1));
