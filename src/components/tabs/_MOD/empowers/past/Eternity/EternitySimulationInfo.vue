@@ -94,11 +94,6 @@ th {
   color: #888;
 }
 
-table {
-  width: 100%;
-  table-layout: fixed;
-}
-
 .locked-text {
   display: inline-block;
   filter: blur(3px);

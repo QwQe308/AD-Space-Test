@@ -118,8 +118,7 @@ export default {
     },
     simulationDisplay() {
       if (!this.simulation) return "";
-      const status = this.simulationGenerating ? "generating resources" : "waiting for reset requirements";
-      return `${this.simulation} Simulation (${status}, speed: ${formatX(this.simulationSpeed, 2, 2)})`;
+      return `${this.simulation} Simulation (speed: ${formatX(this.simulationSpeed, 2, 2)})`;
     },
     isInFailableEC() {
       return this.activeChallengeNames.some(str => str.match(/Eternity Challenge (4|12)/gu));
