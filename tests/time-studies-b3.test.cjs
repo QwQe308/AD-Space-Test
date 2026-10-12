@@ -51,6 +51,7 @@ function load(relative) {
 }
 load("core/constants.js");
 load("core/extensions.js");
+load("core/game-mechanics/effects.js");
 Currency = load("core/currency.js").Currency;
 global.Currency = Currency;
 const originalInterval = global.setInterval;
@@ -90,6 +91,7 @@ const {
 global.EternityChallenges = configuredEternityChallenges;
 const depth1 = load("core/_MOD/abyss/abyss-researches/configs/abyss-research-depth-1.js").AbyssResearchesDepth1;
 const { B3 } = depth1;
+const { globalAbyssResearchSpeed } = load("core/_MOD/abyss/abyss-researches/abyssResearchSpawner.js");
 GameDatabase.space = { abyssResearches: depth1 };
 global.mapGameDataToObject = (configs, create) => {
   const states = Object.fromEntries(Object.entries(configs).map(([id, config]) => [id, create(config)]));
@@ -426,6 +428,44 @@ test("Corruption totals persist across saving and cannot fund a tree import", ()
   respecTimeStudies(true);
   assert.ok(Currency.timeTheorems.value.eq(0));
   assert.ok(Currency.timeTheorems.max.eq(500));
+});
+
+test("B1 applies a live capped total-TT bonus to Abyss speed only after completion", () => {
+  global.AbyssResearches = researches;
+  player.records = { thisReality: { maxEffectiveSpace: new Decimal(40000) } };
+  assert.equal(depth1.B1.type, "single");
+  assert.ok(researches.B1.maxLevel.eq(1));
+  assert.ok(researches.B1.cost.eq(5000));
+  for (const [tt, multiplier] of [[0, 1], [1, 1.01], [50, 1.5], [999, 10.99],
+    [1000, 11], [1001, 11], ["1e400", 11]]) {
+    Currency.timeTheorems.value = new Decimal(tt);
+    assert.ok(researches.B1.effectValue.eq_tolerance(multiplier, 1e-12));
+    assert.ok(globalAbyssResearchSpeed().eq_tolerance(20, 1e-12));
+  }
+  researches.B1.level = new Decimal(1);
+  assert.ok(globalAbyssResearchSpeed().eq_tolerance(220, 1e-12));
+  Currency.timeTheorems.value = new Decimal(50);
+  assert.ok(globalAbyssResearchSpeed().eq_tolerance(30, 1e-12));
+  // Legacy unlimited levels do not multiply the new single-completion reward.
+  researches.B1.level = new Decimal(12);
+  assert.ok(globalAbyssResearchSpeed().eq_tolerance(30, 1e-12));
+  researches.B1.level = new Decimal(0);
+  assert.ok(globalAbyssResearchSpeed().eq_tolerance(20, 1e-12));
+});
+
+test("B1 counts spent study and Corruption TT and is unchanged by respec", () => {
+  global.AbyssResearches = researches;
+  researches.B1.level = new Decimal(1);
+  player.timestudy.studies = [11];
+  player.timestudy.corruptionTTSpent = new Decimal(75);
+  Currency.timeTheorems.value = new Decimal(24);
+  assert.ok(Currency.timeTheorems.max.eq(100));
+  assert.ok(researches.B1.effectValue.eq(2));
+  respecTimeStudies(true);
+  assert.ok(Currency.timeTheorems.value.eq(25));
+  assert.ok(researches.B1.effectValue.eq(2));
+  Currency.timeTheorems.reset();
+  assert.ok(researches.B1.effectValue.eq(1));
 });
 
 test("resetting TT clears Corruption accounting for the next Reality", () => {

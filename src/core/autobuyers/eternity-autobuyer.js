@@ -14,7 +14,7 @@ export class EternityAutobuyerState extends AutobuyerState {
   }
 
   get mode() {
-    return this.data.mode;
+    return this.hasAdditionalModes ? this.data.mode : AUTO_ETERNITY_MODE.AMOUNT;
   }
 
   set mode(value) {
@@ -54,7 +54,7 @@ export class EternityAutobuyerState extends AutobuyerState {
   }
 
   get hasAdditionalModes() {
-    return RealityUpgrade(13).isBought || AbyssResearches["Present-Future"].isEffectActive;
+    return RealityUpgrade(13).isBought;
   }
 
   autoEternitiesAvailable(considerMilestoneReached) {

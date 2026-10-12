@@ -728,6 +728,7 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   global.PlayerProgress.imaginaryUnlocked = () => true;
   global.AbyssResearches = {
     A1: mockEffect(2), A3: mockEffect(3), A5: mockEffect(4), A9: mockEffect(5), A22: mockEffect(10000),
+    B1: mockEffect(21),
     C0: { completed: false }
   };
   global.SpaceResearchRifts = {
@@ -767,8 +768,11 @@ test("space, research speed and conversion breakdowns reconstruct the live formu
   AbyssResearches.A22.canBeApplied = false;
   assertDecimalClose(boostedSpeed.div(speed.globalResearchSpeed()), 10000);
   assert.equal(RS.A22.isActive(), false);
-  assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5 }), ARS.total.multValue());
+  assertDecimalClose(breakdownProduct({ base: ARS.base, A5: ARS.A5, B1: ARS.B1 }), ARS.total.multValue());
   assertDecimalClose(ARS.base.multValue(), 20);
+  assertDecimalClose(ARS.total.multValue(), 1680);
+  AbyssResearches.B1.canBeApplied = false;
+  assert.equal(ARS.B1.isActive(), false);
   assertDecimalClose(ARS.total.multValue(), 80);
   assertDecimalClose(breakdownProduct(Object.fromEntries(
     ["SR22", "A9", "spaceDilation", "lightWhite", "spaceChallenge3", "spaceDivisorPercentage"]

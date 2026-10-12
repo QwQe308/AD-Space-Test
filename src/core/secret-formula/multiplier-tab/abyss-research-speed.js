@@ -17,4 +17,5 @@ export const ARS = {
     icon: MultiplierTabIcons.SPACE,
   },
   A5: abyssResearch("A5", "Research Speed from Tickspeed Upgrades"),
+  B1: abyssResearch("B1", "Research Speed from Total Time Theorems"),
 };

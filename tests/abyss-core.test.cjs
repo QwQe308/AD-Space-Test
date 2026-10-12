@@ -343,18 +343,79 @@ test("Past-Present adds a concurrent research slot and stacks with both existing
   assert.equal(researches.NEXT.maxConcurrent, 3);
 });
 
-test("Present-Future unlocks existing advanced Eternity modes independently of Reality upgrade 13", () => {
+test("Present-Future unlocks TD and 5xEP autobuyers without advanced Eternity modes", () => {
   const { EternityAutobuyerState } = loadSource(path.join(root, "core/autobuyers/eternity-autobuyer.js"));
+  const { TimeDimensionAutobuyerState } = loadSource(path.join(root, "core/autobuyers/time-dimension-autobuyer.js"));
+  const { EPMultAutobuyerState } = loadSource(path.join(root, "core/autobuyers/prestige-currency-multiplier-autobuyer.js"));
   const autobuyer = new EternityAutobuyerState();
+  const timeDimensions = Array.from({ length: 8 }, (_, index) => new TimeDimensionAutobuyerState(index + 1));
+  const epMult = new EPMultAutobuyerState();
   let realityUpgradeBought = false;
   global.RealityUpgrade = id => ({ isBought: id === 13 && realityUpgradeBought });
+  global.Pelle = { isDoomed: false };
+  global.PelleUpgrade = { TDAutobuyers: { canBeApplied: false } };
+  const checkBuyers = unlocked => {
+    assert.ok(timeDimensions.every(buyer => buyer.isUnlocked === unlocked));
+    assert.equal(epMult.isUnlocked, unlocked);
+  };
+  checkBuyers(false);
   assert.equal(autobuyer.hasAdditionalModes, false);
   researches["Present-Future"].addProgress(depth1["Present-Future"].cost);
-  assert.equal(autobuyer.hasAdditionalModes, true);
+  checkBuyers(true);
+  assert.equal(autobuyer.hasAdditionalModes, false);
+  Pelle.isDoomed = true;
+  checkBuyers(false);
+  PelleUpgrade.TDAutobuyers.canBeApplied = true;
+  assert.ok(timeDimensions.every(buyer => buyer.isUnlocked));
+  assert.equal(epMult.isUnlocked, false);
+  Pelle.isDoomed = false;
   researches["Present-Future"].reset();
+  checkBuyers(false);
   assert.equal(autobuyer.hasAdditionalModes, false);
   realityUpgradeBought = true;
+  checkBuyers(true);
   assert.equal(autobuyer.hasAdditionalModes, true);
+});
+
+test("legacy advanced Eternity modes fall back to amount until Reality upgrade 13 is bought", () => {
+  const { EternityAutobuyerState } = loadSource(path.join(root, "core/autobuyers/eternity-autobuyer.js"));
+  global.AUTO_ETERNITY_MODE = { AMOUNT: 0, TIME: 1, X_HIGHEST: 2 };
+  let bought = false;
+  global.RealityUpgrade = () => ({ isBought: bought });
+  const autobuyer = new EternityAutobuyerState();
+  player.auto = { eternity: { mode: AUTO_ETERNITY_MODE.TIME } };
+  researches["Present-Future"].level = DC.D1;
+  assert.equal(autobuyer.mode, AUTO_ETERNITY_MODE.AMOUNT);
+  bought = true;
+  assert.equal(autobuyer.mode, AUTO_ETERNITY_MODE.TIME);
+});
+
+test("Present-Future 5xEP automation purchases while active and stops after losing the unlock", () => {
+  const { EPMultAutobuyerState } = loadSource(path.join(root, "core/autobuyers/prestige-currency-multiplier-autobuyer.js"));
+  global.RealityUpgrade = () => ({ isBought: false });
+  global.Pelle = { isDoomed: false };
+  player.auto = { epMultBuyer: { isActive: true } };
+  let purchases = 0;
+  let upgradeApplications = 0;
+  global.applyEU2 = () => upgradeApplications++;
+  global.EternityUpgrade = { epMult: { buyMax: auto => {
+    assert.equal(auto, true);
+    purchases++;
+  } } };
+  const autobuyer = new EPMultAutobuyerState();
+  autobuyer.tick();
+  assert.equal(purchases, 0);
+  researches["Present-Future"].level = DC.D1;
+  autobuyer.tick();
+  assert.equal(purchases, 1);
+  autobuyer.isActive = false;
+  autobuyer.tick();
+  assert.equal(purchases, 1);
+  autobuyer.isActive = true;
+  researches["Present-Future"].reset();
+  autobuyer.tick();
+  assert.equal(purchases, 1);
+  assert.equal(upgradeApplications, 1);
 });
 
 test("Empower subtabs are unlocked by their corresponding Abyss Research", t => {

@@ -16,7 +16,7 @@ function getEmpowerCost(){
 const baseConfig = {
   // ARs taken from depth 0.
   A21B: {
-    position: [1, 2],
+    position: [3, 2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1e4),
     permanent: true,
@@ -30,7 +30,7 @@ const baseConfig = {
     next: [],
   },
   A6B: {
-    position: [-1, 2],
+    position: [-3, 2],
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(75),
     permanent: true,
@@ -81,7 +81,7 @@ const baseConfig = {
       costIncrease: new Decimal(2),
     },
     description(level) {
-      return `Multiplies EP gain by 3 for each level.<br>
+      return `Multiply EP gain by 3 for each level.<br>
       (×${format(this.effectValue(level), 2, 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
     },
     effectValue(level) {
@@ -92,18 +92,14 @@ const baseConfig = {
   },
   B1: {
     position: [0, 1],
-    type: NODE_TYPE.UNLIMITED,
-    scaling: {
-      type: "linear",
-      cost: new Decimal(5e3),
-      costIncrease: new Decimal(1.5),
-    },
+    type: NODE_TYPE.SINGLE,
+    cost: new Decimal(5e3),
     description(level) {
-      return `Get ready for challenges.<br>Multiplies all TD multiplier by 5 for each level.<br>
-      (×${format(this.effectValue(level), 2, 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
+      return `Get ready for challenges.<br>Abyss Research speed +1% for each total TT, caps at 1000 total TT.<br>
+      (×${format(this.effectValue(level), 2, 2)})`;
     },
-    effectValue(level) {
-      return DC.D5.pow(level);
+    effectValue() {
+      return Currency.timeTheorems.max.min(1000).mul(0.01).add(1);
     },
     next: ["B2"],
   },
@@ -112,7 +108,7 @@ const baseConfig = {
     type: NODE_TYPE.UNLIMITED,
     scaling: {
       type: "linear",
-      cost: new Decimal(5e3),
+      cost: new Decimal(8e3),
       costIncrease: new Decimal(3),
     },
     description(level) {
@@ -158,13 +154,13 @@ const baseConfig = {
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to review the PAST.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
-      baseInfo += `<br><br>-------- Path Difficultity (Active) --------<br><br>`;
+      baseInfo += `<br><br>-------- Path Difficultity (Idle) --------<br><br>`;
       switch (getEternityTotalState()) {
         // No empowers
         case 0:
-          baseInfo += `Time ----- ◆◆◇◇◇<br>`;
+          baseInfo += `Time ----- ◆◆◆◆◇<br>`;
           baseInfo += `Strategy - ◆◆◇◇◇<br>`;
-          baseInfo += `Active --- ◆◆◆◆◇`;
+          baseInfo += `Active --- ◆◇◇◇◇`;
       }
       return baseInfo;
     },
@@ -204,13 +200,13 @@ const baseConfig = {
     description(level) {
       let baseInfo = `To complete the power of eternity, we need to forecast the FUTURE.`;
       if (getEternityStateCompleted("PST")) return baseInfo;
-      baseInfo += `<br><br>-------- Path Difficultity (Idle) --------<br><br>`;
+      baseInfo += `<br><br>-------- Path Difficultity (Active) --------<br><br>`;
       switch (getEternityTotalState()) {
         // No empowers
         case 0:
-          baseInfo += `Time ----- ◆◆◆◆◇<br>`;
+          baseInfo += `Time ----- ◆◆◇◇◇<br>`;
           baseInfo += `Strategy - ◆◆◇◇◇<br>`;
-          baseInfo += `Active --- ◆◇◇◇◇`;
+          baseInfo += `Active --- ◆◆◆◆◇`;
       }
       return baseInfo;
     },
@@ -255,7 +251,7 @@ const baseConfig = {
     type: NODE_TYPE.SINGLE,
     cost: new Decimal(1e5),
     description(level) {
-      return `Unlock Advanced Eternity Automation.`;
+      return `Unlock autobuyers for Time Dimensions and ${formatX(5)} EP.`;
     },
     next: [],
   },
