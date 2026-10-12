@@ -78,7 +78,7 @@ const baseConfig = {
     scaling: {
       type: "linear",
       cost: new Decimal(5e3),
-      costIncrease: new Decimal(1.5),
+      costIncrease: new Decimal(2),
     },
     description(level) {
       return `Multiplies EP gain by 3 for each level.<br>
@@ -99,11 +99,11 @@ const baseConfig = {
       costIncrease: new Decimal(1.5),
     },
     description(level) {
-      return `Get ready for challenges.<br>Multiplies all TD multiplier by 10 for each level.<br>
+      return `Get ready for challenges.<br>Multiplies all TD multiplier by 5 for each level.<br>
       (×${format(this.effectValue(level), 2, 2)} → ×${format(this.effectValue(level.add(1)), 2, 2)})`;
     },
     effectValue(level) {
-      return DC.E1.pow(level);
+      return DC.D5.pow(level);
     },
     next: ["B2"],
   },

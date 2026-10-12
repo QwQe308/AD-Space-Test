@@ -154,6 +154,10 @@ export default {
               <div class="main">
                 <InfinitySimulationInfo v-if="displayingSimulation === 'Infinity'" />
                 <EternitySimulationInfo v-if="displayingSimulation === 'Eternity'" />
+                <br />
+                <span class="weak-text">
+                  (Simulation bulks 33ms fast resets into 2s one, gaining multiplied resources based on the time, with gamespeed before that reset / (30 * speed))
+                </span>
               </div>
             </div>
           </div>
