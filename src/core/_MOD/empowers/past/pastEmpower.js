@@ -2,8 +2,6 @@ import { DC } from "../../../constants";
 import { Currency } from "../../../currency";
 
 class PastEmpowerClass {
-  constructor() {}
-
   // Freezing
   get data() {
     return player.empowers.past;
@@ -32,9 +30,7 @@ class PastEmpowerClass {
   // Simulating
   set simulating(newVal) {
     SimulationConfigs[newVal].reset();
-    this.simulationSpeed = DC.D1;
     this.data.simulating = newVal;
-    this.resetSimulationTimer();
   }
 
   get simulating() {
@@ -45,12 +41,9 @@ class PastEmpowerClass {
     return SimulationConfigs[this.simulating];
   }
 
-  set simulationSpeed(newVal) {
-    this.data.simulationSpeed = newVal;
-  }
-
   get simulationSpeed() {
-    return this.data.simulationSpeed;
+    // Future simulation speed bonuses are applied here.
+    return DC.D1;
   }
 
   toggleSimulation(newVal) {
@@ -62,65 +55,24 @@ class PastEmpowerClass {
   }
 
   removeSimulation() {
-    this.simulationSpeed = DC.D1;
     this.data.simulating = null;
   }
 
-  get simulationMaxSpeed() {
-    const maxSpeed = DC.E1;
-    return maxSpeed;
-  }
-
-  resetSimulationTimer() {
-    this.data.simulationTimeThisReset = DC.D0;
-    this.data.simulationTrueTimeThisReset = 0;
-    this.data.simulationTickThisReset = 0;
-  }
-
-  get effectiveSimulationTime() {
-    return Math.min(this.data.simulationTrueTimeThisReset, this.data.simulationTickThisReset * 15);
-  }
-
-  get simulationResetTimeRemaining() {
-    return Math.max(2000 - this.effectiveSimulationTime, 0);
-  }
-
-  updateSimulationAfterTick(diff, trueDiff) {
+  updateSimulationAfterTick(diff) {
     if (!this.simulating) return;
-    const CurrentSimulationConfig = this.simulationConfig;
-    this.data.simulationTimeThisReset = this.data.simulationTimeThisReset.add(diff);
-    this.data.simulationTrueTimeThisReset += trueDiff;
-    this.data.simulationTickThisReset++;
-    // Avoiding largr diff periods such as offline progress
-    const fakeSimulationTime = this.effectiveSimulationTime;
-    // Handle simulation
-    if (CurrentSimulationConfig.checkSuccess()) {
-      if (fakeSimulationTime < 2000) {
-        this.simulationSpeed = this.simulationSpeed.mul(2000 / Math.max(33, fakeSimulationTime))
-          .min(this.simulationMaxSpeed);
-        if (this.simulationSpeed.eq(this.simulationMaxSpeed)) return;
-      }
-      CurrentSimulationConfig.giveRewards(this.simulationSpeed, this.data.simulationTimeThisReset.div(1000));
-      CurrentSimulationConfig.reset();
-      this.resetSimulationTimer();
-    } else if (fakeSimulationTime > 3000) {
-      this.simulationSpeed = this.simulationSpeed.mul(0.9 ** (Math.min(trueDiff, 200) / 3000)).max(1);
-    }
+    const config = this.simulationConfig;
+    if (!config.checkSuccess()) return;
+    config.giveRewards(this.simulationSpeed, diff.div(1000));
   }
 
   get simulationGain() {
-    if (!this.simulationConfig) return {};
+    if (!this.simulationConfig || !this.simulationConfig.checkSuccess()) return {};
     return this.simulationConfig.getRewards(this.simulationSpeed);
   }
 
   get baseSimulationGain() {
     if (!this.simulationConfig) return {};
     return this.simulationConfig.getRewards(DC.D1);
-  }
-
-  get maxSimulationGain() {
-    if (!this.simulationConfig) return {};
-    return this.simulationConfig.getRewards(this.simulationMaxSpeed);
   }
 
   simulationGainOnSpeed(name, simulationSpeed) {

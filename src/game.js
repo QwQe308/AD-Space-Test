@@ -724,7 +724,7 @@ export function gameLoop(passedDiff, options = {}) {
   // MOD update related
   updateSpaceItems(diff);
   AbyssResearchHelperTools.update(diff);
-  PastEmpower.updateSimulationAfterTick(diff, trueDiff);
+  PastEmpower.updateSimulationAfterTick(diff);
 
   // Stopping these checks after CREDITS_START reduces lag and allows for the glyph customization modal to appear
   if (GameEnd.endState < END_STATE_MARKERS.CREDITS_START) {

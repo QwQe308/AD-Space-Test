@@ -6,41 +6,21 @@ export default {
   name: "InfinitySimulationInfo",
   data() {
     return {
-      thresholds: [
-        DC.D1,
-        PastEmpower.simulationMaxSpeed.pow(0.1),
-        PastEmpower.simulationMaxSpeed.pow(0.25),
-        PastEmpower.simulationMaxSpeed.pow(0.5),
-        PastEmpower.simulationMaxSpeed,
-      ],
-
-      gainOnThresholds: Array(5).map((value, index) => {
-        PastEmpower.simulationGainOnSpeed("Infinity", DC.D1);
-      }),
-
-      growthOnThresholds: Array(5).map((value, index) => {
-        PastEmpower.simulationGainOnSpeed("Infinity", DC.D0);
-      }),
+      baseGain: PastEmpower.simulationGainOnSpeed("Infinity", DC.D1),
+      baseGrowth: { infinityPoints: null, infinities: null },
     };
   },
   methods: {
     update() {
-      this.thresholds = [
-        DC.D1,
-        PastEmpower.simulationMaxSpeed.pow(0.1),
-        PastEmpower.simulationMaxSpeed.pow(0.25),
-        PastEmpower.simulationMaxSpeed.pow(0.5),
-        PastEmpower.simulationMaxSpeed,
-      ];
-
-      this.gainOnThresholds = this.thresholds.map(value => PastEmpower.simulationGainOnSpeed("Infinity", value));
-
-      this.growthOnThresholds = this.gainOnThresholds.map(value => ({
+      this.baseGain = PastEmpower.simulationGainOnSpeed("Infinity", DC.D1);
+      this.baseGrowth = {
         infinityPoints: Currency.infinityPoints.value.eq(0)
           ? null
-          : value.infinityPoints.div(Currency.infinityPoints.value),
-        infinities: Currency.infinities.value.eq(0) ? null : value.infinities.div(Currency.infinities.value),
-      }));
+          : this.baseGain.infinityPoints.div(Currency.infinityPoints.value),
+        infinities: Currency.infinities.value.eq(0)
+          ? null
+          : this.baseGain.infinities.div(Currency.infinities.value),
+      };
     },
   },
 };
@@ -48,45 +28,60 @@ export default {
 
 <template>
   <div class="info-container">
-    <p>If simulating Infinity, expected rewards/sec will be (based on current Infinity, assuming 33ms per reset):</p>
+    <p>If simulating Infinity, expected rewards/sec will be (based on current Infinity):</p>
     <table>
       <tr>
         <th>Speed</th>
         <th>1x</th>
-        <th>{{ format(thresholds[1], 2, 2) }}x (10%)</th>
-        <th>{{ format(thresholds[2], 2, 2) }}x (25%)</th>
-        <th>{{ format(thresholds[3], 2, 2) }}x (50%)</th>
-        <th>{{ format(thresholds[4], 2, 2) }}x (100%)</th>
+        <!-- Reserved for future Replicanti milestones. -->
+        <th
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???x</span>
+        </th>
       </tr>
       <tr>
         <th>IP<br>(Growth)</th>
-        <td
-          v-for="i in 5"
-          :key="i"
-        >
-          {{ format(gainOnThresholds[i - 1].infinityPoints, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].infinityPoints
-              ? formatPercents(growthOnThresholds[i - 1].infinityPoints, 2)
-              : "∞"
+        <td>
+          {{ format(baseGain.infinityPoints, 2, 2) }}<br>(+{{
+            baseGrowth.infinityPoints ? formatPercents(baseGrowth.infinityPoints, 2) : "∞"
           }}/s)
+        </td>
+        <td
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???<br>(+???/s)</span>
         </td>
       </tr>
       <tr>
         <th>Infinities<br>(Growth)</th>
-        <td
-          v-for="i in 5"
-          :key="i"
-        >
-          {{ format(gainOnThresholds[i - 1].infinities, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].infinities ? formatPercents(growthOnThresholds[i - 1].infinities, 2) : "∞"
+        <td>
+          {{ format(baseGain.infinities, 2, 2) }}<br>(+{{
+            baseGrowth.infinities ? formatPercents(baseGrowth.infinities, 2) : "∞"
           }}/s)
+        </td>
+        <td
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???<br>(+???/s)</span>
         </td>
       </tr>
     </table>
-    <p class="weak">
-      (Note that simulations' rewards are based on currencies gained on current Infinity, so after slowdown it may be lower
-      than excepted)
-    </p>
   </div>
 </template>
 
@@ -97,6 +92,18 @@ export default {
 
 th {
   color: #888;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.locked-text {
+  display: inline-block;
+  filter: blur(3px);
+  user-select: none;
+  pointer-events: none;
 }
 
 .info-container {

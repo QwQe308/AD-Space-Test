@@ -19,9 +19,8 @@ export default {
       resetCelestial: false,
       inPelle: false,
       simulation: null,
-      simulationResetTimeRemaining: 0,
       simulationSpeed: new Decimal(1),
-      simulationCanReset: false,
+      simulationGenerating: false,
     };
   },
   computed: {
@@ -119,11 +118,8 @@ export default {
     },
     simulationDisplay() {
       if (!this.simulation) return "";
-      let countdown = this.simulationCanReset ? "reset pending" : "waiting for reset requirements";
-      if (this.simulationResetTimeRemaining > 0) {
-        countdown = `reset in ~${format(this.simulationResetTimeRemaining / 1000, 2, 2)} sec`;
-      }
-      return `${this.simulation} Simulation (${countdown}, speed: ${formatX(this.simulationSpeed, 2, 2)})`;
+      const status = this.simulationGenerating ? "generating resources" : "waiting for reset requirements";
+      return `${this.simulation} Simulation (${status}, speed: ${formatX(this.simulationSpeed, 2, 2)})`;
     },
     isInFailableEC() {
       return this.activeChallengeNames.some(str => str.match(/Eternity Challenge (4|12)/gu));
@@ -155,9 +151,8 @@ export default {
       this.inPelle = Pelle.isDoomed;
       this.simulation = PastEmpower.simulating;
       if (this.simulation) {
-        this.simulationResetTimeRemaining = PastEmpower.simulationResetTimeRemaining;
         this.simulationSpeed.copyFrom(PastEmpower.simulationSpeed);
-        this.simulationCanReset = PastEmpower.simulationConfig.checkSuccess();
+        this.simulationGenerating = PastEmpower.simulationConfig.checkSuccess();
       }
     },
     // Process exit requests from the inside out; Challenges first, then dilation, then Celestial Reality. If the

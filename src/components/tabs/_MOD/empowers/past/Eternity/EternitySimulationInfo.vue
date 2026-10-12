@@ -6,38 +6,21 @@ export default {
   name: "EternitySimulationInfo",
   data() {
     return {
-      thresholds: [
-        DC.D1,
-        PastEmpower.simulationMaxSpeed.pow(0.1),
-        PastEmpower.simulationMaxSpeed.pow(0.25),
-        PastEmpower.simulationMaxSpeed.pow(0.5),
-        PastEmpower.simulationMaxSpeed,
-      ],
-
-      gainOnThresholds: Array.from({ length: 5 }, () =>
-        PastEmpower.simulationGainOnSpeed("Eternity", DC.D1)),
-
-      growthOnThresholds: Array.from({ length: 5 }, () => ({ eternityPoints: null, eternities: null })),
+      baseGain: PastEmpower.simulationGainOnSpeed("Eternity", DC.D1),
+      baseGrowth: { eternityPoints: null, eternities: null },
     };
   },
   methods: {
     update() {
-      this.thresholds = [
-        DC.D1,
-        PastEmpower.simulationMaxSpeed.pow(0.1),
-        PastEmpower.simulationMaxSpeed.pow(0.25),
-        PastEmpower.simulationMaxSpeed.pow(0.5),
-        PastEmpower.simulationMaxSpeed,
-      ];
-
-      this.gainOnThresholds = this.thresholds.map(value => PastEmpower.simulationGainOnSpeed("Eternity", value));
-
-      this.growthOnThresholds = this.gainOnThresholds.map(value => ({
+      this.baseGain = PastEmpower.simulationGainOnSpeed("Eternity", DC.D1);
+      this.baseGrowth = {
         eternityPoints: Currency.eternityPoints.value.eq(0)
           ? null
-          : value.eternityPoints.div(Currency.eternityPoints.value),
-        eternities: Currency.eternities.value.eq(0) ? null : value.eternities.div(Currency.eternities.value),
-      }));
+          : this.baseGain.eternityPoints.div(Currency.eternityPoints.value),
+        eternities: Currency.eternities.value.eq(0)
+          ? null
+          : this.baseGain.eternities.div(Currency.eternities.value),
+      };
     },
   },
 };
@@ -50,40 +33,55 @@ export default {
       <tr>
         <th>Speed</th>
         <th>1x</th>
-        <th>{{ format(thresholds[1], 2, 2) }}x (10%)</th>
-        <th>{{ format(thresholds[2], 2, 2) }}x (25%)</th>
-        <th>{{ format(thresholds[3], 2, 2) }}x (50%)</th>
-        <th>{{ format(thresholds[4], 2, 2) }}x (100%)</th>
+        <!-- Reserved for future Replicanti milestones. -->
+        <th
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???x</span>
+        </th>
       </tr>
       <tr>
         <th>EP<br>(Growth)</th>
-        <td
-          v-for="i in 5"
-          :key="i"
-        >
-          {{ format(gainOnThresholds[i - 1].eternityPoints, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].eternityPoints
-              ? formatPercents(growthOnThresholds[i - 1].eternityPoints, 2)
-              : "∞"
+        <td>
+          {{ format(baseGain.eternityPoints, 2, 2) }}<br>(+{{
+            baseGrowth.eternityPoints ? formatPercents(baseGrowth.eternityPoints, 2) : "∞"
           }}/s)
+        </td>
+        <td
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???<br>(+???/s)</span>
         </td>
       </tr>
       <tr>
         <th>Eternities<br>(Growth)</th>
-        <td
-          v-for="i in 5"
-          :key="i"
-        >
-          {{ format(gainOnThresholds[i - 1].eternities, 2, 2) }}<br>(+{{
-            growthOnThresholds[i - 1].eternities ? formatPercents(growthOnThresholds[i - 1].eternities, 2) : "∞"
+        <td>
+          {{ format(baseGain.eternities, 2, 2) }}<br>(+{{
+            baseGrowth.eternities ? formatPercents(baseGrowth.eternities, 2) : "∞"
           }}/s)
+        </td>
+        <td
+          v-for="i in 4"
+          :key="i"
+          aria-label="Locked milestone"
+        >
+          <span
+            class="locked-text"
+            aria-hidden="true"
+          >???<br>(+???/s)</span>
         </td>
       </tr>
     </table>
-    <p class="weak">
-      (Note that simulations' rewards are based on currencies gained on current Eternity, so after slowdown it may be lower
-      than expected)
-    </p>
   </div>
 </template>
 
@@ -94,6 +92,18 @@ export default {
 
 th {
   color: #888;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.locked-text {
+  display: inline-block;
+  filter: blur(3px);
+  user-select: none;
+  pointer-events: none;
 }
 
 .info-container {

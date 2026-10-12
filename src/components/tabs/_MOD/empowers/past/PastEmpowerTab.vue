@@ -1,6 +1,5 @@
 <script>
 import { PastEmpower } from "../../../../../core/_MOD/empowers/past/pastEmpower";
-import { DC } from "../../../../../core/constants";
 import GlyphComponent from "../../../../GlyphComponent.vue";
 
 import InfinitySimulationHeader from "./Infinity/InfinitySimulationHeader.vue";
@@ -37,7 +36,6 @@ export default {
       ],
 
       simulationSpeed: new Decimal(0),
-      simulationMaxSpeed: PastEmpower.simulationMaxSpeed,
     };
   },
   computed: {},
@@ -46,7 +44,6 @@ export default {
       this.frozenCurrency = PastEmpower.freezing;
       this.simulatingPrestige = PastEmpower.simulating;
       this.simulationSpeed.copyFrom(PastEmpower.simulationSpeed);
-      this.simulationMaxSpeed = PastEmpower.simulationMaxSpeed;
     },
     toggleSimulationDisplay(id) {
       this.displayingSimulation = id === this.displayingSimulation ? null : id;
@@ -139,7 +136,7 @@ export default {
               >
                 <div class="speed">
                   <p>Currently simulating: {{ simulatingPrestige }}</p>
-                  <p>Simulating speed: {{ format(simulationSpeed, 2, 2) }} / {{ format(simulationMaxSpeed, 2, 2) }}</p>
+                  <p>Simulating speed: {{ formatX(simulationSpeed, 2, 2) }}</p>
                 </div>
                 <div class="division">
                   <p>|</p>
@@ -156,7 +153,8 @@ export default {
                 <EternitySimulationInfo v-if="displayingSimulation === 'Eternity'" />
                 <br />
                 <span class="weak-text">
-                  (Simulation bulks 33ms fast resets into 2s one, gaining multiplied resources based on the time, with gamespeed before that reset / (30 * speed))
+                  Simulation generates resources continuously while reset requirements are met,
+                  based on current prestige rewards.
                 </span>
               </div>
             </div>

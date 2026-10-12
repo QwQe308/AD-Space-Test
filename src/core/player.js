@@ -72,11 +72,6 @@ window.player = {
       frozenCurrency: null,
       simulating: null,
       displayingSimulation: null,
-      simulationSpeed: DC.D1,
-
-      simulationTimeThisReset: new Decimal(0),
-      simulationTrueTimeThisReset: 0,
-      simulationTickThisReset: 0,
     },
     present: {
       mana: 0,
